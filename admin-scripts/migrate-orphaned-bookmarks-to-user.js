@@ -14,20 +14,12 @@ mongoose.connect(process.env.MONGODB_URI)
     process.exit(1);
   });
 
-const migrateBookmarks = async () => {
+const migrateBookmarks = async (username) => {
   try {
-    // Check if system user exists, create if not
-    let systemUser = await User.findOne({ username: 'system' });
-    
-    if (!systemUser) {
-      console.log('Creating system user...');
-      systemUser = new User({
-        username: 'system',
-        email: 'system@bookmarkapp.com',
-        password: crypto.randomBytes(16).toString('hex'),
-      });
-      await systemUser.save();
-      console.log('System user created');
+    // Find user by provided username
+    const user = await User.findOne({ username });
+    if (!user) {
+      throw new Error(`User "${username}" not found`);
     }
     
     // Find all bookmarks without an owner
@@ -48,17 +40,17 @@ const migrateBookmarks = async () => {
       
       await mongoose.connection.collection('bookmarks').updateOne(
         { _id: bookmark._id },
-        { 
-          $set: { 
-            owner: systemUser._id,
+        {
+          $set: {
+            owner: user._id,
             visibility: 'private',
             updatedAt: new Date()
-          } 
+          }
         }
       );
     }
     
-    console.log('Migration completed successfully');
+    console.log(`Successfully migrated ${bookmarksToMigrate.length} bookmarks to user ${username}`);
     process.exit(0);
   } catch (error) {
     console.error('Migration failed:', error);
@@ -66,4 +58,12 @@ const migrateBookmarks = async () => {
   }
 };
 
-migrateBookmarks();
+// Check if username argument is provided
+if (process.argv.length < 3) {
+  console.error('Error: Username argument is required');
+  console.log('Usage: node migrate-orphaned-bookmarks-to-user.js <username>');
+  process.exit(1);
+}
+
+const username = process.argv[2];
+migrateBookmarks(username);

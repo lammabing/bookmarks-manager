@@ -1,44 +1,48 @@
-# Current Task
+# Current Objectives
 
-## Current Objectives
-1. Implement enhanced tag management system
-2. Develop user authentication and session management
-3. Create browser extension for Chrome and Firefox
-4. Implement bulk editing operations
+1. **Refactor utility scripts to be more flexible**
+   - [x] Modify assignBookmarksToSkylabel.js to work with any username
+   - [x] Modify checkSkylabelBookmarks.js to work with any username
+   - [x] Modify migrate-orphaned-bookmarks-to-user.js to work with any username
+   - [x] Modify reset-password-of-user.js to accept username and password arguments
+   - [x] Update documentation to reflect script changes
 
-## Subtasks
-### Tag Management
-- [ ] Backend: Create tag CRUD endpoints
-- [ ] Frontend: Build tag manager UI component
-- [ ] Implement tag rename/delete propagation logic
+2. **Improve bookmark import functionality**
+   - [ ] Implement support for importing bookmarks from HTML files
+   - [ ] Add validation for imported bookmark data
+   - [ ] Create UI for bookmark import in frontend
 
-### Authentication
-- [ ] Backend: Complete user registration/login API
-- [ ] Frontend: Implement auth modal with login/register forms
-- [ ] Add session management middleware
+3. **Enhance tag management**
+   - [ ] Implement tag autocomplete when adding/editing bookmarks
+   - [ ] Add tag merging functionality
+   - [ ] Create tag statistics dashboard
 
-### Browser Extension
-- [ ] Design extension popup UI
-- [ ] Implement context menu bookmarking
-- [ ] Develop background sync process
+# Subtasks
 
-### Bulk Operations
-- [ ] Create bulk selection UI component
-- [ ] Implement bulk edit API endpoints
-- [ ] Add bulk delete functionality
+## Refactor utility scripts
+- Updated all scripts to accept command-line arguments instead of hardcoded values
+- Added usage instructions and input validation
+- Updated techStack.md documentation
 
-## Current Status
-- Basic bookmark management implemented
-- Tag management backend in progress (50%)
-- Authentication system designed but not implemented
-- Browser extension not started
-- Bulk operations planned but not started
+## Bookmark import
+- Research HTML bookmark file formats (Netscape, Chrome, etc.)
+- Design database schema for imported bookmarks
+- Create import API endpoint
 
-## Next Steps
-1. Complete tag management backend API
-2. Build frontend tag manager component
-3. Implement user authentication endpoints
-4. Design browser extension UI mockups
+## Tag management
+- Analyze existing tags for normalization opportunities
+- Design tag merging interface
+- Plan tag statistics visualization
+
+# Current Status
+- Utility script refactoring completed and documented
+- Bookmark import research in progress
+- Tag management design phase
+
+# Next Steps
+1. Implement HTML bookmark parser
+2. Create import API endpoint
+3. Design tag autocomplete component
 
 ---
-Last Updated: 2025-06-17 02:05 AM by Documentation Agent
+Last Updated: 2025-06-23 12:44 AM by Documentation Agent

@@ -44,12 +44,16 @@ const App = () => {
     saveFontSettings(fontSettings);
   }, [fontSettings]);
 
-  // Fetch bookmarks from the backend
+  // Fetch bookmarks from the backend - public only if not logged in
   useEffect(() => {
     console.log('Fetching bookmarks... currentUser:', currentUser);
     const fetchBookmarks = async () => {
       try {
-        const { data } = await api.get('/bookmarks');
+        let endpoint = '/bookmarks';
+        if (!currentUser) {
+          endpoint = '/bookmarks/public';
+        }
+        const { data } = await api.get(endpoint);
         console.log('Fetched bookmarks:', data.length);
         setBookmarks(data);
         setFilteredBookmarks(data);

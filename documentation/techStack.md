@@ -85,5 +85,11 @@
 *   **Utility:**
     *   `POST /api/metadata`: Fetch metadata for a given URL
 
+## Utility Scripts
+- `scripts/assignBookmarksToUser.js`: Assigns all bookmarks to a specified user. Usage: `node scripts/assignBookmarksToUser.js <username>`
+- `scripts/checkUserBookmarks.js`: Checks how many bookmarks are visible to a specified user. Usage: `node scripts/checkUserBookmarks.js <username>`
+- `scripts/migrate-orphaned-bookmarks-to-user.js`: Migrates orphaned bookmarks (without owner) to a specified user. Usage: `node scripts/migrate-orphaned-bookmarks-to-user.js <username>`
+- `scripts/reset-password-of-user.js`: Resets password for a specified user. Usage: `node scripts/reset-password-of-user.js <username> <newPassword>`
+
 ---
-Last Updated: 2025-06-17 02:10 AM by Documentation Agent
+Last Updated: 2025-06-23 12:37 AM by Documentation Agent
