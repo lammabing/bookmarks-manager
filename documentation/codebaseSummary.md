@@ -66,7 +66,10 @@
 
 ### Frontend
 1. **App.jsx**: Root component, manages routing and global state
+   - Now uses state to control form visibility (initially hidden)
+   - Shows form when "+" button clicked or bookmarklet used
 2. **components/**: Reusable UI components
+   - AddBookmarkForm: Added cancel button to hide form
 3. **utils/api.js**: Centralized API service for backend communication
 
 ### Shared Utilities
@@ -74,4 +77,4 @@
 2. **fontSettings.js**: Manages user font preferences
 
 ---
-Last Updated: 2025-06-17 02:20 AM by Documentation Agent
+Last Updated: 2025-06-23 11:14 AM by Documentation Agent

@@ -7,7 +7,10 @@
    - [x] Modify reset-password-of-user.js to accept username and password arguments
    - [x] Update documentation to reflect script changes
 
-2. **Improve bookmark import functionality**
+2. **Improve UI components**
+   - [x] Make bookmark form appear dynamically instead of always showing
+
+3. **Improve bookmark import functionality**
    - [ ] Implement support for importing bookmarks from HTML files
    - [ ] Add validation for imported bookmark data
    - [ ] Create UI for bookmark import in frontend

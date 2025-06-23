@@ -5,7 +5,7 @@ import AddBookmarkForm from './components/AddBookmarkForm';
 import FontSettingsModal from './components/FontSettingsModal';
 import TagManager from './components/TagManager'; // Import TagManager
 import { loadFontSettings, saveFontSettings } from './utils/fontSettings';
-import { Settings, Grid, List, Copy, Upload, Bookmark as BookmarkIcon, Tags } from 'lucide-react'; // Import Tags icon
+import { Settings, Grid, List, Copy, Upload, Bookmark as BookmarkIcon, Tags, Plus } from 'lucide-react'; // Import Tags and Plus icons
 import AuthModal from './components/Auth/AuthModal';
 import { LogIn, LogOut, User } from 'lucide-react';
 import api from './utils/api';
@@ -30,6 +30,7 @@ const App = () => {
   const [hoverText, setHoverText] = useState('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isFormVisible, setIsFormVisible] = useState(false); // Track form visibility
 
   // Load font settings on mount
   useEffect(() => {
@@ -86,6 +87,7 @@ const App = () => {
 
       // Clear the query parameters after processing
       window.history.replaceState({}, document.title, window.location.pathname);
+      setIsFormVisible(true); // Open form when bookmarklet is used
     }
   }, []);
 
@@ -246,8 +248,16 @@ const App = () => {
         <h1 className="text-2xl font-bold">Bookmarking App</h1>
         {authButton}
       </header>
-      <AddBookmarkForm onAdd={handleAddBookmark} initialData={initialFormData} />
       <div className="flex items-center space-x-2 mb-4">
+        {/* Add Bookmark Button */}
+        <button
+          onClick={() => setIsFormVisible(!isFormVisible)}
+          onMouseEnter={() => setHoverText(isFormVisible ? 'Hide Form' : 'Add Bookmark')}
+          onMouseLeave={() => setHoverText('')}
+          className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center w-10 h-10"
+        >
+          <Plus size={24} />
+        </button>
         {/* Appearance Button */}
         <button
           onClick={() => setIsFontSettingsModalOpen(true)}
@@ -326,6 +336,13 @@ const App = () => {
           />
         </div>
       </div>
+      {isFormVisible && (
+        <AddBookmarkForm
+          onAdd={handleAddBookmark}
+          initialData={initialFormData}
+          onCancel={() => setIsFormVisible(false)}
+        />
+      )}
       <SearchBar onSearch={handleSearch} />
       <FontSettingsModal
         isOpen={isFontSettingsModalOpen}

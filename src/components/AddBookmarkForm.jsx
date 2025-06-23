@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMetadata } from '../utils/fetchMetadata';
 
-const AddBookmarkForm = ({ onAdd }) => {
+const AddBookmarkForm = ({ onAdd, onCancel }) => {
     const [url, setUrl] = useState('');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -108,9 +108,21 @@ const AddBookmarkForm = ({ onAdd }) => {
                     </label>
                 </div>
             </div>
-            <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded-lg">
-                Add Bookmark
-            </button>
+            <div className="flex space-x-2">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="flex-1 p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    className="flex-1 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                    Add Bookmark
+                </button>
+            </div>
         </form>
     );
 };
