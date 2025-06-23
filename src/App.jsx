@@ -165,8 +165,14 @@ const App = () => {
       });
   };
 
-  // Import bookmarks from a JSON file
+  // Import bookmarks from a JSON file - only allowed for logged-in users
   const handleImportBookmarks = (event) => {
+    // Check if user is logged in
+    if (!currentUser) {
+      alert('You must be logged in to import bookmarks.');
+      return;
+    }
+
     const file = event.target.files[0];
     if (!file) return;
 
@@ -288,20 +294,22 @@ const App = () => {
           <Copy size={24} />
         </button>
 
-        {/* Import Bookmarks Button */}
-        <label
-          onMouseEnter={() => setHoverText('Import Bookmarks')}
-          onMouseLeave={() => setHoverText('')}
-          className="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center justify-center w-10 h-10 cursor-pointer"
-        >
-          <Upload size={24} />
-          <input
-            type="file"
-            accept=".json"
-            onChange={handleImportBookmarks}
-            className="hidden"
-          />
-        </label>
+        {/* Import Bookmarks Button - Only show if logged in */}
+        {currentUser && (
+          <label
+            onMouseEnter={() => setHoverText('Import Bookmarks')}
+            onMouseLeave={() => setHoverText('')}
+            className="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center justify-center w-10 h-10 cursor-pointer"
+          >
+            <Upload size={24} />
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImportBookmarks}
+              className="hidden"
+            />
+          </label>
+        )}
 
         {/* Bookmarklet Button */}
         <a
