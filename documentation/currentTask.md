@@ -5,22 +5,13 @@
 2. Develop user authentication and session management
 3. Create browser extension for Chrome and Firefox
 4. Implement bulk editing operations
+5. Improve documentation and fix bugs
 
-<<<<<<< HEAD
-2. **Improve UI components**
-   - [x] Make bookmark form appear dynamically instead of always showing
-
-3. **Improve bookmark import functionality**
-   - [ ] Implement support for importing bookmarks from HTML files
-   - [ ] Add validation for imported bookmark data
-   - [ ] Create UI for bookmark import in frontend
-=======
 ## Subtasks
 ### Tag Management
 - [ ] Backend: Create tag CRUD endpoints
 - [ ] Frontend: Build tag manager UI component
 - [ ] Implement tag rename/delete propagation logic
->>>>>>> parent of c45dfed (Ver2.0)
 
 ### Authentication
 - [ ] Backend: Complete user registration/login API
@@ -37,18 +28,24 @@
 - [ ] Implement bulk edit API endpoints
 - [ ] Add bulk delete functionality
 
+### Documentation and Bug Fixes
+- [x] Fix favicon display issue
+- [x] Update documentation with .env setup instructions
+
 ## Current Status
 - Basic bookmark management implemented
 - Tag management backend in progress (50%)
 - Authentication system designed but not implemented
 - Browser extension not started
 - Bulk operations planned but not started
+- Documentation updated with .env instructions
 
 ## Next Steps
 1. Complete tag management backend API
 2. Build frontend tag manager component
 3. Implement user authentication endpoints
 4. Design browser extension UI mockups
+5. Add favicon generation for manually added bookmarks
 
 ---
-Last Updated: 2025-06-17 02:05 AM by Documentation Agent
+Last Updated: 2025-06-29 02:15 PM by Documentation Agent

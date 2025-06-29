@@ -27,6 +27,12 @@
     *   `concurrently`: ^8.2.2 (Run multiple commands concurrently)
     *   `vite`: ^4.0.0 (Next Generation Frontend Tooling)
 
+## Environment Variables
+*   `.env` file required with:
+    *   `MONGODB_URI`: MongoDB connection string (e.g., `mongodb://localhost:27017/bookmarking-app`)
+    *   `JWT_SECRET`: Secret key for JWT authentication (generate with `openssl rand -base64 32`)
+    *   `VITE_API_BASE_URL`: Frontend API base URL (e.g., `http://localhost:5015/api`)
+
 ## Data Source(s)
 *   MongoDB database
 

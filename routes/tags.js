@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Bookmark from '../models/Bookmark.js';
 import { auth } from '../middleware/auth.js';
 
@@ -12,7 +13,7 @@ router.get('/', auth, async (req, res) => {
     // Aggregate tags and count occurrences
     const tags = await Bookmark.aggregate([
       // Match bookmarks owned by the current user
-      { $match: { owner: req.user._id } },
+      { $match: { owner: new mongoose.Types.ObjectId(req.user.id) } },
       
       // Unwind the tags array to create a document per tag
       { $unwind: "$tags" },
@@ -41,6 +42,12 @@ router.get('/', auth, async (req, res) => {
     res.json(tags);
   } catch (err) {
     console.error('Error fetching tags:', err);
+    console.error('Error details:', {
+      message: err.message,
+      stack: err.stack,
+      user: req.user,
+      userId: req.user.id
+    });
     res.status(500).json({ message: err.message });
   }
 });
@@ -59,9 +66,9 @@ router.put('/:tagName', auth, async (req, res) => {
     
     // Update all bookmarks that have the old tag
     const result = await Bookmark.updateMany(
-      { 
-        owner: req.user._id,
-        tags: oldTag 
+      {
+        owner: new mongoose.Types.ObjectId(req.user.id),
+        tags: oldTag
       },
       { 
         $set: { 

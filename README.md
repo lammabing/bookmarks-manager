@@ -34,8 +34,11 @@ A web-based application for managing bookmarks with advanced organization featur
 3. Set up environment variables:
    ```bash
    cp .env.example .env
-   # Edit .env with your configuration
    ```
+   Edit .env with your configuration. Required variables:
+   - `MONGODB_URI`: MongoDB connection string (e.g., `mongodb://localhost:27017/bookmarking-app`)
+   - `JWT_SECRET`: Secret key for JWT authentication (generate with `openssl rand -base64 32`)
+   - `VITE_API_BASE_URL`: Frontend API base URL (e.g., `http://localhost:5015/api`)
 
 4. Start MongoDB with Docker:
    ```bash
