@@ -45,16 +45,12 @@ const App = () => {
     saveFontSettings(fontSettings);
   }, [fontSettings]);
 
-  // Fetch bookmarks from the backend - public only if not logged in
+  // Fetch bookmarks from the backend
   useEffect(() => {
     console.log('Fetching bookmarks... currentUser:', currentUser);
     const fetchBookmarks = async () => {
       try {
-        let endpoint = '/bookmarks';
-        if (!currentUser) {
-          endpoint = '/bookmarks/public';
-        }
-        const { data } = await api.get(endpoint);
+        const { data } = await api.get('/bookmarks');
         console.log('Fetched bookmarks:', data.length);
         setBookmarks(data);
         setFilteredBookmarks(data);
@@ -93,14 +89,22 @@ const App = () => {
 
   // Add a new bookmark
   const handleAddBookmark = async (bookmark) => {
-    try {
-      const { data } = await api.post('/bookmarks', bookmark);
-      setBookmarks([...bookmarks, data]);
-      setFilteredBookmarks([...bookmarks, data]);
-      setInitialFormData(null); // Clear initial form data after adding
-    } catch (error) {
-      console.error('Error adding bookmark:', error);
-    }
+      try {
+          // Generate favicon if not provided
+          const favicon = bookmark.favicon ||
+              `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}`;
+          
+          const { data } = await api.post('/bookmarks', {
+              ...bookmark,
+              favicon
+          });
+          
+          setBookmarks([...bookmarks, data]);
+          setFilteredBookmarks([...bookmarks, data]);
+          setInitialFormData(null); // Clear initial form data after adding
+      } catch (error) {
+          console.error('Error adding bookmark:', error);
+      }
   };
 
   // Edit a bookmark
@@ -211,14 +215,13 @@ const App = () => {
     const title = encodeURIComponent(document.title);
     const description = encodeURIComponent(window.getSelection().toString().trim() || '');
     const favicon = encodeURIComponent(document.querySelector('link[rel*="icon"]')?.href || \`https://www.google.com/s2/favicons?domain=\${window.location.hostname}\`);
-    const appUrl = \`http://localhost:5173/add?url=\${url}&title=\${title}&description=\${description}&favicon=\${favicon}\`;
+    const appUrl = \`http://localhost:5173/?url=\${url}&title=\${title}&description=\${description}&favicon=\${favicon}\`;
     window.open(appUrl, '_blank');
   })();`;
 
   const handleLogin = (user) => {
     setCurrentUser(user);
   };
-  
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

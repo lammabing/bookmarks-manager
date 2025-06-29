@@ -11,10 +11,21 @@ const TagManager = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/tags');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+      
+      const response = await fetch('/api/tags', {
+        headers: {
+          'x-auth-token': token
+        }
+      });
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
       const data = await response.json();
       setTags(data);
     } catch (e) {
@@ -42,15 +53,25 @@ const TagManager = () => {
     }
     setIsLoading(true);
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+      
       const response = await fetch(`/api/tags/${encodeURIComponent(oldName)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
         body: JSON.stringify({ newName: newTagName.trim() }),
       });
+      
       const result = await response.json();
       if (!response.ok) {
         throw new Error(result.message || `HTTP error! status: ${response.status}`);
       }
+      
       alert(result.message || 'Tag renamed successfully!');
       setEditingTag(null);
       setNewTagName('');
@@ -70,13 +91,23 @@ const TagManager = () => {
     }
     setIsLoading(true);
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+      
       const response = await fetch(`/api/tags/${encodeURIComponent(tagName)}`, {
         method: 'DELETE',
+        headers: {
+          'x-auth-token': token
+        }
       });
+      
       const result = await response.json();
       if (!response.ok) {
         throw new Error(result.message || `HTTP error! status: ${response.status}`);
       }
+      
       alert(result.message || 'Tag deleted successfully!');
       fetchTags(); // Refresh tags list
     } catch (e) {

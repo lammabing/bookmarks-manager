@@ -47,7 +47,7 @@ A web-based application for managing bookmarks with advanced organization featur
    npm run dev
    ```
 
-6. Access the application at: http://localhost:5173
+6. Access the application at: http://localhost:5170
 
 ### Production Deployment
 1. Build frontend assets:

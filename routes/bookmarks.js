@@ -43,22 +43,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route   GET /api/bookmarks/public
-// @desc    Get public bookmarks
-// @access  Public
-router.get('/public', async (req, res) => {
-  try {
-    const bookmarks = await Bookmark.find({ visibility: 'public' })
-      .populate('owner', 'username')
-      .sort({ createdAt: -1 });
-      
-    res.json(bookmarks);
-  } catch (err) {
-    console.error('Error fetching public bookmarks:', err);
-    res.status(500).json({ message: err.message });
-  }
-});
-
 // @route   GET /api/bookmarks/:id
 // @desc    Get a single bookmark
 // @access  Public/Private (depending on bookmark visibility)

@@ -1,126 +1,162 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMetadata } from '../utils/fetchMetadata';
 
-const AddBookmarkForm = ({ onAdd, onCancel }) => {
+const AddBookmarkForm = ({ onAdd, onCancel, initialData }) => {
     const [url, setUrl] = useState('');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [favicon, setFavicon] = useState(''); // Add favicon state
     const [tags, setTags] = useState('');
     const [visibility, setVisibility] = useState('private');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    // Extract URL parameters
+    // Handle initial data if provided (e.g., from bookmarklet)
     useEffect(() => {
-        const queryParams = new URLSearchParams(window.location.search);
-        const urlParam = queryParams.get('url');
-        const titleParam = queryParams.get('title');
-        const descriptionParam = queryParams.get('description');
-        const faviconParam = queryParams.get('favicon');
-
-        if (urlParam) {
-            setUrl(decodeURIComponent(urlParam));
-            setTitle(decodeURIComponent(titleParam || ''));
-            setDescription(decodeURIComponent(descriptionParam || ''));
+        if (initialData) {
+            setUrl(initialData.url || '');
+            setTitle(initialData.title || '');
+            setDescription(initialData.description || '');
+            setFavicon(initialData.favicon || ''); // Set favicon from initialData
         }
-    }, []);
+    }, [initialData]);
 
-    const handleUrlChange = async (e) => {
-        const url = e.target.value;
-        setUrl(url);
-        if (url) {
-            const { title } = await fetchMetadata(url);
-            setTitle(title);
+    // Handle URL metadata fetching
+    const handleUrlBlur = async () => {
+        if (!url) return;
+        
+        setIsLoading(true);
+        setError('');
+        
+        try {
+            const metadata = await fetchMetadata(url);
+            if (!title) setTitle(metadata.title || '');
+            if (!description) setDescription(metadata.description || '');
+        } catch (err) {
+            setError('Failed to fetch URL metadata');
+            console.error('Error fetching metadata:', err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onAdd({
-            id: Date.now(),
-            url,
-            title,
-            description,
-            tags: tags.split(',').map((tag) => tag.trim()),
-            favicon: `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}`,
+        
+        if (!url) {
+            setError('URL is required');
+            return;
+        }
+
+        const bookmark = {
+            url: url.trim(),
+            title: title.trim(),
+            description: description.trim(),
+            favicon: favicon.trim(), // Include favicon in bookmark object
+            tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
             visibility
-        });
-        setUrl('');
-        setTitle('');
-        setDescription('');
-        setTags('');
-        setVisibility('private');
+        };
+
+        try {
+            await onAdd(bookmark);
+            // Reset form
+            setUrl('');
+            setTitle('');
+            setDescription('');
+            setTags('');
+            setVisibility('private');
+            setError('');
+        } catch (err) {
+            setError('Failed to add bookmark');
+            console.error('Error adding bookmark:', err);
+        }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4 mb-4">
-            <input
-                type="url"
-                placeholder="Enter URL"
-                value={url}
-                onChange={handleUrlChange}
-                className="w-full p-2 border rounded-lg"
-                required
-            />
-            <input
-                type="text"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-2 border rounded-lg"
-                required
-            />
-            <textarea
-                placeholder="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-2 border rounded-lg"
-            />
-            <input
-                type="text"
-                placeholder="Tags (comma-separated)"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                className="w-full p-2 border rounded-lg"
-            />
-            <div className="flex items-center space-x-4">
-                <span>Visibility:</span>
-                <div className="flex space-x-2">
-                    <label className="flex items-center">
-                        <input
-                            type="radio"
-                            name="visibility"
-                            value="private"
-                            checked={visibility === 'private'}
-                            onChange={() => setVisibility('private')}
-                            className="mr-1"
-                        />
-                        Private
-                    </label>
-                    <label className="flex items-center">
-                        <input
-                            type="radio"
-                            name="visibility"
-                            value="public"
-                            checked={visibility === 'public'}
-                            onChange={() => setVisibility('public')}
-                            className="mr-1"
-                        />
-                        Public
-                    </label>
-                </div>
+        <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-lg shadow">
+            {error && (
+                <div className="text-red-500 text-sm mb-2">{error}</div>
+            )}
+            
+            <div>
+                <label className="block text-sm font-medium text-gray-700">
+                    URL
+                    <input
+                        type="url"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        onBlur={handleUrlBlur}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        required
+                    />
+                </label>
             </div>
-            <div className="flex space-x-2">
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700">
+                    Title
+                    <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                </label>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700">
+                    Description
+                    <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        rows="3"
+                    />
+                </label>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700">
+                    Tags (comma-separated)
+                    <input
+                        type="text"
+                        value={tags}
+                        onChange={(e) => setTags(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="tag1, tag2, tag3"
+                    />
+                </label>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700">
+                    Visibility
+                    <select
+                        value={visibility}
+                        onChange={(e) => setVisibility(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    >
+                        <option value="private">Private</option>
+                        <option value="public">Public</option>
+                    </select>
+                </label>
+            </div>
+
+            <div className="flex justify-end space-x-2">
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
-                    className="flex-1 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                    disabled={isLoading}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 >
-                    Add Bookmark
+                    {isLoading ? 'Adding...' : 'Add Bookmark'}
                 </button>
             </div>
         </form>
