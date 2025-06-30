@@ -44,9 +44,10 @@
 ## Remote Data Fetching
 The application uses the `fetchMetadata.js` utility to:
 1. Retrieve webpage metadata (title, description, favicon) when adding new bookmarks
-2. Handle CORS issues through a proxy server
+2. Handle CORS issues through a proxy server (CORS Anywhere)
 3. Parse HTML content to extract Open Graph and Twitter Card metadata
 4. Fallback to HTML title and meta description if needed
+5. Generate favicons using Google's favicon service if not found in metadata
 
 ## Web Scraping Targets
 The metadata fetching logic targets:
@@ -56,7 +57,9 @@ The metadata fetching logic targets:
    - property="og:title", "og:description", "og:image"
    - name="twitter:title", "twitter:description", "twitter:image"
 3. First `<link rel="icon">` for favicon
-4. Fallback to domain favicon at /favicon.ico
+4. First `<link rel="icon">` for favicon
+5. Fallback to domain favicon at /favicon.ico
+6. Use Google favicon service (https://www.google.com/s2/favicons?domain=example.com) as final fallback
 
 ---
-Last Updated: 2025-06-17 02:15 AM by Documentation Agent
+Last Updated: 2025-06-30 06:02 PM by Documentation Agent

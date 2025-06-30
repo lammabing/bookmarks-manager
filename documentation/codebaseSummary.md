@@ -12,17 +12,26 @@
 ├── routes/                 # API route handlers
 │   ├── bookmarks.js        # Bookmark CRUD operations
 │   └── users.js            # User authentication routes
+├── extension/              # Browser extension source
+│   ├── background.js       # Handles context menu and background processes
+│   ├── manifest.json       # Defines extension configuration and permissions
+│   ├── popup.html          # Popup UI for extension
+│   ├── popup.js            # Popup interaction logic
+│   ├── popup.css           # Popup styling
+│   ├── site.webmanifest    # Web app manifest
+│   └── icons/              # Extension icons in multiple sizes
 ├── scripts/                # Database maintenance scripts
 ├── src/                    # Frontend React application
 │   ├── components/         # Reusable UI components
 │   │   ├── AddBookmarkForm.jsx
 │   │   ├── Auth/           # Authentication components
 │   │   ├── BookmarkGrid.jsx
+│   │   ├── BulkEditPanel.jsx # Bulk operations UI
 │   │   ├── EditBookmarkForm.jsx
 │   │   ├── FontSettings.jsx
 │   │   ├── FontSettingsModal.jsx
 │   │   ├── SearchBar.jsx
-│   │   └── TagManager.jsx
+│   │   └── TagManager.jsx  # Tag management UI
 │   ├── utils/              # Utility functions
 │   │   ├── api.js          # API service
 │   │   ├── db.js           # Database connection
@@ -66,15 +75,18 @@
 
 ### Frontend
 1. **App.jsx**: Root component, manages routing and global state
-   - Now uses state to control form visibility (initially hidden)
-   - Shows form when "+" button clicked or bookmarklet used
+   - Controls form visibility and authentication state
+   - Integrates tag manager and bulk edit panels
 2. **components/**: Reusable UI components
-   - AddBookmarkForm: Added cancel button to hide form
+   - TagManager: Manages tag creation, renaming and deletion
+   - BulkEditPanel: Handles bulk operations UI
+   - AddBookmarkForm: Includes cancel button and metadata fetching
 3. **utils/api.js**: Centralized API service for backend communication
+   - Handles all API calls including tag management and bulk operations
 
 ### Shared Utilities
 1. **fetchMetadata.js**: Fetches webpage metadata for new bookmarks
 2. **fontSettings.js**: Manages user font preferences
 
 ---
-Last Updated: 2025-06-23 11:14 AM by Documentation Agent
+Last Updated: 2025-06-30 06:03 PM by Documentation Agent

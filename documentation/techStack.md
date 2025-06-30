@@ -2,11 +2,14 @@
 
 ## Chosen Technologies, Framework, and Architecture
 *   **Frontend:** React, Vite, Tailwind CSS
-*   **Backend:** Node.js, Express
-*   **Database:** MongoDB
+*   **Backend:** Node.js (v20.11.1), Express (v4.18.2)
+*   **Database:** MongoDB (v7.0) with Mongoose ODM (v8.0.3)
 *   **Authentication:** JSON Web Tokens (JWT)
+*   **Browser Extension:** Chrome/Firefox extension for one-click bookmarking
+*   **Proxy Server:** CORS Anywhere for metadata fetching
 *   **Architecture:** Client-server (Frontend interacts with Backend API, Backend interacts with MongoDB)
 *   **State Management:** React Context API
+*   **Font Management:** react-font-picker with Google Fonts integration
 
 ## Module Dependencies
 *   **Dependencies:**
@@ -35,6 +38,9 @@
 
 ## Data Source(s)
 *   MongoDB database
+*   Google Fonts API for font management
+*   Webpage metadata via proxy server
+*   Browser context information via extension
 
 ## Data Structures
 *   **Bookmarks:** Stored as documents in MongoDB, following the `Bookmark` model
@@ -92,4 +98,4 @@
     *   `POST /api/metadata`: Fetch metadata for a given URL
 
 ---
-Last Updated: 2025-06-17 02:10 AM by Documentation Agent
+Last Updated: 2025-06-30 06:01 PM by Documentation Agent

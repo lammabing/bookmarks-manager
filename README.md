@@ -6,11 +6,12 @@ A web-based application for managing bookmarks with advanced organization featur
 
 - **User Authentication**: Secure registration and login with JWT
 - **Bookmark Management**: Add, edit, and delete bookmarks with metadata
-- **Tag Organization**: Organize bookmarks with customizable tags
+- **Tag Management**: Organize bookmarks with customizable tags and bulk editing
 - **Advanced Search**: Filter bookmarks by tags, keywords, and dates
-- **Font Customization**: Adjust font settings for better readability
+- **Font Customization**: Adjust font settings with Google Fonts integration
 - **Metadata Extraction**: Automatically fetches titles, descriptions and favicons
 - **Import/Export**: Import bookmarks from browsers or export for backup
+- **Browser Extension**: Add bookmarks directly from Chrome/Firefox (coming soon)
 
 ## Getting Started
 
@@ -77,6 +78,7 @@ A web-based application for managing bookmarks with advanced organization featur
 ├── docker-compose.yml      # Docker configuration
 ├── package.json            # Project dependencies
 ├── server.js               # Backend entry point
+├── extension/              # Browser extension source
 └── README.md               # Project documentation
 ```
 
@@ -95,4 +97,4 @@ See [documentation/techStack.md](documentation/techStack.md) for API endpoints a
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ---
-*Documentation updated: 2025-06-17*
+*Documentation updated: 2025-06-30*
