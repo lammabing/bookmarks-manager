@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const BookmarkExtensionSchema = new mongoose.Schema({
   bookmarkId: {
@@ -35,4 +35,5 @@ BookmarkExtensionSchema.pre('save', function(next) {
   next();
 });
 
-module.exports = mongoose.model('BookmarkExtension', BookmarkExtensionSchema);
+const BookmarkExtension = mongoose.model('BookmarkExtension', BookmarkExtensionSchema);
+export default BookmarkExtension;

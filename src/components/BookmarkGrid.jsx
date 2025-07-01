@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Trash2, Edit, Lock, Globe } from 'lucide-react';
 import EditBookmarkForm from './EditBookmarkForm';
 
-const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings }) => {
+const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, onSelect, hoverEffect = "hover:shadow-lg hover:bg-blue-50 transition" }) => {
   const [editingBookmark, setEditingBookmark] = useState(null);
 
   const handleEdit = (bookmark) => {
@@ -23,7 +23,7 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings }) =
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
           {bookmarks.map((bookmark) => (
-            <div key={bookmark._id} className="border rounded-lg p-4 shadow-sm relative">
+            <div key={bookmark._id} className={`border rounded-lg p-4 shadow-sm relative cursor-pointer ${hoverEffect}`} onClick={() => onSelect && onSelect(bookmark)}>
               {editingBookmark?._id === bookmark._id ? (
                 <EditBookmarkForm
                   bookmark={bookmark}
@@ -45,6 +45,7 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings }) =
                         color: fontSettings.titleFontColor,
                       }}
                       className="hover:underline mr-2"
+                      onClick={e => e.stopPropagation()}
                     >
                       {bookmark.title}
                     </a>
@@ -110,6 +111,7 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings }) =
                         color: fontSettings.titleFontColor,
                       }}
                       className="hover:underline mr-2"
+                      onClick={e => e.stopPropagation()}
                     >
                       {bookmark.title}
                     </a>

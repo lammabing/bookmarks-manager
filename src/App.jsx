@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BookmarkGrid from './components/BookmarkGrid';
+import BookmarkDetail from './components/BookmarkDetail';
 import SearchBar from './components/SearchBar';
 import AddBookmarkForm from './components/AddBookmarkForm';
 import FontSettingsModal from './components/FontSettingsModal';
@@ -13,6 +14,7 @@ import api from './utils/api';
 const App = () => {
   const [bookmarks, setBookmarks] = useState([]);
   const [filteredBookmarks, setFilteredBookmarks] = useState([]);
+  const [selectedBookmark, setSelectedBookmark] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
   const [initialFormData, setInitialFormData] = useState(null);
   const [fontSettings, setFontSettings] = useState({
@@ -366,13 +368,21 @@ const App = () => {
           <TagManager />
         </div>
       )}
-      <BookmarkGrid
-        bookmarks={filteredBookmarks}
-        onDelete={handleDeleteBookmark}
-        onEdit={handleEditBookmark}
-        viewMode={viewMode}
-        fontSettings={fontSettings}
-      />
+      {selectedBookmark ? (
+        <BookmarkDetail
+          bookmark={selectedBookmark}
+          onBack={() => setSelectedBookmark(null)}
+        />
+      ) : (
+        <BookmarkGrid
+          bookmarks={filteredBookmarks}
+          onDelete={handleDeleteBookmark}
+          onEdit={handleEditBookmark}
+          viewMode={viewMode}
+          fontSettings={fontSettings}
+          onSelect={setSelectedBookmark}
+        />
+      )}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
