@@ -23,7 +23,11 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, onS
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
           {bookmarks.map((bookmark) => (
-            <div key={bookmark._id} className={`border rounded-lg p-4 shadow-sm relative cursor-pointer ${hoverEffect}`} onClick={() => onSelect && onSelect(bookmark)}>
+            <div
+              key={bookmark._id}
+              className={`border rounded-lg p-4 shadow-sm relative cursor-pointer ${hoverEffect}`}
+              {...(editingBookmark?._id === bookmark._id ? {} : { onClick: () => onSelect && onSelect(bookmark) })}
+            >
               {editingBookmark?._id === bookmark._id ? (
                 <EditBookmarkForm
                   bookmark={bookmark}
@@ -74,14 +78,19 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, onS
                     ))}
                   </div>
                   <button
-                    onClick={() => handleEdit(bookmark)}
+                    onClick={e => { e.stopPropagation(); handleEdit(bookmark); }}
                     className="absolute top-2 right-10 p-1 text-blue-500 hover:text-blue-700"
                     aria-label="Edit bookmark"
                   >
                     <Edit size={18} />
                   </button>
                   <button
-                    onClick={() => onDelete(bookmark._id)}
+                    onClick={e => {
+                      e.stopPropagation();
+                      if (window.confirm('Are you sure you want to delete this bookmark?')) {
+                        onDelete(bookmark._id);
+                      }
+                    }}
                     className="absolute top-2 right-2 p-1 text-red-500 hover:text-red-700"
                     aria-label="Delete bookmark"
                   >

@@ -10,13 +10,13 @@ A web-based application for managing bookmarks with advanced organization featur
 - **Advanced Search**: Filter bookmarks by tags, keywords, and dates
 - **Font Customization**: Adjust font settings with Google Fonts integration
 - **Metadata Extraction**: Automatically fetches titles, descriptions and favicons
-- **Import/Export**: Import bookmarks from browsers or export for backup
-- **Browser Extension**: Add bookmarks directly from Chrome/Firefox (coming soon)
+- **Import/Export**: Import bookmarks from browsers or export for backup (planned)
+- **Browser Extension**: Add bookmarks directly from Chrome/Firefox (popup UI and context menu implemented; background sync in progress)
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js v18+
+- Node.js v20+
 - MongoDB (local or cloud instance)
 - Docker (for local MongoDB setup)
 
@@ -34,7 +34,7 @@ A web-based application for managing bookmarks with advanced organization featur
 
 3. Set up environment variables:
    ```bash
-   cp .env.example .env
+   cp .env copy .env
    ```
    Edit .env with your configuration. Required variables:
    - `MONGODB_URI`: MongoDB connection string (e.g., `mongodb://localhost:27017/bookmarking-app`)
@@ -74,16 +74,24 @@ A web-based application for managing bookmarks with advanced organization featur
 ├── routes/                 # API route handlers
 ├── scripts/                # Database maintenance scripts
 ├── src/                    # Frontend React application
+├── extension/              # Browser extension source (Chrome/Firefox)
+│   ├── background.js       # Handles context menu and background processes
+│   ├── manifest.json       # Extension configuration and permissions
+│   ├── popup.html          # Popup UI for extension
+│   ├── popup.js            # Popup interaction logic
+│   ├── popup.css           # Popup styling
+│   └── icons/              # Extension icons
+├── admin-scripts/          # Admin/maintenance scripts
 ├── .env                    # Environment variables
 ├── docker-compose.yml      # Docker configuration
 ├── package.json            # Project dependencies
 ├── server.js               # Backend entry point
-├── extension/              # Browser extension source
-└── README.md               # Project documentation
+├── README.md               # Project documentation
+└── ... (other config and support files)
 ```
 
 ## API Documentation
-See [documentation/techStack.md](documentation/techStack.md) for API endpoints and data schemas.
+See [documentation/techStack.md](documentation/techStack.md) and [documentation/dataSources.md](documentation/dataSources.md) for API endpoints and data schemas.
 
 ## Contributing
 
@@ -97,4 +105,4 @@ See [documentation/techStack.md](documentation/techStack.md) for API endpoints a
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ---
-*Documentation updated: 2025-06-30*
+*Documentation updated: 2025-07-01*

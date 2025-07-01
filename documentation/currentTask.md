@@ -10,7 +10,7 @@
 ## Subtasks
 ### Tag Management
 - [x] Backend: Create tag CRUD endpoints (completed)
-- [ ] Frontend: Build tag manager UI component (in progress)
+- [x] Frontend: Build tag manager UI component (completed)
 - [ ] Implement tag rename/delete propagation logic
 
 ### Authentication
@@ -19,12 +19,12 @@
 - [ ] Add session management middleware
 
 ### Browser Extension
-- [ ] Design extension popup UI
-- [ ] Implement context menu bookmarking
-- [ ] Develop background sync process
+- [x] Design extension popup UI (completed)
+- [x] Implement context menu bookmarking (completed)
+- [ ] Develop background sync process (in progress)
 
 ### Bulk Operations
-- [ ] Create bulk selection UI component
+- [x] Create bulk selection UI component (completed)
 - [ ] Implement bulk edit API endpoints
 - [ ] Add bulk delete functionality
 
@@ -35,10 +35,10 @@
 
 ## Current Status
 - Tag management backend API completed
-- Frontend tag manager component development started
+- Frontend tag manager component completed
 - Authentication system design finalized
-- Browser extension planning phase
-- Bulk operations requirements defined
+- Browser extension popup and context menu implemented; background sync in progress
+- Bulk operations UI component completed
 - Documentation updates in progress
 
 ## Next Steps

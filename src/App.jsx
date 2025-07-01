@@ -256,7 +256,7 @@ const App = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Bookmarking App</h1>
+        <h1 className="text-2xl font-bold">Bookmarks Manager</h1>
         {authButton}
       </header>
       <div className="flex items-center space-x-2 mb-4">
