@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="WSL - Ubuntu" type="wsl" uuid="f8219d07-da79-4bec-8d3b-6d5328de52f8">
+        <config>
+          <option name="distributionMsId" value="Ubuntu" />
+          <option name="projectRootOnTarget" value="{exitCode=0, timeout=false, cancelled=false, stdout=/tmp/tmp.RHMOlzvBEi&#13;&#10;, stderr=}/bookmarks-manager" />
+        </config>
+      </target>
+    </targets>
+  </component>
+</project>
