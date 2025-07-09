@@ -255,108 +255,111 @@ const App = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Bookmarks Manager</h1>
-        {authButton}
-      </header>
-      <div className="flex items-center space-x-2 mb-4">
-        {/* Add Bookmark Button */}
-        <button
-          onClick={() => setIsFormVisible(!isFormVisible)}
-          onMouseEnter={() => setHoverText(isFormVisible ? 'Hide Form' : 'Add Bookmark')}
-          onMouseLeave={() => setHoverText('')}
-          className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center w-10 h-10"
-        >
-          <Plus size={24} />
-        </button>
-        {/* Appearance Button */}
-        <button
-          onClick={() => setIsFontSettingsModalOpen(true)}
-          onMouseEnter={() => setHoverText('Appearance')}
-          onMouseLeave={() => setHoverText('')}
-          className="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center justify-center w-10 h-10"
-        >
-          <Settings size={24} />
-        </button>
-
-        {/* Switch View Button */}
-        <button
-          onClick={toggleViewMode}
-          onMouseEnter={() => setHoverText(viewMode === 'grid' ? 'List View' : 'Grid View')}
-          onMouseLeave={() => setHoverText('')}
-          className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center w-10 h-10"
-        >
-          {viewMode === 'grid' ? <List size={24} /> : <Grid size={24} />}
-        </button>
-
-        {/* Copy Bookmarks Button */}
-        <button
-          onClick={handleCopyBookmarks}
-          onMouseEnter={() => setHoverText('Copy Bookmarks')}
-          onMouseLeave={() => setHoverText('')}
-          className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center w-10 h-10"
-        >
-          <Copy size={24} />
-        </button>
-
-        {/* Import Bookmarks Button - Only show if logged in */}
-        {currentUser && (
-          <label
-            onMouseEnter={() => setHoverText('Import Bookmarks')}
+      <div className="sticky-header-wrapper"> {/* New wrapper for sticky content */}
+        <header className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold">Bookmarks Manager</h1>
+          {authButton}
+        </header>
+        <div className="flex items-center space-x-2 mb-4">
+          {/* Add Bookmark Button */}
+          <button
+            onClick={() => setIsFormVisible(!isFormVisible)}
+            onMouseEnter={() => setHoverText(isFormVisible ? 'Hide Form' : 'Add Bookmark')}
             onMouseLeave={() => setHoverText('')}
-            className="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center justify-center w-10 h-10 cursor-pointer"
+            className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center w-10 h-10"
           >
-            <Upload size={24} />
+            <Plus size={24} />
+          </button>
+          {/* Appearance Button */}
+          <button
+            onClick={() => setIsFontSettingsModalOpen(true)}
+            onMouseEnter={() => setHoverText('Appearance')}
+            onMouseLeave={() => setHoverText('')}
+            className="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center justify-center w-10 h-10"
+          >
+            <Settings size={24} />
+          </button>
+
+          {/* Switch View Button */}
+          <button
+            onClick={toggleViewMode}
+            onMouseEnter={() => setHoverText(viewMode === 'grid' ? 'List View' : 'Grid View')}
+            onMouseLeave={() => setHoverText('')}
+            className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center w-10 h-10"
+          >
+            {viewMode === 'grid' ? <List size={24} /> : <Grid size={24} />}
+          </button>
+
+          {/* Copy Bookmarks Button */}
+          <button
+            onClick={handleCopyBookmarks}
+            onMouseEnter={() => setHoverText('Copy Bookmarks')}
+            onMouseLeave={() => setHoverText('')}
+            className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center w-10 h-10"
+          >
+            <Copy size={24} />
+          </button>
+
+          {/* Import Bookmarks Button - Only show if logged in */}
+          {currentUser && (
+            <label
+              onMouseEnter={() => setHoverText('Import Bookmarks')}
+              onMouseLeave={() => setHoverText('')}
+              className="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center justify-center w-10 h-10 cursor-pointer"
+            >
+              <Upload size={24} />
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportBookmarks}
+                className="hidden"
+              />
+            </label>
+          )}
+
+          {/* Bookmarklet Button */}
+          <a
+            href={bookmarkletCode}
+            title="🔖"
+            draggable="true"
+            onMouseEnter={() => setHoverText('Drag to Bookmark Bar')}
+            onMouseLeave={() => setHoverText('')}
+            className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center justify-center w-10 h-10"
+          >
+            <BookmarkIcon size={24} />
+          </a>
+
+          {/* Tag Manager Button */}
+          <button
+            onClick={() => setIsTagManagerOpen(prev => !prev)}
+            onMouseEnter={() => setHoverText('Manage Tags')}
+            onMouseLeave={() => setHoverText('')}
+            className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 flex items-center justify-center w-10 h-10"
+          >
+            <Tags size={24} />
+          </button>
+
+          {/* Hover Text Box */}
+          <div className="flex-1 ml-2">
             <input
-              type="file"
-              accept=".json"
-              onChange={handleImportBookmarks}
-              className="hidden"
+              type="text"
+              value={hoverText}
+              readOnly
+              className="w-full p-2 border rounded-lg bg-gray-100 text-gray-700"
+              placeholder="Hover over a button for info"
             />
-          </label>
-        )}
-
-        {/* Bookmarklet Button */}
-        <a
-          href={bookmarkletCode}
-          title="🔖"
-          draggable="true"
-          onMouseEnter={() => setHoverText('Drag to Bookmark Bar')}
-          onMouseLeave={() => setHoverText('')}
-          className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center justify-center w-10 h-10"
-        >
-          <BookmarkIcon size={24} />
-        </a>
-
-        {/* Tag Manager Button */}
-        <button
-          onClick={() => setIsTagManagerOpen(prev => !prev)}
-          onMouseEnter={() => setHoverText('Manage Tags')}
-          onMouseLeave={() => setHoverText('')}
-          className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 flex items-center justify-center w-10 h-10"
-        >
-          <Tags size={24} />
-        </button>
-
-        {/* Hover Text Box */}
-        <div className="flex-1 ml-2">
-          <input
-            type="text"
-            value={hoverText}
-            readOnly
-            className="w-full p-2 border rounded-lg bg-gray-100 text-gray-700"
-            placeholder="Hover over a button for info"
-          />
+          </div>
         </div>
-      </div>
-      {isFormVisible && (
-        <AddBookmarkForm
-          onAdd={handleAddBookmark}
-          initialData={initialFormData}
-          onCancel={() => setIsFormVisible(false)}
-        />
-      )}
-      <SearchBar onSearch={handleSearch} />
+        {isFormVisible && (
+          <AddBookmarkForm
+            onAdd={handleAddBookmark}
+            initialData={initialFormData}
+            onCancel={() => setIsFormVisible(false)}
+          />
+        )}
+        <SearchBar onSearch={handleSearch} />
+      </div> {/* End of sticky-header-wrapper */}
+
       <FontSettingsModal
         isOpen={isFontSettingsModalOpen}
         onClose={() => setIsFontSettingsModalOpen(false)}
@@ -368,21 +371,23 @@ const App = () => {
           <TagManager />
         </div>
       )}
-      {selectedBookmark ? (
-        <BookmarkDetail
-          bookmark={selectedBookmark}
-          onBack={() => setSelectedBookmark(null)}
-        />
-      ) : (
-        <BookmarkGrid
-          bookmarks={filteredBookmarks}
-          onDelete={handleDeleteBookmark}
-          onEdit={handleEditBookmark}
-          viewMode={viewMode}
-          fontSettings={fontSettings}
-          onSelect={setSelectedBookmark}
-        />
-      )}
+      <div className="scrollable-content-wrapper"> {/* New wrapper for scrollable content */}
+        {selectedBookmark ? (
+          <BookmarkDetail
+            bookmark={selectedBookmark}
+            onBack={() => setSelectedBookmark(null)}
+          />
+        ) : (
+          <BookmarkGrid
+            bookmarks={filteredBookmarks}
+            onDelete={handleDeleteBookmark}
+            onEdit={handleEditBookmark}
+            viewMode={viewMode}
+            fontSettings={fontSettings}
+            onSelect={setSelectedBookmark}
+          />
+        )}
+      </div> {/* End of scrollable-content-wrapper */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}

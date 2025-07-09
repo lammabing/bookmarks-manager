@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GBrowserService"><![CDATA[{
+  "history": [
+    {
+      "name": "GBrowser - IntelliJ IDEs Plugin | Marketplace",
+      "url": "https://plugins.jetbrains.com/plugin/14458-gbrowser"
+    },
+    {
+      "name": "GBrowser Plugin for JetBrains IDEs | JetBrains Marketplace",
+      "url": "https://plugins.jetbrains.com/search?tags=Tools%20Integration"
+    },
+    {
+      "name": "GBrowser Plugin for JetBrains IDEs | JetBrains Marketplace",
+      "url": "https://plugins.jetbrains.com/search?excludeTags=internal"
+    },
+    {
+      "name": "GBrowser Plugin for JetBrains IDEs | JetBrains Marketplace",
+      "url": "https://plugins.jetbrains.com/search?excludeTags=internal&products=androidstudio&products=aqua&products=clion&products=dataspell&products=dbe&products=fleet&products=go&products=idea&products=idea_ce&products=mps&products=phpstorm&products=pycharm&products=rider&products=ruby&products=rust&products=webstorm&products=writerside&tags=Tools%20Integration"
+    },
+    {
+      "name": "GBrowser Plugin for JetBrains IDEs | JetBrains Marketplace",
+      "url": "https://plugins.jetbrains.com/plugin/9966-native-terminal"
+    },
+    {
+      "name": "Native Terminal Plugin for JetBrains IDEs | JetBrains Marketplace",
+      "url": "https://plugins.jetbrains.com/plugin/9966-native-terminal/versions#tabs"
+    },
+    {
+      "name": "Native Terminal Plugin for JetBrains IDEs | JetBrains Marketplace",
+      "url": "https://plugins.jetbrains.com/plugin/9966-native-terminal/versions/stable"
+    },
+    {
+      "name": "Download WebStorm: The JavaScript and TypeScript IDE by JetBrains",
+      "url": "https://www.jetbrains.com/webstorm/download/"
+    },
+    {
+      "name": "Download WebStorm: The JavaScript and TypeScript IDE by JetBrains",
+      "url": "https://www.jetbrains.com/webstorm/download/?section=windows"
+    }
+  ]
+}]]></component>
+</project>

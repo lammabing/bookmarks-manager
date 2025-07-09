@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlInput = document.getElementById('bookmark-url');
   const bookmarksList = document.getElementById('bookmarks-list');
   const logoutBtn = document.getElementById('logout-btn');
+  const toggleViewBtn = document.getElementById('toggle-view-btn');
+  let showPublic = false;
 
   function showLogin() {
     loginSection.style.display = '';
@@ -22,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function showBookmarks() {
     loginSection.style.display = 'none';
     bookmarksSection.style.display = '';
+    showPublic = false;
     loadBookmarks();
   }
 
@@ -32,7 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       showLogin();
     }
-  });
+    // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
+    });
+  }
+});
 
   // Login form handler
   loginForm.addEventListener('submit', (e) => {
@@ -52,39 +63,119 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.storage.sync.set({ authToken: data.token }, () => {
           loginForm.reset();
           showBookmarks();
-        });
+          // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
+    });
+  }
+});
       })
       .catch(err => {
         loginError.textContent = err.message;
         loginError.style.display = '';
-      });
-  });
+        // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
+    });
+  }
+});
+    // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
+    });
+  }
+});
 
   // Logout handler
   logoutBtn.addEventListener('click', () => {
     chrome.storage.sync.remove('authToken', showLogin);
-  });
+    // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
+    });
+  }
+});
 
   // Load bookmarks from backend
   function loadBookmarks() {
     bookmarksList.innerHTML = '<em>Loading bookmarks...</em>';
     chrome.storage.sync.get(['authToken'], (result) => {
-      const token = result.authToken;
-      fetch('http://localhost:3000/api/bookmarks', {
-        headers: token ? { 'x-auth-token': token } : {}
-      })
+      let url = 'http://localhost:3000/api/bookmarks';
+      let headers = {};
+      if (!showPublic && result.authToken) {
+        headers['x-auth-token'] = result.authToken;
+      }
+      fetch(url, { headers })
         .then(res => res.json())
         .then(data => {
           if (!Array.isArray(data) || data.length === 0) {
             bookmarksList.innerHTML = '<em>No bookmarks found.</em>';
             return;
           }
-          bookmarksList.innerHTML = '<ul>' + data.map(b => `<li><a href="${b.url}" target="_blank">${b.title || b.url}</a></li>`).join('') + '</ul>';
+          bookmarksList.innerHTML = '<ul>' + data.map(b => {
+            let deleteBtn = '';
+            // Only show delete button if user is logged in and not viewing public bookmarks
+            if (!showPublic && b._id) {
+              deleteBtn = ` <button class="delete-btn" data-id="${b._id}">Delete</button>`;
+            }
+            return `<li><a href="${b.url}" target="_blank">${b.title || b.url}</a>${deleteBtn}</li>`;
+          }).join('') + '</ul>';
+
+          // Add event listeners for delete buttons
+          document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const id = this.getAttribute('data-id');
+              if (confirm('Are you sure you want to delete this bookmark?')) {
+                chrome.storage.sync.get(['authToken'], (result) => {
+                  const token = result.authToken;
+                  fetch(`http://localhost:3000/api/bookmarks/${id}`, {
+                    method: 'DELETE',
+                    headers: token ? { 'x-auth-token': token } : {}
+                  })
+                  .then(res => {
+                    if (!res.ok) throw new Error('Failed to delete bookmark');
+                    loadBookmarks();
+                  })
+                  .catch(() => {
+                    alert('Error deleting bookmark.');
+                  });
+                });
+              }
+            });
+          });
         })
         .catch(() => {
           bookmarksList.innerHTML = '<em>Error loading bookmarks.</em>';
-        });
+          // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
     });
+  }
+});
+      // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
+    });
+  }
+});
   }
 
   form.addEventListener('submit', (e) => {
@@ -113,7 +204,39 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(() => {
           alert('Error adding bookmark.');
-        });
+          // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
     });
-  });
+  }
+});
+      // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
+    });
+  }
+});
+    // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
+    });
+  }
+});
+  // Toggle between My Bookmarks and All Public Bookmarks
+  if (toggleViewBtn) {
+    toggleViewBtn.addEventListener('click', () => {
+      showPublic = !showPublic;
+      toggleViewBtn.textContent = showPublic ? 'Show My Bookmarks' : 'Show All Public Bookmarks';
+      loadBookmarks();
+    });
+  }
 });
