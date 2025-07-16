@@ -43,6 +43,10 @@ A web-based application for managing bookmarks with advanced organization featur
 
 4. Start MongoDB with Docker:
    ```bash
+   ./start-mongo.sh
+   ```
+   Or use Docker Compose:
+   ```bash
    docker compose up -d
    ```
 
@@ -105,4 +109,4 @@ See [documentation/techStack.md](documentation/techStack.md) and [documentation/
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ---
-*Documentation updated: 2025-07-01*
+*Documentation updated: 2025-07-14*

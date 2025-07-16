@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "dev": "NODE_OPTIONS=--max-old-space-size=1024 vite --port 5170",
+    "dev": "NODE_OPTIONS=--max-old-space-size=1024 vite --port 5170 --host 0.0.0.0",
     "build": "vite build",
     "serve": "vite preview",
     "start": "node server.js",

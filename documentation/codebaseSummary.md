@@ -8,9 +8,12 @@
 │   └── auth.js             # Authentication middleware
 ├── models/                 # MongoDB models
 │   ├── Bookmark.js         # Bookmark schema and model
+│   ├── BookmarkExtension.js # Extension-specific bookmark model
 │   └── User.js             # User schema and model
 ├── routes/                 # API route handlers
 │   ├── bookmarks.js        # Bookmark CRUD operations
+│   ├── bookmarkExtensions.js # Extension-specific routes
+│   ├── tags.js             # Tag management routes
 │   └── users.js            # User authentication routes
 ├── extension/              # Browser extension source
 │   ├── background.js       # Handles context menu and background processes
@@ -21,6 +24,7 @@
 │   ├── site.webmanifest    # Web app manifest
 │   └── icons/              # Extension icons in multiple sizes
 ├── scripts/                # Database maintenance scripts
+├── start-mongo.sh          # MongoDB Docker container starter
 ├── src/                    # Frontend React application
 │   ├── components/         # Reusable UI components
 │   │   ├── AddBookmarkForm.jsx
@@ -51,6 +55,7 @@
 ├── server.js               # Backend entry point
 ├── setup-app.sh            # Setup script
 ├── start.sh                # Startup script
+├── start-mongo.sh          # MongoDB Docker container starter
 └── tailwind.config.js      # Tailwind CSS configuration
 ```
 

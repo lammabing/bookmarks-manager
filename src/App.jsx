@@ -231,25 +231,28 @@ const App = () => {
   };
   
   const authButton = currentUser ? (
-    <div className="flex items-center">
-      <span className="mr-2 text-sm hidden md:inline">
-        {currentUser.username}
-      </span>
+    <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2">
+        <User size={20} className="text-gray-600" />
+        <span className="text-sm font-medium text-gray-700">
+          {currentUser.username}
+        </span>
+      </div>
       <button
         onClick={handleLogout}
-        className="flex items-center text-sm bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+        className="flex items-center text-sm bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors duration-200"
       >
         <LogOut size={16} className="mr-1" />
-        <span className="hidden md:inline">Logout</span>
+        <span>Logout</span>
       </button>
     </div>
   ) : (
     <button
       onClick={() => setIsAuthModalOpen(true)}
-      className="flex items-center text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+      className="flex items-center text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition-colors duration-200"
     >
       <LogIn size={16} className="mr-1" />
-      <span className="hidden md:inline">Login / Register</span>
+      <span>Login / Register</span>
     </button>
   );
 
