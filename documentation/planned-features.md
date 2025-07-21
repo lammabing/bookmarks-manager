@@ -11,9 +11,8 @@ This document outlines potential features to add to the bookmarking application,
 
 #### 2. Folder/Collection System
 
-*   **Description:** Implement a hierarchical structure (like folders or collections) to organize bookmarks in addition to or as an alternative to tags.
-*   **Practicality:** Moderate complexity. Requires changes to the data model (adding a 'folder' or 'collection' field, potentially with nesting), backend API, and significant frontend UI/UX work for drag-and-drop or selection-based organization.
-*   **Tradeoffs:** Adds complexity to data querying and display. Users might prefer one system (tags vs. folders) over the other, or find managing both cumbersome.
+*   **Description:** Implement a hierarchical structure (like folders or collections with tree structure) to organize bookmarks in addition to or as an alternative to tags.
+*   **Practicality:** Moderate complexity. Requires changes to the data model (adding a 'folder' or 'collection' field, potentially with nesting), backend API, and frontend UI/UX additions/modifications for drag-and-drop or selection-based organization.
 
 #### 3. Advanced Filtering and Sorting
 

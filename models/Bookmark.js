@@ -6,19 +6,24 @@ const bookmarkSchema = new mongoose.Schema({
   description: { type: String },
   tags: [String],
   favicon: { type: String },
-  owner: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true 
+    required: true
   },
-  visibility: { 
-    type: String, 
-    enum: ['private', 'selected', 'public'], 
-    default: 'private' 
+  folder: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Folder',
+    default: null
   },
-  sharedWith: [{ 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User' 
+  visibility: {
+    type: String,
+    enum: ['private', 'selected', 'public'],
+    default: 'private'
+  },
+  sharedWith: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
