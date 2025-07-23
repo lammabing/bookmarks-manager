@@ -10,6 +10,18 @@ import bookmarkExtensionRoutes from './routes/bookmarkExtensions.js';
 // Load environment variables
 dotenv.config();
 
+// Validate required environment variables
+if (!process.env.MONGODB_URI) {
+  console.error('Error: MONGODB_URI environment variable is required');
+  console.error('Please create a .env file with MONGODB_URI set');
+  process.exit(1);
+}
+
+if (!process.env.JWT_SECRET) {
+  console.error('Error: JWT_SECRET environment variable is required');
+  process.exit(1);
+}
+
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5015;
