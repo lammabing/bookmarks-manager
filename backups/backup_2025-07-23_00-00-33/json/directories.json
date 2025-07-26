@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "687a93f6e3619b496e451d37",
+    "name": "Root",
+    "description": "Root directory for all bookmarks",
+    "parent": null,
+    "owner": "6845ba6677f8151b7f8c12a0",
+    "visibility": "private",
+    "sharedWith": [],
+    "createdAt": "2025-07-18T18:35:34.438Z",
+    "updatedAt": "2025-07-18T18:35:34.447Z",
+    "__v": 0
+  },
+  {
+    "_id": "687a93f6e3619b496e451d39",
+    "name": "Imported",
+    "description": "Bookmarks imported from legacy system",
+    "parent": "687a93f6e3619b496e451d37",
+    "owner": "6845ba6677f8151b7f8c12a0",
+    "visibility": "private",
+    "sharedWith": [],
+    "createdAt": "2025-07-18T18:35:34.452Z",
+    "updatedAt": "2025-07-18T18:35:34.452Z",
+    "__v": 0
+  },
+  {
+    "_id": "687a93f6e3619b496e451d3f",
+    "name": "Root",
+    "description": "Root directory for all bookmarks",
+    "parent": null,
+    "owner": "6846af16e233e8ac5388f584",
+    "visibility": "private",
+    "sharedWith": [],
+    "createdAt": "2025-07-18T18:35:34.473Z",
+    "updatedAt": "2025-07-18T18:35:34.474Z",
+    "__v": 0
+  },
+  {
+    "_id": "687a93f6e3619b496e451d41",
+    "name": "Imported",
+    "description": "Bookmarks imported from legacy system",
+    "parent": "687a93f6e3619b496e451d3f",
+    "owner": "6846af16e233e8ac5388f584",
+    "visibility": "private",
+    "sharedWith": [],
+    "createdAt": "2025-07-18T18:35:34.479Z",
+    "updatedAt": "2025-07-18T18:35:34.479Z",
+    "__v": 0
+  },
+  {
+    "_id": "687b0d819a657756dfc8a019",
+    "name": "shop",
+    "description": "",
+    "parent": null,
+    "owner": "6846af16e233e8ac5388f584",
+    "visibility": "private",
+    "sharedWith": [],
+    "createdAt": "2025-07-19T03:14:09.834Z",
+    "updatedAt": "2025-07-19T03:14:09.841Z",
+    "__v": 0
+  }
+]

@@ -130,25 +130,25 @@ folder: {
 ## Detailed Implementation Steps
 
 ### 1. Database Schema Implementation
-- [ ] Create `models/Folder.js` with the folder schema
-- [ ] Update `models/Bookmark.js` to include folder reference
+- [x] Create `models/Folder.js` with the folder schema
+- [x] Update `models/Bookmark.js` to include folder reference
 - [ ] Create database migration script for existing bookmarks
-- [ ] Add indexes for folder queries
-- [ ] Implement circular reference prevention
-- [ ] Add cascade delete functionality
+- [x] Add indexes for folder queries
+- [x] Implement circular reference prevention
+- [x] Add cascade delete functionality
 
 ### 2. Backend API Development
-- [ ] Create `routes/folders.js` with CRUD endpoints
-- [ ] Implement GET /api/folders - Get user's folder tree
-- [ ] Implement GET /api/folders/:id - Get specific folder details
-- [ ] Implement POST /api/folders - Create new folder
-- [ ] Implement PUT /api/folders/:id - Update folder
-- [ ] Implement DELETE /api/folders/:id - Delete folder (with cascade handling)
-- [ ] Implement GET /api/folders/:id/bookmarks - Get bookmarks in folder
-- [ ] Implement POST /api/folders/:id/move - Move folder to new parent
-- [ ] Update `routes/bookmarks.js` to support folder filtering
-- [ ] Add folder validation middleware
-- [ ] Implement folder ownership checks
+- [x] Create `routes/folders.js` with CRUD endpoints
+- [x] Implement GET /api/folders - Get user's folder tree
+- [x] Implement GET /api/folders/:id - Get specific folder details
+- [x] Implement POST /api/folders - Create new folder
+- [x] Implement PUT /api/folders/:id - Update folder
+- [x] Implement DELETE /api/folders/:id - Delete folder (with cascade handling)
+- [x] Implement GET /api/folders/:id/bookmarks - Get bookmarks in folder
+- [x] Implement POST /api/folders/:id/move - Move folder to new parent
+- [x] Update `routes/bookmarks.js` to support folder filtering
+- [x] Add folder validation middleware
+- [x] Implement folder ownership checks
 
 ### 3. Frontend Services
 - [ ] Create `src/utils/folderApi.js` - Folder API service

@@ -12,6 +12,7 @@ A web-based application for managing bookmarks with advanced organization featur
 - **Metadata Extraction**: Automatically fetches titles, descriptions and favicons
 - **Import/Export**: Import bookmarks from browsers or export for backup (planned)
 - **Browser Extension**: Add bookmarks directly from Chrome/Firefox (popup UI and context menu implemented; background sync in progress)
+- **Bookmarklet**: Add bookmarks from any webpage with a single click using the bookmarklet
 
 ## Getting Started
 
@@ -39,7 +40,7 @@ A web-based application for managing bookmarks with advanced organization featur
    Edit .env with your configuration. Required variables:
    - `MONGODB_URI`: MongoDB connection string (e.g., `mongodb://localhost:27017/bookmarking-app`)
    - `JWT_SECRET`: Secret key for JWT authentication (generate with `openssl rand -base64 32`)
-   - `VITE_API_BASE_URL`: Frontend API base URL (e.g., `http://localhost:5015/api`)
+   - `VITE_API_BASE_URL`: Frontend API base URL for production (e.g., `https://yourdomain.com/api`)
 
 4. Start MongoDB with Docker:
    ```bash
@@ -93,6 +94,20 @@ A web-based application for managing bookmarks with advanced organization featur
 ├── README.md               # Project documentation
 └── ... (other config and support files)
 ```
+
+## Bookmarklet
+
+Add bookmarks from any webpage with a single click using our bookmarklet feature.
+
+To install:
+1. See [documentation/bookmarklet-guide.md](documentation/bookmarklet-guide.md) for detailed installation instructions
+2. Copy the bookmarklet code from [src/bookmarklet.min.js](src/bookmarklet.min.js)
+3. Create a new bookmark in your browser's bookmarks bar
+4. Paste the code as the URL/address of the bookmark
+
+When you're on any webpage, simply click the bookmarklet to open a form pre-filled with the page's information.
+
+For testing instructions, see [documentation/bookmarklet-testing-guide.md](documentation/bookmarklet-testing-guide.md).
 
 ## API Documentation
 See [documentation/techStack.md](documentation/techStack.md) and [documentation/dataSources.md](documentation/dataSources.md) for API endpoints and data schemas.

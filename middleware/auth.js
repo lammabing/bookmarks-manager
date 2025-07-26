@@ -1,25 +1,30 @@
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import User from '../models/User.js';
 
-dotenv.config();
-
-export const auth = async (req, res, next) => {
-  // Get token from header
-  const token = req.header('x-auth-token');
-
-  // Check if no token
-  if (!token) {
-    return res.status(401).json({ message: 'No token, authorization denied' });
-  }
-
+const auth = async (req, res, next) => {
   try {
-    // Verify token
+    const token = req.header('x-auth-token') || req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+      return res.status(401).json({ message: 'No token, authorization denied' });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Add user from payload
     req.user = decoded;
+
+    // Optionally fetch full user data
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(401).json({ message: 'Token is not valid' });
+    }
+
+    req.user = user;
     next();
-  } catch (err) {
+  } catch (error) {
     res.status(401).json({ message: 'Token is not valid' });
   }
 };
+
+// Export both as named export and default export for compatibility
+export { auth };
+export default auth;

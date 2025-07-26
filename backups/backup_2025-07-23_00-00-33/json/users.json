@@ -1,0 +1,20 @@
+[
+  {
+    "_id": "6845ba6677f8151b7f8c12a0",
+    "username": "system",
+    "email": "system@bookmarkapp.com",
+    "password": "$2a$10$K30s3k00ZW9fq4hBn1y8q.E4RenJavCsqhKHndufTcUDr8mbMV0HG",
+    "createdAt": "2025-06-08T16:29:26.703Z",
+    "updatedAt": "2025-06-08T16:29:26.712Z",
+    "__v": 0
+  },
+  {
+    "_id": "6846af16e233e8ac5388f584",
+    "username": "skylabel",
+    "email": "skylabel@gmx.com",
+    "password": "$2a$10$uCTw/3LscFTmEFPjPtknQ.OOpGwJ74RwKpAdnjKUnre7dJwiVxe1C",
+    "createdAt": "2025-06-09T09:53:26.681Z",
+    "updatedAt": "2025-06-09T09:53:26.690Z",
+    "__v": 0
+  }
+]

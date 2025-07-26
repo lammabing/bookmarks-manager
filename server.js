@@ -6,6 +6,7 @@ import userRoutes from './routes/users.js';
 import bookmarkRoutes from './routes/bookmarks.js';
 import tagRoutes from './routes/tags.js'; // Import the new tags router
 import bookmarkExtensionRoutes from './routes/bookmarkExtensions.js';
+import folderRoutes from './routes/folders.js';
 
 // Load environment variables
 dotenv.config();
@@ -28,7 +29,7 @@ const PORT = process.env.PORT || 5015;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5171',
+  origin: 'http://localhost:5170',
   credentials: true
 }));
 app.use(express.json());
@@ -38,6 +39,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/tags', tagRoutes); // Add the tags routes
 app.use('/api', bookmarkExtensionRoutes);
+app.use('/api/folders', folderRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)

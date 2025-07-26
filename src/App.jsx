@@ -1,403 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import BookmarkGrid from './components/BookmarkGrid';
-import BookmarkDetail from './components/BookmarkDetail';
-import SearchBar from './components/SearchBar';
-import AddBookmarkForm from './components/AddBookmarkForm';
-import FontSettingsModal from './components/FontSettingsModal';
-import TagManager from './components/TagManager'; // Import TagManager
-import { loadFontSettings, saveFontSettings } from './utils/fontSettings';
-import { Settings, Grid, List, Copy, Upload, Bookmark as BookmarkIcon, Tags, Plus } from 'lucide-react'; // Import Tags and Plus icons
-import AuthModal from './components/Auth/AuthModal';
-import { LogIn, LogOut, User } from 'lucide-react';
-import api from './utils/api';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { FolderProvider } from "./contexts/FolderContext";
+import { BookmarkProvider } from "./contexts/BookmarkContext";
+import { TagProvider } from "./contexts/TagContext";
+import { FontProvider } from "./contexts/FontContext";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-const App = () => {
-  const [bookmarks, setBookmarks] = useState([]);
-  const [filteredBookmarks, setFilteredBookmarks] = useState([]);
-  const [selectedBookmark, setSelectedBookmark] = useState(null);
-  const [viewMode, setViewMode] = useState('grid');
-  const [initialFormData, setInitialFormData] = useState(null);
-  const [fontSettings, setFontSettings] = useState({
-    titleFontFamily: 'Arial',
-    titleFontSize: 16,
-    titleFontWeight: 'bold',
-    titleFontColor: '#000000',
-    descriptionFontFamily: 'Arial',
-    descriptionFontSize: 14,
-    descriptionFontWeight: 'normal',
-    descriptionFontColor: '#333333',
-  });
-  const [isFontSettingsModalOpen, setIsFontSettingsModalOpen] = useState(false);
-  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false); // State for TagManager visibility
-  const [hoverText, setHoverText] = useState('');
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isFormVisible, setIsFormVisible] = useState(false); // Track form visibility
-
-  // Load font settings on mount
-  useEffect(() => {
-    const savedSettings = loadFontSettings();
-    if (savedSettings) {
-      setFontSettings(savedSettings);
-    }
-  }, []);
-
-  // Save font settings when they change
-  useEffect(() => {
-    saveFontSettings(fontSettings);
-  }, [fontSettings]);
-
-  // Fetch bookmarks from the backend
-  useEffect(() => {
-    console.log('Fetching bookmarks... currentUser:', currentUser);
-    const fetchBookmarks = async () => {
-      try {
-        const { data } = await api.get('/bookmarks');
-        console.log('Fetched bookmarks:', data.length);
-        setBookmarks(data);
-        setFilteredBookmarks(data);
-      } catch (error) {
-        console.error('Error fetching bookmarks:', error);
-        if (error.response) {
-          console.error('Response data:', error.response.data);
-          console.error('Response status:', error.response.status);
-        }
-      }
-    };
-    fetchBookmarks();
-  }, [currentUser]); // Refetch when currentUser changes
-
-  // Handle bookmarklet data
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const url = queryParams.get('url');
-    const title = queryParams.get('title');
-    const description = queryParams.get('description');
-    const favicon = queryParams.get('favicon');
-
-    if (url) {
-      setInitialFormData({
-        url,
-        title: title || 'Untitled',
-        description: description || '',
-        favicon: favicon || `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}`,
-      });
-
-      // Clear the query parameters after processing
-      window.history.replaceState({}, document.title, window.location.pathname);
-      setIsFormVisible(true); // Open form when bookmarklet is used
-    }
-  }, []);
-
-  // Add a new bookmark
-  const handleAddBookmark = async (bookmark) => {
-      try {
-          // Generate favicon if not provided
-          const favicon = bookmark.favicon ||
-              `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}`;
-          
-          const { data } = await api.post('/bookmarks', {
-              ...bookmark,
-              favicon
-          });
-          
-          setBookmarks([...bookmarks, data]);
-          setFilteredBookmarks([...bookmarks, data]);
-          setInitialFormData(null); // Clear initial form data after adding
-      } catch (error) {
-          console.error('Error adding bookmark:', error);
-      }
-  };
-
-  // Edit a bookmark
-  const handleEditBookmark = async (updatedBookmark) => {
-    try {
-      const { data } = await api.put(`/bookmarks/${updatedBookmark._id}`, updatedBookmark);
-      
-      const updatedBookmarks = bookmarks.map((bookmark) =>
-        bookmark._id === data._id ? data : bookmark
-      );
-      setBookmarks(updatedBookmarks);
-      setFilteredBookmarks(updatedBookmarks);
-    } catch (error) {
-      console.error('Error updating bookmark:', error);
-      alert(`Failed to update bookmark: ${error.response?.data?.message || error.message}`);
-    }
-  };
-
-  // Delete a bookmark
-  const handleDeleteBookmark = async (id) => {
-    try {
-      await api.delete(`/bookmarks/${id}`);
-      const updatedBookmarks = bookmarks.filter((bookmark) => bookmark._id !== id);
-      setBookmarks(updatedBookmarks);
-      setFilteredBookmarks(updatedBookmarks);
-    } catch (error) {
-      console.error('Error deleting bookmark:', error);
-    }
-  };
-
-  // Search bookmarks
-  const handleSearch = (query) => {
-    const filtered = bookmarks.filter(
-      (bookmark) =>
-        bookmark.title.toLowerCase().includes(query.toLowerCase()) ||
-        bookmark.description.toLowerCase().includes(query.toLowerCase()) ||
-        bookmark.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
-    );
-    setFilteredBookmarks(filtered);
-  };
-
-  // Toggle view mode
-  const toggleViewMode = () => {
-    setViewMode((prevMode) => (prevMode === 'grid' ? 'list' : 'grid'));
-  };
-
-  // Apply font settings
-  const handleApplyFontSettings = (settings) => {
-    setFontSettings(settings);
-  };
-
-  // Copy filtered bookmarks to clipboard as JSON
-  const handleCopyBookmarks = () => {
-    const jsonString = JSON.stringify(filteredBookmarks, null, 2);
-    navigator.clipboard.writeText(jsonString)
-      .then(() => {
-        alert('Filtered bookmarks copied to clipboard!');
-      })
-      .catch((err) => {
-        console.error('Failed to copy bookmarks:', err);
-        alert('Failed to copy bookmarks to clipboard.');
-      });
-  };
-
-  // Import bookmarks from a JSON file - only allowed for logged-in users
-  const handleImportBookmarks = (event) => {
-    // Check if user is logged in
-    if (!currentUser) {
-      alert('You must be logged in to import bookmarks.');
-      return;
-    }
-
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const importedBookmarks = JSON.parse(e.target.result);
-
-        // Validate the imported data
-        if (!Array.isArray(importedBookmarks)) {
-          throw new Error('Invalid file format: Expected an array of bookmarks.');
-        }
-
-        // Process each bookmark
-        const processedBookmarks = importedBookmarks.map((bookmark) => ({
-          ...bookmark,
-          favicon: `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}`,
-        }));
-
-        // Add the processed bookmarks to the database
-        const { data } = await api.post('/bookmarks', processedBookmarks);
-        setBookmarks([...bookmarks, ...data]);
-        setFilteredBookmarks([...bookmarks, ...data]);
-
-        alert('Bookmarks imported successfully!');
-      } catch (error) {
-        console.error('Error importing bookmarks:', error);
-        alert(`Failed to import bookmarks: ${error.response?.data?.message || error.message}`);
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const bookmarkletCode = `javascript:(function() {
-    const url = encodeURIComponent(window.location.href);
-    const title = encodeURIComponent(document.title);
-    const description = encodeURIComponent(window.getSelection().toString().trim() || '');
-    const favicon = encodeURIComponent(document.querySelector('link[rel*="icon"]')?.href || \`https://www.google.com/s2/favicons?domain=\${window.location.hostname}\`);
-    const appUrl = \`http://localhost:5173/?url=\${url}&title=\${title}&description=\${description}&favicon=\${favicon}\`;
-    window.open(appUrl, '_blank');
-  })();`;
-
-  const handleLogin = (user) => {
-    setCurrentUser(user);
-  };
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setCurrentUser(null);
-  };
-  
-  const authButton = currentUser ? (
-    <div className="flex items-center space-x-3">
-      <div className="flex items-center space-x-2">
-        <User size={20} className="text-gray-600" />
-        <span className="text-sm font-medium text-gray-700">
-          {currentUser.username}
-        </span>
-      </div>
-      <button
-        onClick={handleLogout}
-        className="flex items-center text-sm bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors duration-200"
-      >
-        <LogOut size={16} className="mr-1" />
-        <span>Logout</span>
-      </button>
-    </div>
-  ) : (
-    <button
-      onClick={() => setIsAuthModalOpen(true)}
-      className="flex items-center text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition-colors duration-200"
-    >
-      <LogIn size={16} className="mr-1" />
-      <span>Login / Register</span>
-    </button>
-  );
-
+function App() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="sticky-header-wrapper"> {/* New wrapper for sticky content */}
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">Bookmarks Manager</h1>
-          {authButton}
-        </header>
-        <div className="flex items-center space-x-2 mb-4">
-          {/* Add Bookmark Button */}
-          <button
-            onClick={() => setIsFormVisible(!isFormVisible)}
-            onMouseEnter={() => setHoverText(isFormVisible ? 'Hide Form' : 'Add Bookmark')}
-            onMouseLeave={() => setHoverText('')}
-            className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center w-10 h-10"
-          >
-            <Plus size={24} />
-          </button>
-          {/* Appearance Button */}
-          <button
-            onClick={() => setIsFontSettingsModalOpen(true)}
-            onMouseEnter={() => setHoverText('Appearance')}
-            onMouseLeave={() => setHoverText('')}
-            className="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center justify-center w-10 h-10"
-          >
-            <Settings size={24} />
-          </button>
-
-          {/* Switch View Button */}
-          <button
-            onClick={toggleViewMode}
-            onMouseEnter={() => setHoverText(viewMode === 'grid' ? 'List View' : 'Grid View')}
-            onMouseLeave={() => setHoverText('')}
-            className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center w-10 h-10"
-          >
-            {viewMode === 'grid' ? <List size={24} /> : <Grid size={24} />}
-          </button>
-
-          {/* Copy Bookmarks Button */}
-          <button
-            onClick={handleCopyBookmarks}
-            onMouseEnter={() => setHoverText('Copy Bookmarks')}
-            onMouseLeave={() => setHoverText('')}
-            className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center w-10 h-10"
-          >
-            <Copy size={24} />
-          </button>
-
-          {/* Import Bookmarks Button - Only show if logged in */}
-          {currentUser && (
-            <label
-              onMouseEnter={() => setHoverText('Import Bookmarks')}
-              onMouseLeave={() => setHoverText('')}
-              className="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center justify-center w-10 h-10 cursor-pointer"
-            >
-              <Upload size={24} />
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImportBookmarks}
-                className="hidden"
-              />
-            </label>
-          )}
-
-          {/* Bookmarklet Button */}
-          <a
-            href={bookmarkletCode}
-            title="🔖"
-            draggable="true"
-            onMouseEnter={() => setHoverText('Drag to Bookmark Bar')}
-            onMouseLeave={() => setHoverText('')}
-            className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center justify-center w-10 h-10"
-          >
-            <BookmarkIcon size={24} />
-          </a>
-
-          {/* Tag Manager Button */}
-          <button
-            onClick={() => setIsTagManagerOpen(prev => !prev)}
-            onMouseEnter={() => setHoverText('Manage Tags')}
-            onMouseLeave={() => setHoverText('')}
-            className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 flex items-center justify-center w-10 h-10"
-          >
-            <Tags size={24} />
-          </button>
-
-          {/* Hover Text Box */}
-          <div className="flex-1 ml-2">
-            <input
-              type="text"
-              value={hoverText}
-              readOnly
-              className="w-full p-2 border rounded-lg bg-gray-100 text-gray-700"
-              placeholder="Hover over a button for info"
-            />
-          </div>
-        </div>
-        {isFormVisible && (
-          <AddBookmarkForm
-            onAdd={handleAddBookmark}
-            initialData={initialFormData}
-            onCancel={() => setIsFormVisible(false)}
-          />
-        )}
-        <SearchBar onSearch={handleSearch} />
-      </div> {/* End of sticky-header-wrapper */}
-
-      <FontSettingsModal
-        isOpen={isFontSettingsModalOpen}
-        onClose={() => setIsFontSettingsModalOpen(false)}
-        onApply={handleApplyFontSettings}
-        initialSettings={fontSettings}
-      />
-      {isTagManagerOpen && (
-        <div className="my-4">
-          <TagManager />
-        </div>
-      )}
-      <div className="scrollable-content-wrapper"> {/* New wrapper for scrollable content */}
-        {selectedBookmark ? (
-          <BookmarkDetail
-            bookmark={selectedBookmark}
-            onBack={() => setSelectedBookmark(null)}
-          />
-        ) : (
-          <BookmarkGrid
-            bookmarks={filteredBookmarks}
-            onDelete={handleDeleteBookmark}
-            onEdit={handleEditBookmark}
-            viewMode={viewMode}
-            fontSettings={fontSettings}
-            onSelect={setSelectedBookmark}
-          />
-        )}
-      </div> {/* End of scrollable-content-wrapper */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onAuth={handleLogin}
-      />
-    </div>
+    <AuthProvider>
+      <FolderProvider>
+        <BookmarkProvider>
+          <TagProvider>
+            <FontProvider>
+              <Router>
+                <div className="min-h-screen bg-gray-50">
+                  <Navbar />
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Routes>
+                </div>
+              </Router>
+            </FontProvider>
+          </TagProvider>
+        </BookmarkProvider>
+      </FolderProvider>
+    </AuthProvider>
   );
-};
+}
 
 export default App;
