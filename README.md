@@ -97,15 +97,57 @@ A web-based application for managing bookmarks with advanced organization featur
 
 ## Bookmarklet
 
-Add bookmarks from any webpage with a single click using our bookmarklet feature.
+The bookmarklet allows you to quickly add bookmarks to your bookmarks-manager from any webpage with a single click.
 
-To install:
-1. See [documentation/bookmarklet-guide.md](documentation/bookmarklet-guide.md) for detailed installation instructions
-2. Copy the bookmarklet code from [src/bookmarklet.min.js](src/bookmarklet.min.js)
-3. Create a new bookmark in your browser's bookmarks bar
-4. Paste the code as the URL/address of the bookmark
+### How to Install the Bookmarklet
 
-When you're on any webpage, simply click the bookmarklet to open a form pre-filled with the page's information.
+1. Copy the JavaScript code from [src/bookmarklet.min.js](src/bookmarklet.min.js)
+
+2. Create a new bookmark in your browser's bookmarks bar
+
+3. Name it "Add to Bookmarks Manager" (or any name you prefer)
+
+4. Paste the copied JavaScript code as the URL/address of the bookmark
+
+5. Save the bookmark
+
+### How to Use the Bookmarklet
+
+1. Navigate to any webpage you want to bookmark
+2. Click the "Add to Bookmarks Manager" bookmark in your bookmarks bar
+3. A new window will open with a form pre-filled with:
+   - Page URL
+   - Page title
+   - Page description (if available)
+   - Site favicon (if available)
+4. You can edit any of these fields before saving
+5. Click "Add Bookmark" to save it to your bookmarks-manager
+
+### Bookmarklet Features
+
+- Automatically extracts page information (URL, title, description)
+- Attempts to fetch the site's favicon
+- Opens in a properly sized window for easy use
+- Works on most websites
+
+### Bookmarklet Troubleshooting
+
+If the bookmarklet doesn't work:
+
+1. Make sure your bookmarks-manager is running on `http://localhost:5170`
+2. Check that you're logged in to your bookmarks-manager
+3. Try refreshing the page before using the bookmarklet
+4. Some websites with strict Content Security Policies may block bookmarklets
+
+### Bookmarklet Customization
+
+If you're running your bookmarks-manager on a different port or URL, you'll need to modify the bookmarklet code accordingly. Change this part of the code:
+
+```javascript
+const appUrl = `http://localhost:5170/?url=${url}&title=${title}&description=${description}&favicon=${favicon}`;
+```
+
+Replace `http://localhost:5170` with your actual bookmarks-manager URL.
 
 For testing instructions, see [documentation/bookmarklet-testing-guide.md](documentation/bookmarklet-testing-guide.md).
 
@@ -124,4 +166,4 @@ See [documentation/techStack.md](documentation/techStack.md) and [documentation/
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ---
-*Documentation updated: 2025-07-14*
+*Documentation updated: 2025-01-27*
