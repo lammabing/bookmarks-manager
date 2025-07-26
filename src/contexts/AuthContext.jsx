@@ -15,27 +15,95 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
   const checkAuthStatus = async () => {
+    // Prevent multiple simultaneous auth checks
+    if (isCheckingAuth) return;
+
+    setIsCheckingAuth(true);
     try {
       const token = localStorage.getItem('token');
       if (token) {
         const response = await authApi.getProfile();
         setUser(response.data);
         setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
       }
     } catch (error) {
-      localStorage.removeItem('token');
-      setUser(null);
-      setIsAuthenticated(false);
+      console.error('Auth check failed:', error);
+      // CRITICAL FIX: Only remove token for actual authentication errors
+      // Don't remove token for network errors, server errors, etc.
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        setUser(null);
+        setIsAuthenticated(false);
+      } else {
+        // For other errors (network, 500, etc.), keep the token but set unauthenticated state
+        // The user can try again later without losing their session
+        setUser(null);
+        setIsAuthenticated(false);
+      }
     } finally {
       setLoading(false);
+      setIsCheckingAuth(false);
     }
   };
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        // Set authenticated state immediately based on token presence
+        // This prevents login prompts while we verify the token
+        setIsAuthenticated(true);
+        setLoading(false);
+
+        // Verify token in background without blocking UI
+        try {
+          const response = await authApi.getProfile();
+          setUser(response.data);
+          setIsAuthenticated(true);
+        } catch (error) {
+          // Only remove token for 401 (unauthorized)
+          if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+          // For other errors, keep the optimistic state
+        }
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for storage changes to sync auth state across tabs
+    const handleStorageChange = (e) => {
+      if (e.key === 'token') {
+        if (e.newValue) {
+          setIsAuthenticated(true);
+          checkAuthStatus();
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+          setLoading(false);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []); // Empty dependency array - only run once on mount
 
   const login = async (email, password) => {
     try {

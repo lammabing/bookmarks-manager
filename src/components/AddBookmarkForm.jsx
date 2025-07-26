@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useBookmarks } from '../contexts/BookmarkContext';
 import { useTags } from '../contexts/TagContext';
+import { useAuth } from '../contexts/AuthContext';
 import FolderSelector from './FolderSelector';
 import TagSelector from './TagSelector';
 
 const AddBookmarkForm = ({ onClose, initialData = null }) => {
+  const navigate = useNavigate();
   const { addBookmark, updateBookmark } = useBookmarks();
   const { tags } = useTags();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
     url: initialData?.url || '',
@@ -21,35 +25,49 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
   // Extract URL parameters when component mounts
   useEffect(() => {
     console.log('AddBookmarkForm useEffect triggered');
-    
+
     if (!initialData) {
+      // First check for pending bookmark data from sessionStorage
+      const pendingBookmark = sessionStorage.getItem('pendingBookmark');
+      if (pendingBookmark) {
+        try {
+          const savedData = JSON.parse(pendingBookmark);
+          setFormData(savedData);
+          sessionStorage.removeItem('pendingBookmark');
+          return;
+        } catch (error) {
+          console.error('Error parsing pending bookmark data:', error);
+        }
+      }
+
+      // Then check URL parameters
       const queryParams = new URLSearchParams(window.location.search);
       const urlParam = queryParams.get('url');
       const titleParam = queryParams.get('title');
       const descriptionParam = queryParams.get('description');
       const faviconParam = queryParams.get('favicon');
-      
+
       console.log('URL Parameters:', {
         url: urlParam,
         title: titleParam,
         description: descriptionParam,
         favicon: faviconParam
       });
-      
+
       if (urlParam) {
         try {
           const decodedUrl = decodeURIComponent(urlParam);
           const faviconUrl = faviconParam
             ? decodeURIComponent(faviconParam)
             : `https://www.google.com/s2/favicons?domain=${new URL(decodedUrl).hostname}`;
-          
+
           console.log('Setting form data with:', {
             url: decodedUrl,
             title: titleParam ? decodeURIComponent(titleParam) : '',
             description: descriptionParam ? decodeURIComponent(descriptionParam) : '',
             favicon: faviconUrl
           });
-          
+
           setFormData(prev => ({
             ...prev,
             url: decodedUrl,
@@ -70,9 +88,22 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Wait for auth loading to complete before checking authentication
+    if (authLoading) {
+      return; // Don't proceed while still checking auth
+    }
+
+    // Check authentication after loading is complete
+    if (!isAuthenticated) {
+      setShowLoginPrompt(true);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -112,6 +143,12 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
     }));
   };
 
+  const handleLoginRedirect = () => {
+    // Store form data in sessionStorage to preserve it
+    sessionStorage.setItem('pendingBookmark', JSON.stringify(formData));
+    navigate('/login');
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -123,6 +160,12 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
           {error && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
               {error}
+            </div>
+          )}
+
+          {showLoginPrompt && (
+            <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+              Please log in to save bookmarks. Your form data will be preserved.
             </div>
           )}
 
@@ -221,13 +264,31 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-              >
-                {loading ? 'Saving...' : (initialData ? 'Update' : 'Add Bookmark')}
-              </button>
+              {authLoading ? (
+                <button
+                  type="button"
+                  disabled={true}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md opacity-50"
+                >
+                  Checking auth...
+                </button>
+              ) : !isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={handleLoginRedirect}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Login Required
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  {loading ? 'Saving...' : (initialData ? 'Update' : 'Add Bookmark')}
+                </button>
+              )}
             </div>
             <input type="hidden" name="favicon" value={formData.favicon} />
           </form>
