@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import AddBookmarkForm from '../components/AddBookmarkForm';
-import { BookmarkIcon, TagIcon, FolderIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import PublicBookmarksGrid from '../components/PublicBookmarksGrid';
+import { BookmarkIcon, TagIcon, FolderIcon, MagnifyingGlassIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
   const [showAddForm, setShowAddForm] = useState(false);
-  
+
   // Check for URL parameters when component mounts
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const urlParam = queryParams.get('url');
-    
+
     if (urlParam) {
       setShowAddForm(true);
     }
@@ -48,7 +49,7 @@ const Home = () => {
           onClose={() => setShowAddForm(false)}
         />
       )}
-      
+
       {/* Hero Section */}
       <div className="bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
@@ -116,6 +117,43 @@ const Home = () => {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Public Bookmarks Section */}
+      <div className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="flex justify-center mb-4">
+              <GlobeAltIcon className="h-12 w-12 text-blue-600" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Discover Public Bookmarks
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Explore interesting links shared by our community
+            </p>
+          </div>
+
+          <PublicBookmarksGrid />
+
+          <div className="text-center mt-8">
+            {isAuthenticated ? (
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 transition-colors"
+              >
+                View All in Dashboard
+              </Link>
+            ) : (
+              <Link
+                to="/register"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+              >
+                Join to Share Your Bookmarks
+              </Link>
+            )}
           </div>
         </div>
       </div>

@@ -2,13 +2,101 @@ import express from 'express';
 import Bookmark from '../models/Bookmark.js';
 import Folder from '../models/Folder.js';
 import { auth } from '../middleware/auth.js';
-import jwt from 'jsonwebtoken'; // Add missing import
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
+// @route   GET /api/bookmarks/public
+// @desc    Get all public bookmarks (no auth required)
+// @access  Public
+router.get('/public', async (req, res) => {
+  try {
+    console.log('=== PUBLIC BOOKMARKS REQUEST ===');
+    console.log('Query params:', req.query);
+
+    const { page = 1, limit = 12 } = req.query;
+
+    const bookmarks = await Bookmark.find({
+      visibility: 'public'
+    })
+    .populate('owner', 'username')
+    .sort({ updatedAt: -1 })
+    .limit(parseInt(limit))
+    .skip((parseInt(page) - 1) * parseInt(limit));
+
+    console.log(`Found ${bookmarks.length} public bookmarks`);
+
+    const total = await Bookmark.countDocuments({ visibility: 'public' });
+
+    res.json({
+      bookmarks,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Error in public bookmarks:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Add bulk move endpoint (before other routes)
+router.post('/move', auth, async (req, res) => {
+  try {
+    const { bookmarkIds, targetFolder } = req.body;
+
+    // Validate folder ownership if provided
+    if (targetFolder) {
+      const folderDoc = await Folder.findOne({
+        _id: targetFolder,
+        owner: req.user.id
+      });
+      if (!folderDoc) {
+        return res.status(400).json({ message: 'Invalid target folder' });
+      }
+    }
+
+    // Update bookmarks
+    const result = await Bookmark.updateMany(
+      {
+        _id: { $in: bookmarkIds },
+        owner: req.user.id
+      },
+      { folder: targetFolder || null }
+    );
+
+    // Update bookmark counts for affected folders
+    const affectedFolders = await Bookmark.distinct('folder', {
+      _id: { $in: bookmarkIds }
+    });
+
+    for (const folderId of affectedFolders) {
+      if (folderId) {
+        const folderDoc = await Folder.findById(folderId);
+        if (folderDoc) await folderDoc.updateBookmarkCount();
+      }
+    }
+
+    if (targetFolder) {
+      const targetFolderDoc = await Folder.findById(targetFolder);
+      if (targetFolderDoc) await targetFolderDoc.updateBookmarkCount();
+    }
+
+    res.json({
+      message: `${result.modifiedCount} bookmarks moved successfully`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // @route   GET /api/bookmarks
 // @desc    Get all bookmarks (filtered by visibility and ownership)
-// @access  Public/Private
+// @access  Private
 router.get('/', auth, async (req, res) => {
   try {
     const { folder, tags, search } = req.query;
@@ -228,57 +316,6 @@ router.post('/:id/share', auth, async (req, res) => {
   } catch (err) {
     console.error('Error sharing bookmark:', err);
     res.status(500).json({ message: err.message });
-  }
-});
-
-// Add bulk move endpoint
-router.post('/move', auth, async (req, res) => {
-  try {
-    const { bookmarkIds, targetFolder } = req.body;
-
-    // Validate folder ownership if provided
-    if (targetFolder) {
-      const folderDoc = await Folder.findOne({
-        _id: targetFolder,
-        owner: req.user.id
-      });
-      if (!folderDoc) {
-        return res.status(400).json({ message: 'Invalid target folder' });
-      }
-    }
-
-    // Update bookmarks
-    const result = await Bookmark.updateMany(
-      {
-        _id: { $in: bookmarkIds },
-        owner: req.user.id
-      },
-      { folder: targetFolder || null }
-    );
-
-    // Update bookmark counts for affected folders
-    const affectedFolders = await Bookmark.distinct('folder', {
-      _id: { $in: bookmarkIds }
-    });
-
-    for (const folderId of affectedFolders) {
-      if (folderId) {
-        const folderDoc = await Folder.findById(folderId);
-        if (folderDoc) await folderDoc.updateBookmarkCount();
-      }
-    }
-
-    if (targetFolder) {
-      const targetFolderDoc = await Folder.findById(targetFolder);
-      if (targetFolderDoc) await targetFolderDoc.updateBookmarkCount();
-    }
-
-    res.json({
-      message: `${result.modifiedCount} bookmarks moved successfully`,
-      modifiedCount: result.modifiedCount
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
 });
 
