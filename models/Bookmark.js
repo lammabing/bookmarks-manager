@@ -6,6 +6,7 @@ const bookmarkSchema = new mongoose.Schema({
   description: { type: String },
   tags: [String],
   favicon: { type: String },
+  notes: { type: String },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

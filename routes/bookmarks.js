@@ -87,7 +87,7 @@ router.get('/:id', async (req, res) => {
 // @access  Private
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, url, description, tags, folder, favicon } = req.body;
+    const { title, url, description, tags, folder, favicon, notes } = req.body;
 
     // Validate folder ownership if provided
     if (folder) {
@@ -107,7 +107,8 @@ router.post('/', auth, async (req, res) => {
       tags: tags || [],
       folder: folder || null,
       owner: req.user.id,
-      favicon: favicon || `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}`
+      favicon: favicon || `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}`,
+      notes: notes || ''
     });
 
     await bookmark.save();
@@ -140,11 +141,27 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to update this bookmark' });
     }
 
+    // Validate folder ownership if provided
+    if (req.body.folder) {
+      const folderDoc = await Folder.findOne({
+        _id: req.body.folder,
+        owner: req.user.id
+      });
+      if (!folderDoc) {
+        return res.status(400).json({ message: 'Invalid folder' });
+      }
+    }
+
     const updatedBookmark = await Bookmark.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedAt: new Date() },
+      {
+        ...req.body,
+        updatedAt: new Date(),
+        // Ensure tags is always an array
+        tags: req.body.tags || []
+      },
       { new: true, runValidators: true }
-    );
+    ).populate('folder', 'name color');
 
     res.json(updatedBookmark);
   } catch (err) {

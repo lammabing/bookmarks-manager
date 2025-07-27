@@ -65,18 +65,18 @@ const Dashboard = () => {
     // Create a blob with the bookmarks data
     const dataStr = JSON.stringify(bookmarks, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
+
     // Create a download link
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
     link.download = 'bookmarks.json';
-    
+
     // Trigger the download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     // Clean up
     URL.revokeObjectURL(url);
   };
@@ -270,7 +270,6 @@ const Dashboard = () => {
             bookmarks={filteredBookmarks}
             onDelete={handleDelete}
             onEdit={handleEdit}
-            onSelect={handleSelect}
             viewMode="grid"
             fontSettings={fontSettings}
           />
@@ -291,7 +290,7 @@ const Dashboard = () => {
         onChange={handleImportBookmarks}
         className="hidden"
       />
-      
+
       {/* Tag Manager Modal */}
       {showTagManager && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

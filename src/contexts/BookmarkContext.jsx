@@ -34,12 +34,18 @@ export const BookmarkProvider = ({ children }) => {
 
   const addBookmark = async (bookmarkData) => {
     try {
+      console.log('Adding bookmark with data:', bookmarkData);
+
       // Generate favicon if not provided
       const bookmarkDataWithFavicon = {
         ...bookmarkData,
-        favicon: bookmarkData.favicon || `https://www.google.com/s2/favicons?domain=${new URL(bookmarkData.url).hostname}`
+        favicon: bookmarkData.favicon || `https://www.google.com/s2/favicons?domain=${new URL(bookmarkData.url).hostname}`,
+        // Ensure tags is always an array
+        tags: Array.isArray(bookmarkData.tags) ? bookmarkData.tags : [],
+        // Ensure notes field is included
+        notes: bookmarkData.notes || ''
       };
-      
+
       const response = await bookmarkApi.createBookmark(bookmarkDataWithFavicon);
       setBookmarks(prev => [response.data, ...prev]);
       return response.data;
@@ -51,8 +57,20 @@ export const BookmarkProvider = ({ children }) => {
 
   const updateBookmark = async (id, bookmarkData) => {
     try {
-      const response = await bookmarkApi.updateBookmark(id, bookmarkData);
-      setBookmarks(prev => prev.map(bookmark => bookmark._id === id ? response.data : bookmark));
+      console.log('Updating bookmark with data:', bookmarkData);
+
+      const updatedData = {
+        ...bookmarkData,
+        // Ensure tags is always an array
+        tags: Array.isArray(bookmarkData.tags) ? bookmarkData.tags : [],
+        // Ensure notes field is included
+        notes: bookmarkData.notes || ''
+      };
+
+      const response = await bookmarkApi.updateBookmark(id, updatedData);
+      setBookmarks(prev => prev.map(bookmark =>
+        bookmark._id === id ? response.data : bookmark
+      ));
       return response.data;
     } catch (error) {
       console.error('Error updating bookmark:', error);

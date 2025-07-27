@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Trash2, Edit, Lock, Globe } from 'lucide-react';
 import EditBookmarkForm from './EditBookmarkForm';
+import BookmarkDetail from './BookmarkDetail';
 
-const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, onSelect, hoverEffect = "hover:shadow-lg hover:bg-blue-50 transition" }) => {
+const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hoverEffect = "hover:shadow-lg hover:bg-blue-50 transition" }) => {
   const [editingBookmark, setEditingBookmark] = useState(null);
+  const [selectedBookmark, setSelectedBookmark] = useState(null);
 
   const handleEdit = (bookmark) => {
     setEditingBookmark(bookmark);
@@ -18,6 +20,32 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, onS
     setEditingBookmark(null);
   };
 
+  const handleCardClick = (bookmark) => {
+    console.log('Card clicked for bookmark:', bookmark.title);
+    setSelectedBookmark(bookmark);
+  };
+
+  const handleBackToGrid = () => {
+    setSelectedBookmark(null);
+  };
+
+  const handleTitleClick = (e, url) => {
+    console.log('Title clicked for URL:', url);
+    e.preventDefault();
+    e.stopPropagation();
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  // If a bookmark is selected for detailed view, show BookmarkDetail
+  if (selectedBookmark) {
+    return (
+      <BookmarkDetail
+        bookmark={selectedBookmark}
+        onBack={handleBackToGrid}
+      />
+    );
+  }
+
   return (
     <div>
       {viewMode === 'grid' ? (
@@ -26,7 +54,12 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, onS
             <div
               key={bookmark._id}
               className={`border rounded-lg p-4 shadow-sm relative cursor-pointer ${hoverEffect}`}
-              {...(editingBookmark?._id === bookmark._id ? {} : { onClick: () => onSelect && onSelect(bookmark) })}
+              onClick={(e) => {
+                if (editingBookmark?._id !== bookmark._id) {
+                  console.log('Card click event triggered');
+                  handleCardClick(bookmark);
+                }
+              }}
             >
               {editingBookmark?._id === bookmark._id ? (
                 <EditBookmarkForm
@@ -48,8 +81,8 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, onS
                         fontWeight: fontSettings.titleFontWeight,
                         color: fontSettings.titleFontColor,
                       }}
-                      className="hover:underline mr-2"
-                      onClick={e => e.stopPropagation()}
+                      className="hover:underline mr-2 cursor-pointer"
+                      onClick={(e) => handleTitleClick(e, bookmark.url)}
                     >
                       {bookmark.title}
                     </a>
@@ -104,7 +137,11 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, onS
       ) : (
         <div className="space-y-4 p-4">
           {bookmarks.map((bookmark) => (
-            <div key={bookmark._id} className="flex items-center justify-between border rounded-lg p-4 shadow-sm">
+            <div
+              key={bookmark._id}
+              className="flex items-center justify-between border rounded-lg p-4 shadow-sm cursor-pointer hover:bg-gray-50 transition"
+              onClick={() => handleCardClick(bookmark)}
+            >
               <div className="flex items-center space-x-4">
                 <img src={bookmark.favicon} alt="Favicon" className="w-6 h-6" />
                 <div>
@@ -119,8 +156,8 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, onS
                         fontWeight: fontSettings.titleFontWeight,
                         color: fontSettings.titleFontColor,
                       }}
-                      className="hover:underline mr-2"
-                      onClick={e => e.stopPropagation()}
+                      className="hover:underline mr-2 cursor-pointer"
+                      onClick={(e) => handleTitleClick(e, bookmark.url)}
                     >
                       {bookmark.title}
                     </a>
@@ -147,14 +184,19 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, onS
               </div>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => handleEdit(bookmark)}
+                  onClick={(e) => { e.stopPropagation(); handleEdit(bookmark); }}
                   className="p-1 text-blue-500 hover:text-blue-700"
                   aria-label="Edit bookmark"
                 >
                   <Edit size={18} />
                 </button>
                 <button
-                  onClick={() => onDelete(bookmark._id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm('Are you sure you want to delete this bookmark?')) {
+                      onDelete(bookmark._id);
+                    }
+                  }}
                   className="p-1 text-red-500 hover:text-red-700"
                   aria-label="Delete bookmark"
                 >
