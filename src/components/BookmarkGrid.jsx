@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, Edit, Lock, Globe } from 'lucide-react';
+import { Trash2, Edit, Lock, Globe, Folder } from 'lucide-react';
 import EditBookmarkForm from './EditBookmarkForm';
 import BookmarkDetail from './BookmarkDetail';
 
@@ -92,6 +92,7 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
                       <Globe size={16} className="text-blue-500" />
                     )}
                   </div>
+
                   <p
                     style={{
                       fontFamily: fontSettings.descriptionFontFamily,
@@ -103,13 +104,41 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
                   >
                     {bookmark.description}
                   </p>
-                  <div className="mt-2">
-                    {bookmark.tags.map((tag) => (
-                      <span key={tag} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
+
+                  {/* Tags below description */}
+                  {bookmark.tags && bookmark.tags.length > 0 && (
+                    <div className="mt-2">
+                      <div className="flex flex-wrap gap-1">
+                        {bookmark.tags.slice(0, 3).map((tag, index) => (
+                          <span
+                            key={index}
+                            className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        {bookmark.tags.length > 3 && (
+                          <span className="text-xs text-gray-500">
+                            +{bookmark.tags.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Folder at bottom */}
+                  {bookmark.folder && (
+                    <div className="mt-2">
+                      <div className="flex items-center text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded inline-flex">
+                        <Folder
+                          className="w-3 h-3 mr-1"
+                          style={{ color: bookmark.folder.color || '#3B82F6' }}
+                        />
+                        <span>{bookmark.folder.name}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     onClick={e => { e.stopPropagation(); handleEdit(bookmark); }}
                     className="absolute top-2 right-10 p-1 text-blue-500 hover:text-blue-700"
@@ -182,26 +211,80 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
                   </p>
                 </div>
               </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleEdit(bookmark); }}
-                  className="p-1 text-blue-500 hover:text-blue-700"
-                  aria-label="Edit bookmark"
-                >
-                  <Edit size={18} />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (window.confirm('Are you sure you want to delete this bookmark?')) {
-                      onDelete(bookmark._id);
-                    }
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <h3
+                    style={{
+                      fontFamily: fontSettings.titleFontFamily,
+                      fontSize: `${fontSettings.titleFontSize}px`,
+                      fontWeight: fontSettings.titleFontWeight,
+                      color: fontSettings.titleFontColor,
+                    }}
+                    className="font-semibold truncate flex-1 mr-2"
+                  >
+                    {bookmark.title}
+                  </h3>
+                  <div className="flex items-center space-x-1 flex-shrink-0">
+                    <button
+                      onClick={e => { e.stopPropagation(); handleEdit(bookmark); }}
+                      className="p-1 text-blue-500 hover:text-blue-700"
+                      aria-label="Edit bookmark"
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); onDelete(bookmark._id); }}
+                      className="p-1 text-red-500 hover:text-red-700"
+                      aria-label="Delete bookmark"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                <p
+                  style={{
+                    fontFamily: fontSettings.descriptionFontFamily,
+                    fontSize: `${fontSettings.descriptionFontSize}px`,
+                    fontWeight: fontSettings.descriptionFontWeight,
+                    color: fontSettings.descriptionFontColor,
                   }}
-                  className="p-1 text-red-500 hover:text-red-700"
-                  aria-label="Delete bookmark"
+                  className="text-sm mb-3 line-clamp-2"
                 >
-                  <Trash2 size={18} />
-                </button>
+                  {bookmark.description}
+                </p>
+
+                {/* Tags below description */}
+                {bookmark.tags && bookmark.tags.length > 0 && (
+                  <div className="mb-3">
+                    <div className="flex flex-wrap gap-1">
+                      {bookmark.tags.slice(0, 3).map((tag, index) => (
+                        <span
+                          key={index}
+                          className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {bookmark.tags.length > 3 && (
+                        <span className="text-xs text-gray-500">
+                          +{bookmark.tags.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom row with folder only */}
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center">
+                    {bookmark.folder && (
+                      <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded mr-2">
+                        📁 {bookmark.folder.name}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           ))}

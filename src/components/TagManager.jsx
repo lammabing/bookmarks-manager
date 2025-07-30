@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-const TagManager = () => {
+const TagManager = ({ onClose }) => {
   const [tags, setTags] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -15,17 +15,17 @@ const TagManager = () => {
       if (!token) {
         throw new Error('Authentication token not found. Please log in.');
       }
-      
+
       const response = await fetch('/api/tags', {
         headers: {
           'x-auth-token': token
         }
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setTags(data);
     } catch (e) {
@@ -57,7 +57,7 @@ const TagManager = () => {
       if (!token) {
         throw new Error('Authentication token not found. Please log in.');
       }
-      
+
       const response = await fetch(`/api/tags/${encodeURIComponent(oldName)}`, {
         method: 'PUT',
         headers: {
@@ -66,12 +66,12 @@ const TagManager = () => {
         },
         body: JSON.stringify({ newName: newTagName.trim() }),
       });
-      
+
       const result = await response.json();
       if (!response.ok) {
         throw new Error(result.message || `HTTP error! status: ${response.status}`);
       }
-      
+
       alert(result.message || 'Tag renamed successfully!');
       setEditingTag(null);
       setNewTagName('');
@@ -95,19 +95,19 @@ const TagManager = () => {
       if (!token) {
         throw new Error('Authentication token not found. Please log in.');
       }
-      
+
       const response = await fetch(`/api/tags/${encodeURIComponent(tagName)}`, {
         method: 'DELETE',
         headers: {
           'x-auth-token': token
         }
       });
-      
+
       const result = await response.json();
       if (!response.ok) {
         throw new Error(result.message || `HTTP error! status: ${response.status}`);
       }
-      
+
       alert(result.message || 'Tag deleted successfully!');
       fetchTags(); // Refresh tags list
     } catch (e) {
@@ -138,52 +138,64 @@ const TagManager = () => {
   }
 
   return (
-    <div className="p-4 bg-gray-800 text-white rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Tag Management</h2>
-      {tags.length === 0 && !isLoading && (
-        <p>No tags found.</p>
-      )}
-      {tags.length > 0 && (
-        <ul className="space-y-2">
-          {tags.map((tag) => (
-            <li key={tag.name} className="p-3 bg-gray-700 rounded flex justify-between items-center">
-              {editingTag && editingTag.name === tag.name ? (
-                <div className="flex-grow">
-                  <input
-                    type="text"
-                    value={newTagName}
-                    onChange={(e) => setNewTagName(e.target.value)}
-                    className="bg-gray-600 text-white p-1 rounded mr-2 w-full md:w-auto"
-                    autoFocus
-                  />
-                  <button onClick={() => handleRename(tag.name)} className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded mr-2 text-sm" disabled={isLoading}>
-                    Save
-                  </button>
-                  <button onClick={cancelEdit} className="bg-gray-500 hover:bg-gray-600 px-3 py-1 rounded text-sm" disabled={isLoading}>
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <div className="flex-grow">
-                  <span className="font-medium">{tag.name}</span>
-                  <span className="text-sm text-gray-400 ml-2">({tag.count} bookmarks)</span>
-                </div>
-              )}
-              {!editingTag || editingTag.name !== tag.name ? (
-                <div className="flex-shrink-0">
-                  <button onClick={() => startEdit(tag)} className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded mr-2 text-sm" disabled={isLoading || !!editingTag}>
-                    Rename
-                  </button>
-                  <button onClick={() => handleDelete(tag.name)} className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm" disabled={isLoading || !!editingTag}>
-                    Delete
-                  </button>
-                </div>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
-      {isLoading && tags.length > 0 && <p className="mt-4">Processing...</p>}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="p-4 bg-gray-800 text-white rounded-lg shadow">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Tag Management</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-300 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+          {tags.length === 0 && !isLoading && (
+            <p>No tags found.</p>
+          )}
+          {tags.length > 0 && (
+            <ul className="space-y-2">
+              {tags.map((tag) => (
+                <li key={tag.name} className="p-3 bg-gray-700 rounded flex justify-between items-center">
+                  {editingTag && editingTag.name === tag.name ? (
+                    <div className="flex-grow">
+                      <input
+                        type="text"
+                        value={newTagName}
+                        onChange={(e) => setNewTagName(e.target.value)}
+                        className="bg-gray-600 text-white p-1 rounded mr-2 w-full md:w-auto"
+                        autoFocus
+                      />
+                      <button onClick={() => handleRename(tag.name)} className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded mr-2 text-sm" disabled={isLoading}>
+                        Save
+                      </button>
+                      <button onClick={cancelEdit} className="bg-gray-500 hover:bg-gray-600 px-3 py-1 rounded text-sm" disabled={isLoading}>
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex-grow">
+                      <span className="font-medium">{tag.name}</span>
+                      <span className="text-sm text-gray-400 ml-2">({tag.count} bookmarks)</span>
+                    </div>
+                  )}
+                  {!editingTag || editingTag.name !== tag.name ? (
+                    <div className="flex-shrink-0">
+                      <button onClick={() => startEdit(tag)} className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded mr-2 text-sm" disabled={isLoading || !!editingTag}>
+                        Rename
+                      </button>
+                      <button onClick={() => handleDelete(tag.name)} className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm" disabled={isLoading || !!editingTag}>
+                        Delete
+                      </button>
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+          {isLoading && tags.length > 0 && <p className="mt-4">Processing...</p>}
+        </div>
+      </div>
     </div>
   );
 };

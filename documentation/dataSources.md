@@ -10,33 +10,71 @@
    - tags: [String]
    - favicon: String
    - userId: ObjectId (references users._id)
+   - folder: ObjectId (references folders._id, optional)
+   - visibility: String (enum: 'private', 'public', default: 'private')
    - createdAt: Date (auto)
    - updatedAt: Date (auto)
 
 2. **users**
    - _id: ObjectId (auto-generated)
    - username: String (required, unique)
-   - password: String (required)
-   - email: String
+   - password: String (required, hashed)
+   - email: String (optional)
+   - createdAt: Date (auto)
+   - updatedAt: Date (auto)
+
+3. **folders**
+   - _id: ObjectId (auto-generated)
+   - name: String (required)
+   - description: String (optional)
+   - color: String (optional, hex color code)
+   - parent: ObjectId (references folders._id, optional for nested folders)
+   - userId: ObjectId (references users._id, required)
+   - createdAt: Date (auto)
+   - updatedAt: Date (auto)
+
+4. **tags**
+   - _id: ObjectId (auto-generated)
+   - name: String (required, unique per user)
+   - userId: ObjectId (references users._id, required)
    - createdAt: Date (auto)
    - updatedAt: Date (auto)
 
 ### Relationships
-- One-to-Many: User has many Bookmarks
-- Bookmark belongs to one User via userId
+- One-to-Many: User has many Bookmarks, Folders, and Tags
+- One-to-Many: Folder has many Bookmarks (optional relationship)
+- Many-to-Many: Bookmarks can have multiple Tags
+- Hierarchical: Folders can have parent-child relationships (nested folders)
 
 ## API Endpoints
-### Bookmarks
-- `GET /api/bookmarks` - Get all bookmarks for current user
-- `GET /api/bookmarks/:id` - Get bookmark by ID
-- `POST /api/bookmarks` - Create new bookmark(s)
-- `PUT /api/bookmarks/:id` - Update bookmark by ID
-- `DELETE /api/bookmarks/:id` - Delete bookmark by ID
-
-### Users
+### Authentication
 - `POST /api/users/register` - Register new user
 - `POST /api/users/login` - Authenticate user and get JWT
-- `GET /api/users/profile` - Get current user's profile
+- `GET /api/users/me` - Get current user's profile (updated from /profile)
+
+### Bookmarks
+- `GET /api/bookmarks` - Get all bookmarks for current user
+- `GET /api/bookmarks/public` - Get public bookmarks for homepage
+- `GET /api/bookmarks/:id` - Get bookmark by ID
+- `POST /api/bookmarks` - Create new bookmark(s) (supports bulk creation)
+- `PUT /api/bookmarks/:id` - Update bookmark by ID
+- `DELETE /api/bookmarks/:id` - Delete bookmark by ID
+- `PUT /api/bookmarks/:id/move` - Move bookmark to different folder
+
+### Folders
+- `GET /api/folders` - Get all folders for current user
+- `GET /api/folders/:id` - Get folder by ID with bookmarks
+- `POST /api/folders` - Create new folder
+- `PUT /api/folders/:id` - Update folder by ID
+- `DELETE /api/folders/:id` - Delete folder by ID
+- `GET /api/folders/:id/bookmarks` - Get bookmarks in specific folder
+
+### Tags
+- `GET /api/tags` - Get all tags for current user
+- `GET /api/tags/stats` - Get tag usage statistics
+- `POST /api/tags` - Create new tag
+- `PUT /api/tags/:id` - Update tag by ID
+- `DELETE /api/tags/:id` - Delete tag by ID
 
 ### Metadata
 - `POST /api/metadata` - Fetch metadata for a given URL
@@ -57,9 +95,28 @@ The metadata fetching logic targets:
    - property="og:title", "og:description", "og:image"
    - name="twitter:title", "twitter:description", "twitter:image"
 3. First `<link rel="icon">` for favicon
-4. First `<link rel="icon">` for favicon
-5. Fallback to domain favicon at /favicon.ico
-6. Use Google favicon service (https://www.google.com/s2/favicons?domain=example.com) as final fallback
+4. Fallback to domain favicon at /favicon.ico
+5. Use Google favicon service (https://www.google.com/s2/favicons?domain=example.com) as final fallback
+
+## Data Flow Architecture
+### Frontend State Management
+- **AuthContext**: User authentication and session management
+- **BookmarkContext**: Bookmark CRUD operations and state
+- **FolderContext**: Hierarchical folder management (backend complete, frontend in development)
+- **TagContext**: Tag management and statistics
+- **FontContext**: Font customization settings
+
+### API Integration
+- RESTful API design with proper HTTP methods
+- JWT-based authentication for protected routes
+- Middleware for authentication verification and CORS handling
+- Error handling with appropriate HTTP status codes
+
+### Database Optimizations
+- Indexes on frequently queried fields (userId, folder, tags)
+- Efficient tree traversal for folder hierarchies
+- Optimized bookmark-folder associations
+- Connection pooling for MongoDB performance
 
 ---
-Last Updated: 2025-06-30 06:02 PM by Documentation Agent
+Last Updated: 2025-01-27 by Documentation Agent

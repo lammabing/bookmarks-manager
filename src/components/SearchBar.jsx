@@ -1,12 +1,17 @@
-import React, { useState, forwardRef } from 'react';
+import React, { useState, forwardRef, useEffect } from 'react';
 
-const SearchBar = forwardRef(({ onSearch }, ref) => {
-  const [query, setQuery] = useState('');
+const SearchBar = forwardRef(({ searchQuery, onSearchChange, placeholder }, ref) => {
+  const [query, setQuery] = useState(searchQuery || '');
+
+  // Update local state when searchQuery prop changes
+  useEffect(() => {
+    setQuery(searchQuery || '');
+  }, [searchQuery]);
 
   const handleSearch = (e) => {
     const value = e.target.value;
     setQuery(value);
-    onSearch(value);
+    onSearchChange(value);
   };
 
   return (
@@ -14,10 +19,10 @@ const SearchBar = forwardRef(({ onSearch }, ref) => {
       ref={ref}
       type="text"
       id="search-bar"
-      placeholder="Search bookmarks..."
+      placeholder={placeholder || "Search bookmarks..."}
       value={query}
       onChange={handleSearch}
-      className="w-full p-2 border rounded-lg mb-4"
+      className="w-full p-2 border rounded-lg"
     />
   );
 });

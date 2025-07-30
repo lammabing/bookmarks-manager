@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBookmarks } from '../contexts/BookmarkContext';
+import { useFolders } from '../contexts/FolderContext';
 import { useTags } from '../contexts/TagContext';
 import { useAuth } from '../contexts/AuthContext';
-import FolderSelector from './FolderSelector';
 import TagSelector from './TagSelector';
+import FolderSelector from './FolderSelector';
 
 const AddBookmarkForm = ({ onClose, initialData = null }) => {
   const navigate = useNavigate();
   const { addBookmark, updateBookmark } = useBookmarks();
   const { tags } = useTags();
+  const { folders } = useFolders();
   const { isAuthenticated, loading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -17,7 +19,7 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
     title: initialData?.title || '',
     description: initialData?.description || '',
     tags: initialData?.tags || [],
-    folder: initialData?.folder || null,
+    folder: initialData?.folder?._id || initialData?.folder || null,
     notes: initialData?.notes || '',
     favicon: initialData?.favicon || ''
   });
@@ -130,9 +132,10 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
   };
 
   const handleTagsChange = (selectedTags) => {
+    console.log('Tags changed:', selectedTags);
     setFormData(prev => ({
       ...prev,
-      tags: selectedTags
+      tags: selectedTags.map(tag => typeof tag === 'string' ? tag : tag.name)
     }));
   };
 
@@ -150,24 +153,20 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">
-            {initialData ? 'Edit Bookmark' : 'Add New Bookmark'}
-          </h2>
-
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
-            </div>
-          )}
-
-          {showLoginPrompt && (
-            <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
-              Please log in to save bookmarks. Your form data will be preserved.
-            </div>
-          )}
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {initialData ? 'Edit Bookmark' : 'Add New Bookmark'}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl"
+            >
+              ×
+            </button>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* URL */}
@@ -189,13 +188,14 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
             {/* Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title
+                Title *
               </label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
+                required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Bookmark title"
               />
@@ -218,25 +218,27 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
 
             {/* Folder Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="folder" className="block text-sm font-medium text-gray-700 mb-1">
                 Folder
               </label>
               <FolderSelector
                 selectedFolderId={formData.folder}
-                onFolderSelect={handleFolderChange}
-                placeholder="Choose a folder (optional)"
+                onFolderSelect={(folderId) => setFormData(prev => ({ ...prev, folder: folderId }))}
+                placeholder="Select a folder (optional)"
+                allowCreateNew={true}
+                className="w-full"
               />
             </div>
 
             {/* Tags */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
                 Tags
               </label>
               <TagSelector
                 selectedTags={formData.tags}
-                onTagsChange={handleTagsChange}
-                availableTags={tags}
+                onTagsChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+                placeholder="Add tags..."
               />
             </div>
 
@@ -249,48 +251,29 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
                 name="notes"
                 value={formData.notes}
                 onChange={handleInputChange}
-                rows={2}
+                rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Personal notes..."
+                placeholder="Additional notes..."
               />
             </div>
 
-            {/* Actions */}
+            {/* Submit Buttons */}
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
               >
                 Cancel
               </button>
-              {authLoading ? (
-                <button
-                  type="button"
-                  disabled={true}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md opacity-50"
-                >
-                  Checking auth...
-                </button>
-              ) : !isAuthenticated ? (
-                <button
-                  type="button"
-                  onClick={handleLoginRedirect}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  Login Required
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                >
-                  {loading ? 'Saving...' : (initialData ? 'Update' : 'Add Bookmark')}
-                </button>
-              )}
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'Saving...' : (initialData ? 'Update' : 'Add')} Bookmark
+              </button>
             </div>
-            <input type="hidden" name="favicon" value={formData.favicon} />
           </form>
         </div>
       </div>

@@ -56,7 +56,7 @@ export const folderApi = {
 export const authApi = {
   login: (credentials) => api.post('/users/login', credentials),
   register: (userData) => api.post('/users/register', userData),
-  getProfile: () => api.get('/users/profile'),
+  getProfile: () => api.get('/users/me'),
 };
 
 export default api;

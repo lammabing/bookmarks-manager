@@ -10,6 +10,8 @@ import SearchBar from '../components/SearchBar';
 import TagManager from '../components/TagManager';
 import FolderManager from '../components/FolderManager';
 import FontSettingsModal from '../components/FontSettingsModal';
+import FolderTree from '../components/FolderTree';
+import FolderBreadcrumb from '../components/FolderBreadcrumb';
 import { bookmarkApi } from '../utils/api';
 import {
   MagnifyingGlassIcon,
@@ -18,7 +20,9 @@ import {
   AdjustmentsHorizontalIcon,
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
-  PlusIcon
+  PlusIcon,
+  BookmarkIcon,
+  Cog6ToothIcon
 } from '@heroicons/react/24/outline';
 
 const Dashboard = () => {
@@ -27,12 +31,36 @@ const Dashboard = () => {
   const { folders } = useFolders();
   const { tags } = useTags();
   const { fontSettings } = useFontContext();
+
+  // Debug logging
+  console.log('Dashboard fontSettings:', fontSettings);
+  console.log('Dashboard user:', user);
+  console.log('Dashboard bookmarks:', bookmarks);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showFontSettings, setShowFontSettings] = useState(false);
   const [showTagManager, setShowTagManager] = useState(false);
   const [showFolderManager, setShowFolderManager] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFolder, setSelectedFolder] = useState(null);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [viewMode, setViewMode] = useState('grid');
   const searchBarRef = useRef(null);
+
+  // Filter bookmarks based on search, folder, and tags
+  const filteredBookmarks = bookmarks.filter(bookmark => {
+    const matchesSearch = !searchQuery ||
+      bookmark.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      bookmark.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      bookmark.url.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesFolder = !selectedFolder ||
+      (selectedFolder === 'none' ? !bookmark.folder : bookmark.folder?._id === selectedFolder);
+
+    const matchesTags = selectedTags.length === 0 ||
+      selectedTags.every(tag => bookmark.tags?.includes(tag));
+
+    return matchesSearch && matchesFolder && matchesTags;
+  });
 
   const handleDelete = async (id) => {
     try {
@@ -58,7 +86,8 @@ const Dashboard = () => {
   };
 
   const handleUpdateFontSettings = (newSettings) => {
-    updateFontSettings(newSettings);
+    // This function should update font settings through the context
+    console.log('Font settings updated:', newSettings);
   };
 
   const handleExportBookmarks = () => {
@@ -128,212 +157,237 @@ const Dashboard = () => {
     setSearchQuery(query);
   };
 
-  const filteredBookmarks = bookmarks.filter(bookmark => {
-    if (!searchQuery) return true;
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      bookmark.title.toLowerCase().includes(searchLower) ||
-      bookmark.description.toLowerCase().includes(searchLower) ||
-      bookmark.url.toLowerCase().includes(searchLower) ||
-      (bookmark.tags && bookmark.tags.some(tag => tag.toLowerCase().includes(searchLower)))
-    );
-  });
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {showAddForm && (
-        <AddBookmarkForm
-          onClose={() => {
-            setShowAddForm(false);
-            loadBookmarks(); // Reload bookmarks after adding
-          }}
-        />
-      )}
-
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Welcome back, {user?.username}!
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Manage your bookmarks, folders, and tags from here.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Bookmarks</h3>
-          <p className="text-3xl font-bold text-blue-600">{bookmarks.length}</p>
-          <p className="text-sm text-gray-500">Total bookmarks</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome back, {user?.username}!
+          </h1>
+          <p className="text-gray-600">Manage your bookmarks and collections</p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Folders</h3>
-          <p className="text-3xl font-bold text-green-600">{folders.length}</p>
-          <p className="text-sm text-gray-500">Total folders</p>
-        </div>
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <BookmarkIcon className="h-8 w-8 text-blue-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Total Bookmarks</p>
+                <p className="text-2xl font-bold text-gray-900">{bookmarks.length}</p>
+              </div>
+            </div>
+          </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Tags</h3>
-          <p className="text-3xl font-bold text-purple-600">{tags.length}</p>
-          <p className="text-sm text-gray-500">Total tags</p>
-        </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <FolderIcon className="h-8 w-8 text-green-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Folders</p>
+                <p className="text-2xl font-bold text-gray-900">{folders.length}</p>
+              </div>
+            </div>
+          </div>
 
-        {/* Icon Navigation Bar */}
-        <div className="mt-8 flex justify-center space-x-6">
-          <button
-            onClick={() => searchBarRef.current && searchBarRef.current.focus()}
-            className="p-3 bg-blue-100 rounded-full text-blue-600 hover:bg-blue-200 transition-colors"
-            title="Search"
-          >
-            <MagnifyingGlassIcon className="h-6 w-6" />
-          </button>
-          <button
-            onClick={() => setShowTagManager(true)}
-            className="p-3 bg-purple-100 rounded-full text-purple-600 hover:bg-purple-200 transition-colors"
-            title="Manage Tags"
-          >
-            <TagIcon className="h-6 w-6" />
-          </button>
-          <button
-            onClick={() => setShowFolderManager(true)}
-            className="p-3 bg-green-100 rounded-full text-green-600 hover:bg-green-200 transition-colors"
-            title="Manage Folders"
-          >
-            <FolderIcon className="h-6 w-6" />
-          </button>
-          <button
-            onClick={() => setShowFontSettings(true)}
-            className="p-3 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
-            title="Font Settings"
-          >
-            <AdjustmentsHorizontalIcon className="h-6 w-6" />
-          </button>
-          <button
-            onClick={handleExportBookmarks}
-            className="p-3 bg-green-100 rounded-full text-green-600 hover:bg-green-200 transition-colors"
-            title="Export Bookmarks"
-          >
-            <ArrowDownTrayIcon className="h-6 w-6" />
-          </button>
-          <button
-            onClick={() => document.getElementById('import-bookmarks').click()}
-            className="p-3 bg-yellow-100 rounded-full text-yellow-600 hover:bg-yellow-200 transition-colors"
-            title="Import Bookmarks"
-          >
-            <ArrowUpTrayIcon className="h-6 w-6" />
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-8 bg-white p-6 rounded-lg shadow">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Your Bookmarks</h2>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="p-3 bg-blue-100 rounded-full text-blue-600 hover:bg-blue-200 transition-colors"
-              title="Add Bookmark"
-            >
-              <PlusIcon className="h-6 w-6" />
-            </button>
-            <button
-              onClick={() => setShowFontSettings(true)}
-              className="p-3 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
-              title="Font Settings"
-            >
-              <AdjustmentsHorizontalIcon className="h-6 w-6" />
-            </button>
-            <button
-              onClick={handleExportBookmarks}
-              className="p-3 bg-green-100 rounded-full text-green-600 hover:bg-green-200 transition-colors"
-              title="Export Bookmarks"
-            >
-              <ArrowDownTrayIcon className="h-6 w-6" />
-            </button>
-            <button
-              onClick={() => document.getElementById('import-bookmarks').click()}
-              className="p-3 bg-yellow-100 rounded-full text-yellow-600 hover:bg-yellow-200 transition-colors"
-              title="Import Bookmarks"
-            >
-              <ArrowUpTrayIcon className="h-6 w-6" />
-            </button>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <TagIcon className="h-8 w-8 text-purple-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Tags</p>
+                <p className="text-2xl font-bold text-gray-900">{tags.length}</p>
+              </div>
+            </div>
           </div>
         </div>
-        <div id="search-bar-container">
-          <SearchBar ref={searchBarRef} onSearch={handleSearch} />
+
+        {/* Filters and Search */}
+        <div className="bg-white rounded-lg shadow mb-6 p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Search */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Search
+              </label>
+              <SearchBar
+                ref={searchBarRef}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                placeholder="Search bookmarks..."
+              />
+            </div>
+
+            {/* Folder Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Filter by Folder
+              </label>
+              <select
+                value={selectedFolder || ''}
+                onChange={(e) => setSelectedFolder(e.target.value || null)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All folders</option>
+                <option value="none">No folder</option>
+                {folders.map(folder => (
+                  <option key={folder._id} value={folder._id}>
+                    {folder.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Tag Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Filter by Tags
+              </label>
+              <select
+                multiple
+                value={selectedTags}
+                onChange={(e) => {
+                  const values = Array.from(e.target.selectedOptions, option => option.value);
+                  setSelectedTags(values);
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                size="3"
+              >
+                {tags.map((tag, index) => (
+                  <option key={typeof tag === 'string' ? tag : `tag-${index}`} value={typeof tag === 'string' ? tag : tag.name || tag._id}>
+                    {typeof tag === 'string' ? tag : tag.name || tag._id}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Clear Filters */}
+          {(searchQuery || selectedFolder || selectedTags.length > 0) && (
+            <div className="mt-4 pt-4 border-t">
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedFolder(null);
+                  setSelectedTags([]);
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
         </div>
 
+        {/* Action Toolbar */}
+        <div className="bg-white rounded-lg shadow mb-6 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <PlusIcon className="w-5 h-5 mr-2" />
+                Add Bookmark
+              </button>
+
+              <button
+                onClick={() => setShowFolderManager(true)}
+                className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <FolderIcon className="w-5 h-5 mr-2" />
+                Manage Folders
+              </button>
+
+              <button
+                onClick={() => setShowTagManager(true)}
+                className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                <TagIcon className="w-5 h-5 mr-2" />
+                Manage Tags
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-2 text-sm ${
+                    viewMode === 'grid' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Grid
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 text-sm ${
+                    viewMode === 'list' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  List
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowFontSettings(true)}
+                className="flex items-center px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Cog6ToothIcon className="w-5 h-5 mr-2" />
+                Settings
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bookmarks Grid */}
         {loading ? (
-          <p>Loading bookmarks...</p>
-        ) : filteredBookmarks.length > 0 ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
           <BookmarkGrid
             bookmarks={filteredBookmarks}
             onDelete={handleDelete}
             onEdit={handleEdit}
-            viewMode="grid"
-            fontSettings={fontSettings}
+            onSelect={handleSelect}
+            viewMode={viewMode}
+            fontSettings={fontSettings || {
+              titleFontFamily: 'Inter, sans-serif',
+              titleFontSize: 16,
+              titleFontWeight: 'bold',
+              titleFontColor: '#111827',
+              descriptionFontFamily: 'Inter, sans-serif',
+              descriptionFontSize: 14,
+              descriptionFontWeight: 'normal',
+              descriptionFontColor: '#6B7280'
+            }}
           />
-        ) : (
-          <p className="text-gray-500 text-center py-8">No bookmarks match your search. Try different keywords.</p>
+        )}
+
+        {/* Modals */}
+        {showAddForm && (
+          <AddBookmarkForm onClose={() => setShowAddForm(false)} />
+        )}
+
+        {showFolderManager && (
+          <FolderManager onClose={() => setShowFolderManager(false)} />
+        )}
+
+        {showTagManager && (
+          <TagManager onClose={() => setShowTagManager(false)} />
+        )}
+
+        {showFontSettings && (
+          <FontSettingsModal
+            isOpen={showFontSettings}
+            onClose={() => setShowFontSettings(false)}
+            onUpdateSettings={handleUpdateFontSettings}
+          />
         )}
       </div>
-      <FontSettingsModal
-        isOpen={showFontSettings}
-        onClose={() => setShowFontSettings(false)}
-        onApply={handleUpdateFontSettings}
-        initialSettings={fontSettings}
-      />
-      <input
-        type="file"
-        id="import-bookmarks"
-        accept=".json"
-        onChange={handleImportBookmarks}
-        className="hidden"
-      />
-
-      {/* Tag Manager Modal */}
-      {showTagManager && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-xl font-bold">Tag Management</h2>
-              <button
-                onClick={() => setShowTagManager(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-4 overflow-y-auto max-h-[70vh]">
-              <TagManager />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Folder Manager Modal */}
-      {showFolderManager && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-xl font-bold">Folder Management</h2>
-              <button
-                onClick={() => setShowFolderManager(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-4 overflow-y-auto max-h-[70vh]">
-              <FolderManager />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

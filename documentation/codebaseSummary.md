@@ -13,20 +13,11 @@
 │   ├── bookmark_sharing_plan.md # Sharing feature implementation
 │   ├── bookmarklet-guide.md # Bookmarklet usage guide
 │   ├── browser-extensions-plan.md # Extension development plan
-│   └── planned-features.md # Future feature planning
+│   ├── planned-features.md # Future feature planning
+│   └── dataSources.md      # API and database documentation
 ├── middleware/             # Express middleware
-│   └── auth.js             # JWT authentication middleware
-├── models/                 # MongoDB models
-│   ├── Bookmark.js         # Bookmark schema with folder support
-│   ├── BookmarkExtension.js # Extension-specific bookmark model
-│   ├── Folder.js           # Hierarchical folder model
-│   └── User.js             # User schema and model
+├── models/                 # MongoDB models (User, Bookmark, Folder)
 ├── routes/                 # API route handlers
-│   ├── bookmarks.js        # Bookmark CRUD with public endpoint
-│   ├── bookmarkExtensions.js # Extension-specific routes
-│   ├── folders.js          # Folder management routes
-│   ├── tags.js             # Tag management routes
-│   └── users.js            # User authentication routes
 ├── extension/              # Chrome browser extension
 │   ├── background.js       # Context menu and background processes
 │   ├── manifest.json       # Chrome extension configuration
@@ -50,48 +41,37 @@
 │   ├── components/         # Reusable UI components
 │   │   ├── AddBookmarkForm.jsx
 │   │   ├── Auth/           # Authentication components
-│   │   ├── BookmarkGrid.jsx
+│   │   ├── BookmarkGrid.jsx # Main bookmark display component
 │   │   ├── BulkEditPanel.jsx # Bulk operations UI
 │   │   ├── EditBookmarkForm.jsx
 │   │   ├── FontSettings.jsx
 │   │   ├── FontSettingsModal.jsx
 │   │   ├── FolderManager.jsx # Folder management UI (in development)
-│   │   ├── PublicBookmarksGrid.jsx # Public bookmarks display
+│   │   ├── PublicBookmarksGrid.jsx # Homepage public bookmarks
 │   │   ├── SearchBar.jsx
-│   │   └── TagManager.jsx  # Tag management UI
+│   │   ├── TagManager.jsx
+│   │   └── ... (other components)
 │   ├── contexts/           # React context providers
-│   │   ├── AuthContext.jsx # Authentication state management
-│   │   ├── BookmarkContext.jsx # Bookmark state management
-│   │   ├── FolderContext.jsx # Folder state management
-│   │   ├── FontContext.jsx # Font settings management
-│   │   └── TagContext.jsx  # Tag state management
-│   ├── pages/              # Page components
-│   │   ├── Dashboard.jsx   # Main dashboard with unified toolbar
-│   │   └── Home.jsx        # Homepage with public bookmarks
+│   │   ├── AuthContext.jsx # Authentication state
+│   │   ├── BookmarkContext.jsx # Bookmark data management
+│   │   ├── FolderContext.jsx # Folder hierarchy (backend complete)
+│   │   ├── TagContext.jsx  # Tag management
+│   │   └── FontContext.jsx # Font customization
+│   ├── pages/              # Main application pages
+│   │   ├── Dashboard.jsx   # Main user dashboard
+│   │   ├── Home.jsx        # Public homepage
+│   │   ├── Login.jsx       # Authentication page
+│   │   └── Register.jsx    # User registration
 │   ├── utils/              # Utility functions
-│   │   ├── api.js          # API service layer
-│   │   ├── db.js           # Database connection
-│   │   ├── fetchMetadata.js # URL metadata fetcher
-│   │   ├── fontSettings.js # Font management
-│   │   └── importBookmarks.js # Bookmark import utilities
-│   ├── App.jsx             # Main application component
-│   ├── index.css           # Global styles
-│   ├── main.jsx            # Entry point
-│   └── bookmarklet.min.js  # Bookmarklet code
+│   │   ├── api.js          # API client functions
+│   │   └── fetchMetadata.js # Webpage metadata extraction
+│   └── App.jsx             # Root application component
+├── backups/                # Database backups
 ├── .env                    # Environment variables
-├── .gitignore              # Git ignore rules
 ├── docker-compose.yml      # Docker configuration
-├── index.html              # HTML entry point
 ├── package.json            # Project dependencies
-├── package-lock.json       # Dependency lock file
-├── postcss.config.cjs      # PostCSS configuration
-├── README.md               # Project overview
 ├── server.js               # Backend entry point
-├── setup-app.sh            # Setup script
-├── start.sh                # Startup script
-├── start-mongo.sh          # MongoDB Docker container starter
-├── tailwind.config.js      # Tailwind CSS configuration
-└── vite.config.js          # Vite build configuration
+└── README.md               # Project documentation
 ```
 
 ## Key Abstractions
@@ -103,51 +83,45 @@
 6. **Hierarchical Data**: Folder system with parent-child relationships
 7. **Cross-Browser Extension**: Unified extension codebase for Chrome and Firefox
 
-## Module Dependencies
-- Frontend components depend on API service (api.js) for data fetching
-- Context providers manage global application state
-- API routes depend on Mongoose models for database operations
-- Middleware (auth.js) protects authenticated routes
-- Utility modules are imported across both frontend and backend
-- Folder system integrates with existing bookmark management
-- Browser extensions communicate with backend API
+## Current Architecture Status
 
-## Core Components
+### Backend (✅ Stable)
+1. **server.js**: Express server with middleware setup
+2. **routes/**: RESTful API endpoints
+   - `users.js`: Authentication and user management (`/api/users/me` endpoint)
+   - `bookmarks.js`: Bookmark CRUD with proper route ordering
+   - `folders.js`: Hierarchical folder management (complete)
+   - `tags.js`: Tag operations and statistics
+3. **models/**: MongoDB schemas
+   - `User.js`: User authentication and profile data
+   - `Bookmark.js`: Bookmark data with folder associations
+   - `Folder.js`: Hierarchical folder structure (complete)
+4. **middleware/**: Authentication and validation middleware
 
-### Backend
-1. **server.js**: Express server entry point with middleware setup
-2. **models/**: MongoDB schemas for data persistence
-   - Bookmark: Core bookmark data with tags, folders, and visibility
-   - User: User authentication and profile data
-   - Folder: Hierarchical folder structure with parent-child relationships
-   - BookmarkExtension: Additional bookmark metadata
-3. **routes/**: API endpoint handlers with proper ordering
-   - Public bookmarks endpoint (before parameterized routes)
-   - Authentication, CRUD operations, folder management
-   - Bulk operations for efficiency
-4. **middleware/auth.js**: JWT authentication middleware
-
-### Frontend
+### Frontend (✅ Recently Fixed)
 1. **App.jsx**: Root component with routing and global providers
 2. **pages/Home.jsx**: Homepage with public bookmarks showcase
 3. **pages/Dashboard.jsx**: Main dashboard with unified action toolbar
-   - Consolidated all functional buttons into single toolbar
-   - Statistics cards for bookmarks, folders, and tags
-   - Responsive layout with proper spacing
+   - Fixed API endpoint issues (`/users/me`)
+   - Added view mode toggle (grid/list)
+   - Integrated font settings with fallbacks
+   - Removed duplicate tag displays
+   - Improved error handling
 4. **contexts/**: Global state management
    - AuthContext: Session management with cross-tab sync
    - BookmarkContext: Bookmark data and operations
    - FolderContext: Folder hierarchy management (backend complete)
    - TagContext: Tag management and operations
-   - FontContext: Font customization settings
+   - FontContext: Font customization settings (now properly integrated)
 5. **components/**: Reusable UI components
+   - BookmarkGrid: Main bookmark display with grid/list views
    - PublicBookmarksGrid: Display community bookmarks
    - TagManager: Tag creation, editing, and deletion
    - FolderManager: Folder hierarchy management (in development)
    - BulkEditPanel: Bulk operations UI
    - AddBookmarkForm: Bookmark creation with metadata fetching
 
-### Browser Extensions
+### Browser Extensions (🔄 85% Complete)
 1. **Chrome Extension** (`extension/`):
    - manifest.json: Chrome extension configuration
    - background.js: Context menu and background processes
@@ -158,45 +132,52 @@
    - background.js: Firefox-specific background script
    - Shared popup interface with Chrome version
 
-### Shared Utilities
-1. **fetchMetadata.js**: Webpage metadata extraction
-2. **fontSettings.js**: Font preference management
-3. **api.js**: Centralized API service layer with error handling
-4. **importBookmarks.js**: Bookmark import functionality
+## Recent Fixes & Improvements (January 2025)
 
-## Recent Improvements
-- **Route Ordering Fix**: Resolved Express route matching issues for public bookmarks
-- **Folder System Backend**: Complete hierarchical folder CRUD implementation
-- **Session Management**: Fixed cross-tab authentication sync issues
-- **UI Consolidation**: Unified action toolbar in Dashboard
-- **Context Architecture**: Comprehensive state management system
-- **Extension Support**: Chrome/Firefox browser extensions with import
-- **Public Bookmarks**: Homepage showcase of community bookmarks
-- **Bulk Operations**: Efficient bulk move operations with validation
+### Critical Bug Fixes
+- ✅ Fixed API endpoint mismatch (`/users/profile` → `/users/me`)
+- ✅ Resolved undefined component errors (`FolderSelector`, `TagSelector`)
+- ✅ Fixed font settings integration and undefined errors
+- ✅ Corrected public bookmarks route ordering
+- ✅ Removed duplicate tag displays in bookmark cards
 
-## Current Development Focus
-- **Folder Frontend**: Implementing folder tree navigation and management UI
-- **Extension Completion**: Background sync and offline capabilities
-- **Bulk Operations**: Expanding bulk edit and delete functionality
-- **Error Handling**: Enhanced error messages and loading states
-- **Testing**: Unit and integration test implementation
+### UI/UX Enhancements
+- ✅ Added view mode toggle (grid/list) to Dashboard
+- ✅ Improved unified action toolbar
+- ✅ Better error handling and fallback states
+- ✅ Enhanced responsive design
+- ✅ Cleaner bookmark card layout
 
-## Architecture Patterns
-- **Express Route Ordering**: Specific routes before parameterized routes
-- **Context Pattern**: Global state management with React contexts
-- **Repository Pattern**: API service layer abstracts data access
-- **Component Composition**: Reusable UI components with props
-- **Middleware Pattern**: Express middleware for authentication and CORS
-- **Observer Pattern**: Event-driven updates across components
-- **Hierarchical Data**: Tree structures for folder organization
+### Code Quality Improvements
+- ✅ Better error boundaries and fallback handling
+- ✅ Improved context integration
+- ✅ More consistent component structure
+- ✅ Enhanced debugging and logging
 
-## Performance Optimizations
-- **Lazy Loading**: Components loaded on demand
-- **Memoization**: React.memo for expensive components
-- **Debounced Search**: Reduced API calls during search
-- **Optimistic Updates**: Immediate UI feedback before server confirmation
-- **Connection Pooling**: MongoDB connection optimization
-- **Route Efficiency**: Proper Express route ordering for performance
+## Development Status
+
+### Completed Systems
+- ✅ User authentication and session management
+- ✅ Bookmark CRUD operations with metadata
+- ✅ Tag management and filtering
+- ✅ Public bookmark showcase
+- ✅ Font customization system
+- ✅ Browser extension popup UI
+- ✅ Bookmarklet integration
+- ✅ Dashboard with view modes
+
+### In Development
+- 🔄 Folder system frontend (backend complete)
+- 🔄 Browser extension background sync
+- 🔄 Bulk operations completion
+- 🔄 Advanced folder management UI
+
+### Planned
+- 📋 Drag-and-drop functionality
+- 📋 Advanced search and filtering
+- 📋 Collaboration features
+- 📋 Data export/import
+- 📋 Performance optimizations
 
 ---
-Last Updated: 2025-01-27 by Documentation Agent
+*Last Updated: 2025-01-27 by Documentation Agent*

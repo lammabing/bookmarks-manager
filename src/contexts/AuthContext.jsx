@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        const response = await authApi.getProfile();
+        const response = await authApi.getProfile(); // This should call /users/me
         setUser(response.data);
         setIsAuthenticated(true);
       } else {
@@ -35,19 +35,15 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Auth check failed:', error);
       // CRITICAL FIX: Only remove token for actual authentication errors
-      // Don't remove token for network errors, server errors, etc.
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         setUser(null);
         setIsAuthenticated(false);
       } else {
-        // For other errors (network, 500, etc.), keep the token but set unauthenticated state
-        // The user can try again later without losing their session
         setUser(null);
         setIsAuthenticated(false);
       }
     } finally {
-      setLoading(false);
       setIsCheckingAuth(false);
     }
   };
@@ -63,7 +59,7 @@ export const AuthProvider = ({ children }) => {
 
         // Verify token in background without blocking UI
         try {
-          const response = await authApi.getProfile();
+          const response = await authApi.getProfile(); // This should call /users/me
           setUser(response.data);
           setIsAuthenticated(true);
         } catch (error) {
