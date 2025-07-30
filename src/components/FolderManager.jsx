@@ -195,36 +195,73 @@ const FolderManager = ({ onClose }) => {
                   No folders yet. Create your first folder to get started.
                 </div>
               ) : (
-                folders.map(folder => (
-                  <div key={folder._id} className="p-3 flex items-center justify-between hover:bg-gray-50">
-                    <div className="flex items-center">
-                      <div
-                        className="w-3 h-3 rounded-full mr-2"
-                        style={{ backgroundColor: folder.color || '#3B82F6' }}
-                      />
-                      <span className="font-medium">{folder.name}</span>
-                      {folder.description && (
-                        <span className="ml-2 text-sm text-gray-500">- {folder.description}</span>
-                      )}
+                (() => {
+                  // Build folder tree for display
+                  const buildFolderTree = (folders, parentId = null, level = 0) => {
+                    return folders
+                      .filter(folder => folder.parent === parentId)
+                      .map(folder => ({
+                        ...folder,
+                        level,
+                        children: buildFolderTree(folders, folder._id, level + 1)
+                      }))
+                      .sort((a, b) => a.name.localeCompare(b.name));
+                  };
+
+                  // Flatten tree for rendering
+                  const flattenFolders = (tree) => {
+                    let result = [];
+                    tree.forEach(folder => {
+                      result.push(folder);
+                      if (folder.children) {
+                        result = result.concat(flattenFolders(folder.children));
+                      }
+                    });
+                    return result;
+                  };
+
+                  const folderTree = buildFolderTree(folders);
+                  const flatFolders = flattenFolders(folderTree);
+
+                  return flatFolders.map(folder => (
+                    <div key={folder._id} className="p-3 flex items-center justify-between hover:bg-gray-50">
+                      <div className="flex items-center">
+                        <div
+                          className="w-3 h-3 rounded-full mr-2"
+                          style={{
+                            backgroundColor: folder.color || '#3B82F6',
+                            marginLeft: `${folder.level * 20}px`
+                          }}
+                        />
+                        <span className="font-medium">{folder.name}</span>
+                        {folder.description && (
+                          <span className="ml-2 text-sm text-gray-500">- {folder.description}</span>
+                        )}
+                        {folder.bookmarkCount > 0 && (
+                          <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full">
+                            {folder.bookmarkCount} bookmark{folder.bookmarkCount !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex space-x-1">
+                        <button
+                          onClick={() => handleEditFolder(folder)}
+                          className="p-1 text-gray-500 hover:text-blue-600"
+                          title="Edit folder"
+                        >
+                          <PencilIcon className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteFolder(folder._id)}
+                          className="p-1 text-gray-500 hover:text-red-600"
+                          title="Delete folder"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex space-x-1">
-                      <button
-                        onClick={() => handleEditFolder(folder)}
-                        className="p-1 text-gray-500 hover:text-blue-600"
-                        title="Edit folder"
-                      >
-                        <PencilIcon className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteFolder(folder._id)}
-                        className="p-1 text-gray-500 hover:text-red-600"
-                        title="Delete folder"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  ));
+                })()
               )}
             </div>
           </div>

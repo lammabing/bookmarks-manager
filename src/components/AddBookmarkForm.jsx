@@ -23,6 +23,7 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
     notes: initialData?.notes || '',
     favicon: initialData?.favicon || ''
   });
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Extract URL parameters when component mounts
   useEffect(() => {
@@ -115,7 +116,12 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
       } else {
         await addBookmark(formData);
       }
-      onClose();
+      setShowSuccess(true);
+      // Close the form after a short delay to show the success message
+      setTimeout(() => {
+        onClose();
+        setShowSuccess(false);
+      }, 1500);
     } catch (err) {
       setError(err.message || 'Failed to save bookmark');
     } finally {
@@ -167,6 +173,13 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
               ×
             </button>
           </div>
+
+          {/* Success Message */}
+          {showSuccess && (
+            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+              Bookmark {initialData ? 'updated' : 'added'} successfully!
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* URL */}

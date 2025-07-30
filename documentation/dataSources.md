@@ -28,8 +28,12 @@
    - name: String (required)
    - description: String (optional)
    - color: String (optional, hex color code)
+   - icon: String (optional, icon identifier)
    - parent: ObjectId (references folders._id, optional for nested folders)
    - userId: ObjectId (references users._id, required)
+   - isRoot: Boolean (default: false)
+   - order: Number (default: 0)
+   - bookmarkCount: Number (default: 0)
    - createdAt: Date (auto)
    - updatedAt: Date (auto)
 
@@ -60,6 +64,7 @@
 - `PUT /api/bookmarks/:id` - Update bookmark by ID
 - `DELETE /api/bookmarks/:id` - Delete bookmark by ID
 - `PUT /api/bookmarks/:id/move` - Move bookmark to different folder
+- `POST /api/bookmarks/move` - Move multiple bookmarks to folder
 
 ### Folders
 - `GET /api/folders` - Get all folders for current user
@@ -68,6 +73,7 @@
 - `PUT /api/folders/:id` - Update folder by ID
 - `DELETE /api/folders/:id` - Delete folder by ID
 - `GET /api/folders/:id/bookmarks` - Get bookmarks in specific folder
+- `POST /api/folders/:id/move` - Move folder to new parent
 
 ### Tags
 - `GET /api/tags` - Get all tags for current user
@@ -102,7 +108,7 @@ The metadata fetching logic targets:
 ### Frontend State Management
 - **AuthContext**: User authentication and session management
 - **BookmarkContext**: Bookmark CRUD operations and state
-- **FolderContext**: Hierarchical folder management (backend complete, frontend in development)
+- **FolderContext**: Hierarchical folder management (fully implemented)
 - **TagContext**: Tag management and statistics
 - **FontContext**: Font customization settings
 
@@ -119,4 +125,4 @@ The metadata fetching logic targets:
 - Connection pooling for MongoDB performance
 
 ---
-Last Updated: 2025-01-27 by Documentation Agent
+Last Updated: 2025-07-30 by Development Team

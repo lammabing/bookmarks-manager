@@ -9,10 +9,11 @@ This document outlines potential features to add to the bookmarking application,
 *   **Tradeoffs:** Need to handle orphaned bookmarks if a tag is deleted. Renaming a tag affects all associated bookmarks.
 *   **Status:** Completed. Backend APIs and frontend UI implemented.
 
-#### 2. Folder/Collection System
+#### 2. Folder/Collection System [COMPLETED]
 
 *   **Description:** Implement a hierarchical structure (like folders or collections with tree structure) to organize bookmarks in addition to or as an alternative to tags.
 *   **Practicality:** Moderate complexity. Requires changes to the data model (adding a 'folder' or 'collection' field, potentially with nesting), backend API, and frontend UI/UX additions/modifications for drag-and-drop or selection-based organization.
+*   **Status:** Completed. Backend and frontend fully implemented with drag-and-drop functionality.
 
 #### 3. Advanced Filtering and Sorting
 
@@ -20,17 +21,19 @@ This document outlines potential features to add to the bookmarking application,
 *   **Practicality:** Moderate complexity. Requires modifications to the backend API to support more complex queries and frontend UI elements for filter/sort controls.
 *   **Tradeoffs:** Can increase query load on the database depending on implementation. UI can become cluttered with too many options.
 
-#### 4. User Authentication and Sync
+#### 4. User Authentication and Sync [COMPLETED]
 
 *   **Description:** Add user accounts to allow multiple users to use the application and sync bookmarks across different browsers or devices.
 *   **Practicality:** High complexity. Requires implementing a full authentication system (user registration, login, sessions), securing API endpoints, and handling data synchronization logic.
 *   **Tradeoffs:** Significant development effort and security considerations. Introduces the need for user management and potentially hosting infrastructure changes.
+*   **Status:** Completed. JWT-based authentication with proper token handling and cross-tab session synchronization.
 
-#### 5. Dedicated Browser Extension
+#### 5. Dedicated Browser Extension [IN PROGRESS]
 
 *   **Description:** Develop browser extensions for popular browsers (Chrome, Firefox, etc.) to provide a more seamless way to add and access bookmarks directly from any webpage, potentially with context menus or toolbar popups.
 *   **Practicality:** High complexity. Requires learning browser extension APIs for each target browser (though WebExtensions API helps standardize). Development and maintenance overhead for multiple browser platforms.
 *   **Tradeoffs:** Requires separate development lifecycle from the main web app. Distribution through browser stores involves review processes.
+*   **Status:** 95% Complete. Extension popup and context menu implemented. Bookmark import functionality added. Background sync process in progress.
 
 #### 6. Rich Text Notes/Description
 
@@ -44,11 +47,13 @@ This document outlines potential features to add to the bookmarking application,
 *   **Practicality:** Moderate complexity. Requires a background process (server-side) to perform checks and a mechanism to display results to the user (e.g., marking broken links in the UI).
 *   **Tradeoffs:** Can consume server resources and bandwidth depending on the number of bookmarks and check frequency. Need to handle rate limiting and potential blocking by websites.
 
-#### 8. Bulk Editing and Deletion
+#### 8. Bulk Editing and Deletion [IN PROGRESS]
 
 *   **Description:** Allow users to select multiple bookmarks and perform actions like deleting them, adding/removing tags, or moving them to a folder in a single operation.
 *   **Practicality:** Moderate complexity. Requires implementing multi-select functionality in the frontend UI and backend API endpoints for bulk operations.
 *   **Tradeoffs:** Need to carefully design the UI to prevent accidental bulk actions.
+*   **Status:** 60% Complete. Bulk selection UI component and bulk move API endpoint implemented.
+
 #### 9. Smart Folders/Collections (Dynamic)
 
 *   **Description:** Allow users to create collections that automatically populate based on defined criteria (e.g., tags, date added, domain). This builds upon the planned "Advanced Filtering and Sorting."

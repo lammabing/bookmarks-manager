@@ -7,10 +7,11 @@ A web-based application for managing bookmarks with advanced organization featur
 - **User Authentication**: Secure registration and login with JWT
 - **Bookmark Management**: Add, edit, and delete bookmarks with metadata
 - **Tag Management**: Organize bookmarks with customizable tags and bulk editing
+- **Folder System**: Hierarchical folder organization with drag-and-drop functionality
 - **Advanced Search**: Filter bookmarks by tags, keywords, and dates
 - **Font Customization**: Adjust font settings with Google Fonts integration
 - **Metadata Extraction**: Automatically fetches titles, descriptions and favicons
-- **Import/Export**: Import bookmarks from browsers or export for backup (planned)
+- **Import/Export**: Import bookmarks from browsers or export for backup
 - **Browser Extension**: Add bookmarks directly from Chrome/Firefox (popup UI and context menu implemented; background sync in progress)
 - **Bookmarklet**: Add bookmarks from any webpage with a single click using the bookmarklet
 
@@ -84,7 +85,7 @@ A web-based application for managing bookmarks with advanced organization featur
 │   ├── manifest.json       # Extension configuration and permissions
 │   ├── popup.html          # Popup UI for extension
 │   ├── popup.js            # Popup interaction logic
-│   ├── popup.css           # Popup styling
+│   ├── bookmarkImporter.js # Browser bookmark import functionality
 │   └── icons/              # Extension icons
 ├── admin-scripts/          # Admin/maintenance scripts
 ├── .env                    # Environment variables
@@ -122,6 +123,7 @@ The bookmarklet allows you to quickly add bookmarks to your bookmarks-manager fr
    - Site favicon (if available)
 4. You can edit any of these fields before saving
 5. Click "Add Bookmark" to save it to your bookmarks-manager
+6. After successful save, you'll see a subtle success message and the form will automatically close
 
 ### Bookmarklet Features
 
@@ -129,6 +131,9 @@ The bookmarklet allows you to quickly add bookmarks to your bookmarks-manager fr
 - Attempts to fetch the site's favicon
 - Opens in a properly sized window for easy use
 - Works on most websites
+- Preserves form data during login redirects
+- Shows subtle success indication when bookmark is added
+- Automatically closes after successful save
 
 ### Bookmarklet Troubleshooting
 
@@ -166,4 +171,4 @@ See [documentation/techStack.md](documentation/techStack.md) and [documentation/
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ---
-*Documentation updated: 2025-01-27*
+*Documentation updated: 2025-07-30*

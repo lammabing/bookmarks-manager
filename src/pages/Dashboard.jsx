@@ -28,7 +28,7 @@ import {
 const Dashboard = () => {
   const { user } = useAuth();
   const { bookmarks, loading, loadBookmarks } = useBookmarks();
-  const { folders } = useFolders();
+  const { folders, selectedFolder, selectFolder, clearFolderSelection } = useFolders();
   const { tags } = useTags();
   const { fontSettings } = useFontContext();
 
@@ -41,7 +41,6 @@ const Dashboard = () => {
   const [showTagManager, setShowTagManager] = useState(false);
   const [showFolderManager, setShowFolderManager] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFolder, setSelectedFolder] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
   const [viewMode, setViewMode] = useState('grid');
   const searchBarRef = useRef(null);
@@ -224,7 +223,13 @@ const Dashboard = () => {
               </label>
               <select
                 value={selectedFolder || ''}
-                onChange={(e) => setSelectedFolder(e.target.value || null)}
+                onChange={(e) => {
+                  if (e.target.value === '') {
+                    clearFolderSelection();
+                  } else {
+                    selectFolder(e.target.value);
+                  }
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All folders</option>
@@ -267,7 +272,7 @@ const Dashboard = () => {
               <button
                 onClick={() => {
                   setSearchQuery('');
-                  setSelectedFolder(null);
+                  clearFolderSelection();
                   setSelectedTags([]);
                 }}
                 className="text-sm text-blue-600 hover:text-blue-800"
@@ -276,6 +281,11 @@ const Dashboard = () => {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Folder Breadcrumb */}
+        <div className="mb-4">
+          <FolderBreadcrumb />
         </div>
 
         {/* Action Toolbar */}
@@ -342,30 +352,40 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Bookmarks Grid */}
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        {/* Folder Tree and Bookmarks Grid */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Folder Tree */}
+          <div className="lg:w-1/4">
+            <FolderTree className="bg-white rounded-lg shadow" />
           </div>
-        ) : (
-          <BookmarkGrid
-            bookmarks={filteredBookmarks}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-            onSelect={handleSelect}
-            viewMode={viewMode}
-            fontSettings={fontSettings || {
-              titleFontFamily: 'Inter, sans-serif',
-              titleFontSize: 16,
-              titleFontWeight: 'bold',
-              titleFontColor: '#111827',
-              descriptionFontFamily: 'Inter, sans-serif',
-              descriptionFontSize: 14,
-              descriptionFontWeight: 'normal',
-              descriptionFontColor: '#6B7280'
-            }}
-          />
-        )}
+
+          {/* Bookmarks Grid */}
+          <div className="lg:w-3/4">
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <BookmarkGrid
+                bookmarks={filteredBookmarks}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+                onSelect={handleSelect}
+                viewMode={viewMode}
+                fontSettings={fontSettings || {
+                  titleFontFamily: 'Inter, sans-serif',
+                  titleFontSize: 16,
+                  titleFontWeight: 'bold',
+                  titleFontColor: '#111827',
+                  descriptionFontFamily: 'Inter, sans-serif',
+                  descriptionFontSize: 14,
+                  descriptionFontWeight: 'normal',
+                  descriptionFontColor: '#6B7280'
+                }}
+              />
+            )}
+          </div>
+        </div>
 
         {/* Modals */}
         {showAddForm && (

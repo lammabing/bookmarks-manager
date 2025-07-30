@@ -26,6 +26,7 @@ javascript:(function(){const url=encodeURIComponent(window.location.href),title=
    - Site favicon (if available)
 4. You can edit any of these fields before saving
 5. Click "Add Bookmark" to save it to your bookmarks-manager
+6. After successful save, you'll see a subtle success message and the form will automatically close
 
 ## Features
 
@@ -33,6 +34,9 @@ javascript:(function(){const url=encodeURIComponent(window.location.href),title=
 - Attempts to fetch the site's favicon
 - Opens in a properly sized window for easy use
 - Works on most websites
+- Preserves form data during login redirects
+- Shows subtle success indication when bookmark is added
+- Automatically closes after successful save
 
 ## Troubleshooting
 
@@ -52,3 +56,10 @@ const appUrl = `http://localhost:5170/?url=${url}&title=${title}&description=${d
 ```
 
 Replace `http://localhost:5170` with your actual bookmarks-manager URL.
+
+## Testing
+
+For detailed testing instructions, see the [Bookmarklet Testing Guide](bookmarklet-testing-guide.md).
+
+---
+*Last Updated: 2025-07-30 by Development Team*

@@ -6,6 +6,8 @@ export const useFolders = () => {
   const [folderTree, setFolderTree] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [expandedFolders, setExpandedFolders] = useState(new Set());
+  const [selectedFolder, setSelectedFolder] = useState(null);
 
   // Fetch folders from API
   const fetchFolders = useCallback(async () => {
@@ -40,13 +42,13 @@ export const useFolders = () => {
   const editFolder = useCallback(async (folderId, folderData) => {
     try {
       const updatedFolder = await updateFolder(folderId, folderData);
-      setFolders(prev => 
-        prev.map(folder => 
+      setFolders(prev =>
+        prev.map(folder =>
           folder._id === folderId ? updatedFolder : folder
         )
       );
       setFolderTree(buildFolderTree(
-        folders.map(folder => 
+        folders.map(folder =>
           folder._id === folderId ? updatedFolder : folder
         )
       ));
@@ -80,6 +82,55 @@ export const useFolders = () => {
     return folders.filter(folder => folder.parent === folderId);
   }, [folders]);
 
+  // Toggle folder expansion
+  const toggleFolderExpansion = useCallback((folderId) => {
+    setExpandedFolders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(folderId)) {
+        newSet.delete(folderId);
+      } else {
+        newSet.add(folderId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Select folder
+  const selectFolder = useCallback((folderId) => {
+    setSelectedFolder(folderId);
+    
+    // Expand all parent folders
+    if (folderId) {
+      setExpandedFolders(prev => {
+        const newSet = new Set(prev);
+        let currentFolder = folders.find(f => f._id === folderId);
+        
+        while (currentFolder && currentFolder.parent) {
+          newSet.add(currentFolder.parent);
+          currentFolder = folders.find(f => f._id === currentFolder.parent);
+        }
+        
+        return newSet;
+      });
+    }
+  }, [folders]);
+
+  // Clear folder selection
+  const clearFolderSelection = useCallback(() => {
+    setSelectedFolder(null);
+  }, []);
+
+  // Expand all folders
+  const expandAllFolders = useCallback(() => {
+    const allFolderIds = folders.map(folder => folder._id);
+    setExpandedFolders(new Set(allFolderIds));
+  }, [folders]);
+
+  // Collapse all folders
+  const collapseAllFolders = useCallback(() => {
+    setExpandedFolders(new Set());
+  }, []);
+
   // Initial load
   useEffect(() => {
     fetchFolders();
@@ -95,6 +146,13 @@ export const useFolders = () => {
     editFolder,
     removeFolder,
     getFolderById,
-    getFolderChildren
+    getFolderChildren,
+    expandedFolders,
+    toggleFolderExpansion,
+    selectedFolder,
+    selectFolder,
+    clearFolderSelection,
+    expandAllFolders,
+    collapseAllFolders
   };
 };

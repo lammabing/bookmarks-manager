@@ -63,7 +63,7 @@
 *   **Bookmarks:** MongoDB documents with URL, title, description, tags, favicon, timestamps
 *   **Users:** MongoDB documents with username, email, hashed password, profile data
 *   **Tags:** Managed within bookmark documents and separate tag collection
-*   **Folders:** Hierarchical structure (planned implementation)
+*   **Folders:** Hierarchical structure with parent-child relationships and metadata
 *   **Extensions:** Additional bookmark metadata and annotations
 
 ## API Endpoints
@@ -84,6 +84,15 @@
     *   `POST /api/tags`: Create new tag
     *   `PUT /api/tags/:id`: Update tag by ID
     *   `DELETE /api/tags/:id`: Delete tag by ID
+
+*   **Folders:**
+    *   `GET /api/folders`: Get user's folder tree
+    *   `GET /api/folders/:id`: Get specific folder details
+    *   `POST /api/folders`: Create new folder
+    *   `PUT /api/folders/:id`: Update folder
+    *   `DELETE /api/folders/:id`: Delete folder (with cascade handling)
+    *   `GET /api/folders/:id/bookmarks`: Get bookmarks in folder
+    *   `POST /api/folders/:id/move`: Move folder to new parent
 
 *   **Extensions:**
     *   `GET /api/bookmarkExtensions/:bookmarkId`: Get extensions for bookmark
@@ -109,4 +118,4 @@
 *   **Connection Pooling:** MongoDB connection optimization
 
 ---
-Last Updated: 2025-01-27 by Documentation Agent
+Last Updated: 2025-07-30 by Development Team
