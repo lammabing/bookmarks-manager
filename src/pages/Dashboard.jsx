@@ -109,6 +109,26 @@ const Dashboard = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportFilteredBookmarks = () => {
+    // Create a blob with the filtered bookmarks data
+    const dataStr = JSON.stringify(filteredBookmarks, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+    // Create a download link
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'filtered-bookmarks.json';
+
+    // Trigger the download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Clean up
+    URL.revokeObjectURL(url);
+  };
+
   const handleImportBookmarks = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -295,25 +315,33 @@ const Dashboard = () => {
               <button
                 onClick={() => setShowAddForm(true)}
                 className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                title="Add Bookmark"
               >
-                <PlusIcon className="w-5 h-5 mr-2" />
-                Add Bookmark
+                <PlusIcon className="w-5 h-5" />
               </button>
 
               <button
                 onClick={() => setShowFolderManager(true)}
                 className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                title="Manage Folders"
               >
-                <FolderIcon className="w-5 h-5 mr-2" />
-                Manage Folders
+                <FolderIcon className="w-5 h-5" />
               </button>
 
               <button
                 onClick={() => setShowTagManager(true)}
                 className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                title="Manage Tags"
               >
-                <TagIcon className="w-5 h-5 mr-2" />
-                Manage Tags
+                <TagIcon className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={handleExportFilteredBookmarks}
+                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                title="Export Filtered Bookmarks"
+              >
+                <ArrowDownTrayIcon className="w-5 h-5" />
               </button>
             </div>
 
