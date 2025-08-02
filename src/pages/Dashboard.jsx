@@ -33,9 +33,12 @@ const Dashboard = () => {
   const { fontSettings } = useFontContext();
 
   // Debug logging
-  console.log('Dashboard fontSettings:', fontSettings);
-  console.log('Dashboard user:', user);
-  console.log('Dashboard bookmarks:', bookmarks);
+  console.log('🔍 [DEBUG] Dashboard component mounted');
+  console.log('🔍 [DEBUG] Dashboard fontSettings:', fontSettings);
+  console.log('🔍 [DEBUG] Dashboard user:', user);
+  console.log('🔍 [DEBUG] Dashboard bookmarks:', bookmarks);
+  console.log('🔍 [DEBUG] Dashboard folders:', folders);
+  console.log('🔍 [DEBUG] Dashboard folders length:', folders?.length || 0);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showFontSettings, setShowFontSettings] = useState(false);
   const [showTagManager, setShowTagManager] = useState(false);

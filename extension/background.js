@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // Send bookmark to backend API
         chrome.storage.sync.get(['authToken'], (result) => {
             const token = result.authToken;
-            fetch('http://localhost:3000/api/bookmarks', {
+            fetch('http://localhost:5015/api/bookmarks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -48,4 +48,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 });
         });
     }
-});
+  });
+  
+  // Listen for messages from the web application
+  chrome.runtime.onMessageExternal.addListener(
+    (request, sender, sendResponse) => {
+      // Verify the sender is the correct web app
+      if (sender.url === "http://localhost:5015/" && request.action === "set_auth_token" && request.token) {
+        chrome.storage.sync.set({ authToken: request.token }, () => {
+          console.log("Auth token received from web app and stored in extension.");
+          sendResponse({ status: "success" });
+        });
+      }
+      return true; // Indicates you wish to send a response asynchronously
+    }
+  );

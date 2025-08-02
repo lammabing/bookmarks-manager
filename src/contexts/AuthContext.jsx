@@ -103,12 +103,31 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('🔍 [DEBUG] AuthContext login function called');
       const response = await authApi.login({ email, password });
       const { token, user } = response.data;
 
+      console.log('🔍 [DEBUG] Login successful, storing token in localStorage');
       localStorage.setItem('token', token);
+      console.log('🔍 [DEBUG] Token stored, setting user state');
       setUser(user);
       setIsAuthenticated(true);
+      console.log('🔍 [DEBUG] Auth state updated after login');
+
+      // Send token to Chrome extension
+      // IMPORTANT: Replace 'YOUR_CHROME_EXTENSION_ID_HERE' with your actual Chrome extension ID
+      // You can find this ID at chrome://extensions
+      if (typeof chrome !== 'undefined' && chrome.runtime) {
+        const extensionId = 'kmnkaimhicifocjpoejgcpekbobffiag'; // <-- REPLACE THIS
+        chrome.runtime.sendMessage(extensionId, { action: "set_auth_token", token: token }, (response) => {
+          if (chrome.runtime.lastError) {
+            // This is expected if the extension is not installed or ID is incorrect.
+            console.log("Could not send token to extension:", chrome.runtime.lastError.message);
+          } else {
+            console.log("Token sent to extension successfully.", response);
+          }
+        });
+      }
 
       return { success: true };
     } catch (error) {

@@ -89,7 +89,7 @@ class BookmarkImporter {
     for (const bookmark of bookmarks) {
       try {
         const token = await this.getAuthToken();
-        const response = await fetch('http://localhost:3000/api/bookmarks', {
+        const response = await fetch('http://localhost:5015/api/bookmarks', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

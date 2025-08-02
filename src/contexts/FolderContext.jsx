@@ -14,6 +14,7 @@ export const useFolders = () => {
 
 export const FolderProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
+  console.log('🔍 [DEBUG] FolderProvider - isAuthenticated:', isAuthenticated);
   const foldersData = useFoldersHook();
 
   // We only want to expose the data and functions that are relevant to the context

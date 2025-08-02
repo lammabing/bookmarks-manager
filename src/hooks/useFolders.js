@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getFolders, createFolder, updateFolder, deleteFolder, buildFolderTree } from '../utils/folderApi.js';
+import { useAuth } from '../contexts/AuthContext';
 
 export const useFolders = () => {
+  const { isAuthenticated } = useAuth();
   const [folders, setFolders] = useState([]);
   const [folderTree, setFolderTree] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -11,22 +13,41 @@ export const useFolders = () => {
 
   // Fetch folders from API
   const fetchFolders = useCallback(async () => {
+    console.log('🔍 [DEBUG] fetchFolders called');
+    console.log('🔍 [DEBUG] isAuthenticated:', isAuthenticated);
+    console.log('🔍 [DEBUG] Token in localStorage:', localStorage.getItem('token') ? 'Present' : 'Missing');
+    
+    // Only fetch folders if user is authenticated
+    if (!isAuthenticated) {
+      console.log('🔍 [DEBUG] User not authenticated, skipping folder fetch');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     try {
+      console.log('🔍 [DEBUG] Making API call to getFolders...');
       const data = await getFolders();
+      console.log('🔍 [DEBUG] API response received, folders count:', data?.length || 0);
       setFolders(data);
       setFolderTree(buildFolderTree(data));
     } catch (err) {
+      console.error('🔍 [DEBUG] Error fetching folders:', err);
+      console.error('🔍 [DEBUG] Error response status:', err.response?.status);
+      console.error('🔍 [DEBUG] Error response data:', err.response?.data);
       setError(err.message || 'Failed to fetch folders');
-      console.error('Error fetching folders:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Create new folder
   const addFolder = useCallback(async (folderData) => {
+    if (!isAuthenticated) {
+      setError('User not authenticated');
+      throw new Error('User not authenticated');
+    }
+    
     try {
       const newFolder = await createFolder(folderData);
       setFolders(prev => [...prev, newFolder]);
@@ -36,10 +57,15 @@ export const useFolders = () => {
       setError(err.message || 'Failed to create folder');
       throw err;
     }
-  }, [folders]);
+  }, [folders, isAuthenticated]);
 
   // Update existing folder
   const editFolder = useCallback(async (folderId, folderData) => {
+    if (!isAuthenticated) {
+      setError('User not authenticated');
+      throw new Error('User not authenticated');
+    }
+    
     try {
       const updatedFolder = await updateFolder(folderId, folderData);
       setFolders(prev =>
@@ -57,10 +83,15 @@ export const useFolders = () => {
       setError(err.message || 'Failed to update folder');
       throw err;
     }
-  }, [folders]);
+  }, [folders, isAuthenticated]);
 
   // Delete folder
   const removeFolder = useCallback(async (folderId) => {
+    if (!isAuthenticated) {
+      setError('User not authenticated');
+      throw new Error('User not authenticated');
+    }
+    
     try {
       await deleteFolder(folderId);
       const updatedFolders = folders.filter(folder => folder._id !== folderId);
@@ -70,7 +101,7 @@ export const useFolders = () => {
       setError(err.message || 'Failed to delete folder');
       throw err;
     }
-  }, [folders]);
+  }, [folders, isAuthenticated]);
 
   // Get folder by ID
   const getFolderById = useCallback((folderId) => {
@@ -131,10 +162,13 @@ export const useFolders = () => {
     setExpandedFolders(new Set());
   }, []);
 
-  // Initial load
+  // Initial load and re-fetch when authentication changes
   useEffect(() => {
+    console.log('🔍 [DEBUG] useFolders useEffect running');
+    console.log('🔍 [DEBUG] isAuthenticated:', isAuthenticated);
+    console.log('🔍 [DEBUG] Current folders state:', folders.length);
     fetchFolders();
-  }, [fetchFolders]);
+  }, [fetchFolders, isAuthenticated]);
 
   return {
     folders,
