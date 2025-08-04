@@ -78,6 +78,19 @@ export const BookmarkProvider = ({ children }) => {
     }
   };
 
+  const shareBookmark = async (id, userIds) => {
+    try {
+      const response = await bookmarkApi.shareBookmark(id, userIds);
+      setBookmarks(prev => prev.map(bookmark =>
+        bookmark._id === id ? response.data.bookmark : bookmark
+      ));
+      return response.data;
+    } catch (error) {
+      console.error('Error sharing bookmark:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadBookmarks();
@@ -92,7 +105,8 @@ export const BookmarkProvider = ({ children }) => {
     loadBookmarks,
     setBookmarks,
     addBookmark,
-    updateBookmark
+    updateBookmark,
+    shareBookmark
   };
 
   return (

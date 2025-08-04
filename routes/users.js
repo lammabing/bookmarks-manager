@@ -111,4 +111,21 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
+// @route   GET /api/users/shareable
+// @desc    Get list of users that can be shared with
+// @access  Private
+router.get('/shareable', auth, async (req, res) => {
+  try {
+    // Get all users except the current user
+    const users = await User.find({
+      _id: { $ne: req.user.id }
+    }).select('-password');
+    
+    res.json(users);
+  } catch (err) {
+    console.error('Error fetching shareable users:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 export default router;

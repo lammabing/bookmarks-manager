@@ -6,6 +6,7 @@ import { useTags } from '../contexts/TagContext';
 import { useAuth } from '../contexts/AuthContext';
 import TagSelector from './TagSelector';
 import FolderSelector from './FolderSelector';
+import ShareSettings from './ShareSettings';
 
 const AddBookmarkForm = ({ onClose, initialData = null }) => {
   const navigate = useNavigate();
@@ -21,7 +22,9 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
     tags: initialData?.tags || [],
     folder: initialData?.folder?._id || initialData?.folder || null,
     notes: initialData?.notes || '',
-    favicon: initialData?.favicon || ''
+    favicon: initialData?.favicon || '',
+    visibility: initialData?.visibility || 'private',
+    sharedWith: initialData?.sharedWith || []
   });
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -267,6 +270,22 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Additional notes..."
+              />
+            </div>
+
+            {/* Sharing Settings */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Sharing Settings
+              </label>
+              <ShareSettings
+                bookmark={initialData}
+                onVisibilityChange={(visibility) => setFormData(prev => ({ ...prev, visibility }))}
+                onSharedWithChange={(sharedWith) => setFormData(prev => ({ ...prev, sharedWith }))}
+                onShare={async (sharingData) => {
+                  // This will be handled when the form is submitted
+                  setFormData(prev => ({ ...prev, ...sharingData }));
+                }}
               />
             </div>
 

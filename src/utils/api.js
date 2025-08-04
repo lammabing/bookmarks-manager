@@ -32,6 +32,7 @@ export const bookmarkApi = {
   createBookmark: (data) => api.post('/bookmarks', data),
   updateBookmark: (id, data) => api.put(`/bookmarks/${id}`, data),
   deleteBookmark: (id) => api.delete(`/bookmarks/${id}`),
+  shareBookmark: (id, userIds) => api.post(`/bookmarks/${id}/share`, { userIds }),
   getPublicBookmarks: async (page = 1, limit = 12) => {
     const response = await fetch(`${API_BASE_URL}/bookmarks/public?page=${page}&limit=${limit}`);
     if (!response.ok) {
@@ -62,6 +63,7 @@ export const authApi = {
   login: (credentials) => api.post('/users/login', credentials),
   register: (userData) => api.post('/users/register', userData),
   getProfile: () => api.get('/users/me'),
+  getShareableUsers: () => api.get('/users/shareable'),
 };
 
 export default api;

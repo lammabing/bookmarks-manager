@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Trash2, Edit, Lock, Globe, Folder } from 'lucide-react';
+import { Trash2, Edit, Lock, Globe, Users, Folder } from 'lucide-react';
 import EditBookmarkForm from './EditBookmarkForm';
 import BookmarkDetail from './BookmarkDetail';
+import SharingBadge from './SharingBadge';
+import SocialMediaShare from './SocialMediaShare';
 
 const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hoverEffect = "hover:shadow-lg hover:bg-blue-50 transition" }) => {
   const [editingBookmark, setEditingBookmark] = useState(null);
@@ -86,11 +88,7 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
                     >
                       {bookmark.title}
                     </a>
-                    {bookmark.visibility === 'private' ? (
-                      <Lock size={16} className="text-gray-500" />
-                    ) : (
-                      <Globe size={16} className="text-blue-500" />
-                    )}
+                    <SharingBadge visibility={bookmark.visibility} className="ml-2" />
                   </div>
 
                   <p
@@ -138,6 +136,11 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
                       </div>
                     </div>
                   )}
+
+                  {/* Social Media Share */}
+                  <div className="mt-2">
+                    <SocialMediaShare bookmark={bookmark} />
+                  </div>
 
                   <button
                     onClick={e => { e.stopPropagation(); handleEdit(bookmark); }}
@@ -190,11 +193,7 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
                     >
                       {bookmark.title}
                     </a>
-                    {bookmark.visibility === 'private' ? (
-                      <Lock size={16} className="text-gray-500" />
-                    ) : (
-                      <Globe size={16} className="text-blue-500" />
-                    )}
+                    <SharingBadge visibility={bookmark.visibility} className="ml-2" />
                   </div>
                   <p
                     style={{
@@ -275,8 +274,8 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
                   </div>
                 )}
 
-                {/* Bottom row with folder only */}
-                <div className="flex items-center justify-between text-xs text-gray-500">
+                {/* Bottom row with folder and social share */}
+                <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     {bookmark.folder && (
                       <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded mr-2">
@@ -284,6 +283,7 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
                       </span>
                     )}
                   </div>
+                  <SocialMediaShare bookmark={bookmark} />
                 </div>
               </div>
             </div>
