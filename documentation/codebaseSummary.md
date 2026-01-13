@@ -50,6 +50,11 @@
 │   │   ├── FolderSelector.jsx # Folder selection dropdown
 │   │   ├── PublicBookmarksGrid.jsx # Homepage public bookmarks
 │   │   ├── SearchBar.jsx
+│   │   ├── ShareSettings.jsx # Bookmark sharing settings (completed)
+│   │   ├── SharingBadge.jsx # Sharing status indicator (completed)
+│   │   ├── SocialMediaShare.jsx # Social media sharing (completed)
+│   │   ├── ToastNotification.jsx # Toast notifications (completed)
+│   │   ├── UserSelector.jsx # User selection for sharing (completed)
 │   │   ├── TagManager.jsx
 │   │   └── ... (other components)
 │   ├── contexts/           # React context providers
@@ -57,7 +62,8 @@
 │   │   ├── BookmarkContext.jsx # Bookmark data management
 │   │   ├── FolderContext.jsx # Folder hierarchy (fully implemented)
 │   │   ├── TagContext.jsx  # Tag management
-│   │   └── FontContext.jsx # Font customization
+│   │   ├── FontContext.jsx # Font customization
+│   │   └── ToastContext.jsx # Toast notifications (completed)
 │   ├── hooks/              # Custom React hooks
 │   │   └── useFolders.js   # Folder management hook
 │   ├── pages/              # Main application pages
@@ -130,18 +136,21 @@
 6. **hooks/**: Custom React hooks
    - useFolders: Folder management hook with state and actions
 
-### Browser Extensions (🔄 95% Complete)
-1. **Chrome Extension** (`extension/`):
+### Browser Extensions (✅ Complete)
+1. **Chrome Extension** (`chrome-extension/`):
    - manifest.json: Chrome extension configuration
    - background.js: Context menu and background processes
-   - popup.html/js: Extension popup interface
+   - popup.html/js: Extension popup interface with pre-filled bookmark forms
+   - content.js: Content script for authentication flow
    - bookmarkImporter.js: Import browser bookmarks
 2. **Firefox Extension** (`firefox-extension/`):
-   - manifest.json: Firefox extension configuration
+   - manifest.json: Firefox extension configuration (using scripts instead of service_worker)
    - background.js: Firefox-specific background script
-   - Shared popup interface with Chrome version
+   - popup.html/js: Firefox popup interface with pre-filled bookmark forms
+   - content.js: Content script for authentication flow
+   - bookmarkImporter.js: Firefox bookmark import
 
-## Recent Fixes & Improvements (July 2025)
+## Recent Fixes & Improvements (August 2025)
 
 ### Critical Features Implemented
 - ✅ Completed folder system implementation with hierarchical structure
@@ -151,6 +160,14 @@
 - ✅ Integrated folder-based filtering in search functionality
 - ✅ Added visual folder indicators in bookmark grid
 - ✅ Implemented browser bookmark import functionality in extension
+- ✅ Completed bookmark sharing system with visibility levels
+- ✅ Added user selection component for sharing bookmarks
+- ✅ Implemented toast notification system with undo functionality
+- ✅ Added social media sharing options for bookmarks
+- ✅ Implemented "Shared with me" filter in dashboard
+- ✅ Enhanced browser extensions with pre-filled bookmark forms
+- ✅ Fixed Firefox extension compatibility (using scripts instead of service_worker)
+- ✅ Added favicon support to browser extensions
 
 ### UI/UX Enhancements
 - ✅ Added view mode toggle (grid/list) to Dashboard
@@ -182,6 +199,12 @@
 - ✅ Folder system with hierarchical structure
 - ✅ Drag-and-drop folder organization
 - ✅ Browser bookmark import functionality
+- ✅ Bookmark sharing system with visibility levels
+- ✅ Toast notification system with undo functionality
+- ✅ Social media sharing options
+- ✅ "Shared with me" filter functionality
+- ✅ Enhanced browser extensions with pre-filled forms
+- ✅ Firefox extension compatibility fixes
 
 ### In Development
 - 🔄 Browser extension background sync

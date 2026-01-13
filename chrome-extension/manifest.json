@@ -1,24 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "Bookmarks Manager Extension",
-  "version": "1.0",
-  "description": "Add and access bookmarks directly from any webpage.",
+  "name": "Bookmark App Extension",
+  "version": "1.0.0",
+  "description": "Quickly add bookmarks to your bookmarking app",
   "permissions": [
-    "contextMenus",
-    "storage",
     "activeTab",
-    "scripting",
-    "bookmarks",
-    "tabs"
+    "storage"
   ],
   "host_permissions": [
     "http://localhost:5170/*",
     "https://localhost:5170/*",
     "*://*/*"
   ],
-  "background": {
-    "scripts": ["background.js"]
-  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -26,7 +19,11 @@
       "32": "icons/icon32.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
-    }
+    },
+    "default_title": "Add Bookmark"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {

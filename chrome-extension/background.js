@@ -1,41 +1,15 @@
-// Background service worker for the Firefox bookmark extension
+// Background service worker for the bookmark extension
 
 // API base URL - adjust this to match your server
 const API_BASE_URL = 'http://localhost:5170/api';
 
-// NOTE: For Firefox compatibility, use the browser.* namespace instead of chrome.*
-// You may use a polyfill if you want to support both Chrome and Firefox.
-
-browser.runtime.onInstalled.addListener(() => {
-  browser.contextMenus.create({
-    id: "add-bookmark",
-    title: "Add page to Bookmarks Manager",
-    contexts: ["page"]
-  });
-});
-
-browser.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === "add-bookmark" && tab) {
-    browser.scripting.executeScript({
-      target: {tabId: tab.id},
-      func: () => {
-        browser.runtime.sendMessage({
-          action: "add_bookmark_from_context_menu",
-          url: window.location.href,
-          title: document.title
-        });
-      }
-    });
-  }
-});
-
 // Listen for messages from popup and content scripts
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('Firefox background received message:', request);
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log('Background received message:', request);
 
   if (request.action === 'get_auth_token') {
     // Retrieve stored token
-    browser.storage.local.get(['authToken', 'user']).then((result) => {
+    chrome.storage.local.get(['authToken', 'user'], (result) => {
       sendResponse({
         token: result.authToken || null,
         user: result.user || null
@@ -46,10 +20,10 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'set_auth_token') {
     // Store auth token and user info
-    browser.storage.local.set({
+    chrome.storage.local.set({
       authToken: request.token,
       user: request.user
-    }).then(() => {
+    }, () => {
       console.log('Auth token stored successfully');
       sendResponse({ success: true });
     });
@@ -58,7 +32,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'clear_auth_token') {
     // Clear auth token and user info
-    browser.storage.local.remove(['authToken', 'user']).then(() => {
+    chrome.storage.local.remove(['authToken', 'user'], () => {
       console.log('Auth token cleared');
       sendResponse({ success: true });
     });
@@ -66,7 +40,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === 'add_bookmark') {
-    // Handle adding bookmark from popup
+    // Add bookmark to the app
     addBookmark(request.bookmarkData, request.token)
       .then(response => sendResponse({ success: true, data: response }))
       .catch(error => sendResponse({ success: false, error: error.message }));
@@ -79,33 +53,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       .then(user => sendResponse({ success: true, user }))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true;
-  }
-
-  // Handle the original context menu add_bookmark action
-  if (request.action === "add_bookmark_from_context_menu") {
-    // Send bookmark to backend API (for context menu)
-    browser.storage.local.get(["authToken"]).then((result) => {
-      const token = result.authToken;
-      fetch(`${API_BASE_URL}/bookmarks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'x-auth-token': token } : {})
-        },
-        body: JSON.stringify({ title: request.title, url: request.url })
-      })
-        .then(res => {
-          if (!res.ok) throw new Error('Failed to add bookmark');
-          return res.json();
-        })
-        .then(() => {
-          // Optionally notify the user or update UI
-        })
-        .catch((error) => {
-          console.error('Error adding bookmark:', error);
-          // Optionally handle error
-        });
-    });
   }
 });
 
@@ -154,7 +101,12 @@ async function verifyToken(token) {
   }
 }
 
+// Listen for extension installation
+chrome.runtime.onInstalled.addListener(() => {
+  console.log('Bookmark extension installed');
+});
+
 // Listen for extension startup
-browser.runtime.onStartup.addListener(() => {
+chrome.runtime.onStartup.addListener(() => {
   console.log('Bookmark extension started');
 });
