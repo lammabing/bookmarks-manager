@@ -6,9 +6,11 @@ The browser extension has been fully implemented with the following features:
 
 1. **Cross-browser compatibility** - Works on both Chrome and Firefox using the WebExtension API
 2. **Context menu integration** - Users can add the current page to bookmarks manager directly from the context menu
-3. **Popup UI** - Toolbar popup for adding bookmarks and importing browser bookmarks
+3. **Enhanced Popup UI** - Toolbar popup for adding bookmarks and importing browser bookmarks
 4. **Bookmark import functionality** - Import all bookmarks or select specific folders from the browser
 5. **Authentication handling** - Securely manages user authentication tokens
+6. **Pre-filled bookmark forms** - When not logged in, clicking the extension opens the app with current page information pre-filled in the add bookmark form
+7. **Favicon support** - Automatically fetches favicons for bookmarked pages
 
 ## Implemented Components
 
