@@ -5,7 +5,7 @@
 *   **Backend:** Node.js (v20.11.1), Express 4.21.2
 *   **Database:** MongoDB (v7.0) with Mongoose ODM 8.0.3
 *   **Authentication:** JSON Web Tokens (JWT) with cross-tab session sync
-*   **State Management:** React Context API (Auth, Bookmarks, Folders, Tags, Font)
+*   **State Management:** React Context API (Auth, Bookmarks, Folders, Tags, Font, Toast)
 *   **Routing:** React Router DOM 7.7.0
 *   **Icons:** Lucide React 0.100.0, Heroicons React 2.2.0
 *   **Browser Extension:** Chrome/Firefox extension with Manifest V3 support
@@ -50,6 +50,15 @@
     *   `JWT_SECRET`: Secret key for JWT authentication (generate with `openssl rand -base64 32`)
     *   `VITE_API_BASE_URL`: Frontend API base URL (e.g., `http://localhost:5015/api`)
 
+## Security Best Practices
+*   Never commit `.env` files to version control
+*   Use strong, randomly generated secrets for `JWT_SECRET`
+*   Regularly rotate API keys and secrets
+*   Use environment-specific configurations
+*   Implement proper input validation and sanitization
+*   Apply the principle of least privilege for database access
+*   Keep dependencies updated to patch security vulnerabilities
+
 ## Data Source(s)
 *   **Primary Database:** MongoDB with Mongoose ODM
 *   **External APIs:** 
@@ -60,7 +69,7 @@
 *   **Session Storage:** Temporary UI state management
 
 ## Data Structures
-*   **Bookmarks:** MongoDB documents with URL, title, description, tags, favicon, timestamps
+*   **Bookmarks:** MongoDB documents with URL, title, description, tags, favicon, visibility, sharedWith, timestamps
 *   **Users:** MongoDB documents with username, email, hashed password, profile data
 *   **Tags:** Managed within bookmark documents and separate tag collection
 *   **Folders:** Hierarchical structure with parent-child relationships and metadata
@@ -72,12 +81,17 @@
     *   `POST /api/users/login`: User authentication
     *   `GET /api/users/profile`: Get current user profile
 
+*   **Users:**
+    *   `GET /api/users/shareable`: Get list of users that can be shared with
+
 *   **Bookmarks:**
     *   `GET /api/bookmarks`: Get all bookmarks for current user
     *   `GET /api/bookmarks/:id`: Get single bookmark by ID
     *   `POST /api/bookmarks`: Add new bookmark or array of bookmarks
     *   `PUT /api/bookmarks/:id`: Update bookmark by ID
     *   `DELETE /api/bookmarks/:id`: Delete bookmark by ID
+    *   `POST /api/bookmarks/:id/share`: Update bookmark sharing settings
+    *   `GET /api/bookmarks/shared`: Get bookmarks shared with current user
 
 *   **Tags:**
     *   `GET /api/tags`: Get all tags for current user
@@ -118,4 +132,4 @@
 *   **Connection Pooling:** MongoDB connection optimization
 
 ---
-Last Updated: 2025-07-30 by Development Team
+Last Updated: 2025-08-05 by Development Team

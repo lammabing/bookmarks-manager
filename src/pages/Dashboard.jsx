@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBookmarks } from '../contexts/BookmarkContext';
 import { useFolders } from '../contexts/FolderContext';
@@ -10,8 +10,13 @@ import SearchBar from '../components/SearchBar';
 import TagManager from '../components/TagManager';
 import FolderManager from '../components/FolderManager';
 import FontSettingsModal from '../components/FontSettingsModal';
+import TutorialModal from '../components/TutorialModal';
 import FolderTree from '../components/FolderTree';
 import FolderBreadcrumb from '../components/FolderBreadcrumb';
+import BulkEditToolbar from '../components/BulkEditToolbar';
+import BulkEditModal from '../components/BulkEditModal';
+import BulkOperationToast from '../components/BulkOperationToast';
+import Tooltip from '../components/Tooltip';
 import { bookmarkApi } from '../utils/api';
 import {
   MagnifyingGlassIcon,
@@ -22,12 +27,13 @@ import {
   ArrowUpTrayIcon,
   PlusIcon,
   BookmarkIcon,
-  Cog6ToothIcon
+  QuestionMarkCircleIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { bookmarks, loading, loadBookmarks } = useBookmarks();
+  const { bookmarks, loading, loadBookmarks, getSharedWithMeBookmarks } = useBookmarks();
   const { folders, selectedFolder, selectFolder, clearFolderSelection } = useFolders();
   const { tags } = useTags();
   const { fontSettings } = useFontContext();
@@ -46,10 +52,46 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [viewMode, setViewMode] = useState('grid');
+  const [sharedBookmarks, setSharedBookmarks] = useState([]);
+  const [showSharedWithMe, setShowSharedWithMe] = useState(false);
+  const [loadingShared, setLoadingShared] = useState(false);
   const searchBarRef = useRef(null);
+  
+  // Bulk editing state
+  const [selectedBookmarks, setSelectedBookmarks] = useState(new Set());
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false);
+  const [bulkEditOperation, setBulkEditOperation] = useState('edit');
+  const [showBulkOperationToast, setShowBulkOperationToast] = useState(false);
+  const [bulkOperationMessage, setBulkOperationMessage] = useState('');
+  const [bulkOperationType, setBulkOperationType] = useState('success');
+  const [showTutorial, setShowTutorial] = useState(false);
 
-  // Filter bookmarks based on search, folder, and tags
-  const filteredBookmarks = bookmarks.filter(bookmark => {
+  // Load shared bookmarks
+  const loadSharedBookmarks = async () => {
+    try {
+      setLoadingShared(true);
+      const response = await getSharedWithMeBookmarks();
+      setSharedBookmarks(response.bookmarks || []);
+    } catch (error) {
+      console.error('Error loading shared bookmarks:', error);
+      setSharedBookmarks([]);
+    } finally {
+      setLoadingShared(false);
+    }
+  };
+
+  // Toggle between my bookmarks and shared with me
+  const toggleSharedWithMe = () => {
+    const newValue = !showSharedWithMe;
+    setShowSharedWithMe(newValue);
+    
+    if (newValue && sharedBookmarks.length === 0) {
+      loadSharedBookmarks();
+    }
+  };
+
+  // Filter bookmarks based on search, folder, tags, and sharing mode
+  const filteredBookmarks = (showSharedWithMe ? sharedBookmarks : bookmarks).filter(bookmark => {
     const matchesSearch = !searchQuery ||
       bookmark.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       bookmark.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -175,8 +217,210 @@ const Dashboard = () => {
     event.target.value = '';
   };
 
+  const handleImportBookmarksHTML = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const fileExtension = file.name.toLowerCase().split('.').pop();
+    if (fileExtension !== 'html' && fileExtension !== 'htm') {
+      alert('Please select a valid HTML file (.html or .htm)');
+      event.target.value = '';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('bookmarksFile', file);
+
+    try {
+      const token = localStorage.getItem('token'); // Get token from localStorage
+      if (!token) {
+        alert('Please log in first');
+        return;
+      }
+
+      const response = await fetch('/api/import/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`Successfully imported ${data.bookmarksImported} bookmarks and ${data.foldersImported} folders!`);
+        // Reload bookmarks after import
+        loadBookmarks();
+      } else {
+        alert(data.error || 'Failed to import bookmarks');
+      }
+    } catch (error) {
+      console.error('Error importing HTML bookmarks:', error);
+      alert('Network error: ' + error.message);
+    }
+
+    // Reset file input
+    event.target.value = '';
+  };
+
   const handleSearch = (query) => {
     setSearchQuery(query);
+  };
+
+  // Bulk editing handlers
+  const handleSelectionChange = (newSelection) => {
+    setSelectedBookmarks(newSelection);
+  };
+
+  const handleBulkEdit = () => {
+    console.log('🔍 [DEBUG] handleBulkEdit called');
+    setBulkEditOperation('edit');
+    setShowBulkEditModal(true);
+    console.log('🔍 [DEBUG] showBulkEditModal set to:', true, 'operationType:', 'edit');
+  };
+
+  const handleBulkTags = () => {
+    console.log('🔍 [DEBUG] handleBulkTags called');
+    setBulkEditOperation('tags');
+    setShowBulkEditModal(true);
+    console.log('🔍 [DEBUG] showBulkEditModal set to:', true, 'operationType:', 'tags');
+  };
+
+  const handleBulkDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedBookmarks.size} bookmarks?`)) {
+      try {
+        const bookmarkIds = Array.from(selectedBookmarks);
+        await bookmarkApi.bulkDelete(bookmarkIds);
+        
+        // Reload bookmarks after deletion
+        loadBookmarks();
+        
+        // Clear selection
+        setSelectedBookmarks(new Set());
+        
+        // Show success message
+        setBulkOperationMessage(`Successfully deleted ${selectedBookmarks.size} bookmarks`);
+        setBulkOperationType('success');
+        setShowBulkOperationToast(true);
+        
+        // Hide toast after 3 seconds
+        setTimeout(() => setShowBulkOperationToast(false), 3000);
+      } catch (error) {
+        console.error('Error deleting bookmarks:', error);
+        setBulkOperationMessage('Error deleting bookmarks');
+        setBulkOperationType('error');
+        setShowBulkOperationToast(true);
+        
+        // Hide toast after 3 seconds
+        setTimeout(() => setShowBulkOperationToast(false), 3000);
+      }
+    }
+  };
+
+  const handleBulkVisibility = async (visibility) => {
+    try {
+      const bookmarkIds = Array.from(selectedBookmarks);
+      await bookmarkApi.bulkVisibility(bookmarkIds, visibility);
+      
+      // Reload bookmarks after update
+      loadBookmarks();
+      
+      // Clear selection
+      setSelectedBookmarks(new Set());
+      
+      // Show success message
+      setBulkOperationMessage(`Successfully updated ${selectedBookmarks.size} bookmarks`);
+      setBulkOperationType('success');
+      setShowBulkOperationToast(true);
+      
+      // Hide toast after 3 seconds
+      setTimeout(() => setShowBulkOperationToast(false), 3000);
+    } catch (error) {
+      console.error('Error updating bookmarks:', error);
+      setBulkOperationMessage('Error updating bookmarks');
+      setBulkOperationType('error');
+      setShowBulkOperationToast(true);
+      
+      // Hide toast after 3 seconds
+      setTimeout(() => setShowBulkOperationToast(false), 3000);
+    }
+  };
+
+  const handleBulkShare = async () => {
+    setBulkEditOperation('share');
+    setShowBulkEditModal(true);
+  };
+
+  const handleBulkSave = async (data) => {
+    console.log('🔍 [DEBUG] handleBulkSave called with data:', data);
+    try {
+      const bookmarkIds = Array.from(selectedBookmarks);
+      console.log('🔍 [DEBUG] bookmarkIds:', bookmarkIds);
+      
+      // Handle share operation separately
+      if (bulkEditOperation === 'share') {
+        console.log('🔍 [DEBUG] Handling share operation');
+        await bookmarkApi.bulkShare(bookmarkIds, data.sharedWith);
+      } else {
+        console.log('🔍 [DEBUG] Handling edit/tags operation');
+        const operations = {};
+        
+        // Build operations object based on what's being updated
+        if (data.folderId !== undefined) {
+          operations.folder = data.folderId;
+        }
+        
+        if (data.tags) {
+          operations.tags = {
+            action: 'replace',
+            tags: data.tags
+          };
+        }
+        
+        if (data.visibility) {
+          operations.visibility = data.visibility;
+        }
+        
+        console.log('🔍 [DEBUG] operations:', operations);
+        
+        // Use bulk edit API if we have operations
+        if (Object.keys(operations).length > 0) {
+          await bookmarkApi.bulkEdit(bookmarkIds, operations);
+        }
+      }
+      
+      // Reload bookmarks after update
+      loadBookmarks();
+      
+      // Clear selection
+      setSelectedBookmarks(new Set());
+      
+      // Close modal
+      setShowBulkEditModal(false);
+      
+      // Show success message
+      const operationName = bulkEditOperation === 'share' ? 'shared' : 'updated';
+      setBulkOperationMessage(`Successfully ${operationName} ${selectedBookmarks.size} bookmarks`);
+      setBulkOperationType('success');
+      setShowBulkOperationToast(true);
+      
+      // Hide toast after 3 seconds
+      setTimeout(() => setShowBulkOperationToast(false), 3000);
+    } catch (error) {
+      console.error('Error updating bookmarks:', error);
+      setBulkOperationMessage('Error updating bookmarks');
+      setBulkOperationType('error');
+      setShowBulkOperationToast(true);
+      
+      // Hide toast after 3 seconds
+      setTimeout(() => setShowBulkOperationToast(false), 3000);
+    }
+  };
+
+  const handleBulkCancel = () => {
+    setSelectedBookmarks(new Set());
   };
 
   return (
@@ -225,7 +469,25 @@ const Dashboard = () => {
 
         {/* Filters and Search */}
         <div className="bg-white rounded-lg shadow mb-6 p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Shared with me toggle */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Bookmark Source
+              </label>
+              <button
+                onClick={toggleSharedWithMe}
+                className={`w-full flex items-center justify-center px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                  showSharedWithMe
+                    ? 'bg-blue-100 border-blue-500 text-blue-700'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <UsersIcon className="w-5 h-5 mr-2" />
+                {showSharedWithMe ? 'Shared with me' : 'My bookmarks'}
+              </button>
+            </div>
+
             {/* Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -290,13 +552,14 @@ const Dashboard = () => {
           </div>
 
           {/* Clear Filters */}
-          {(searchQuery || selectedFolder || selectedTags.length > 0) && (
+          {(searchQuery || selectedFolder || selectedTags.length > 0 || showSharedWithMe) && (
             <div className="mt-4 pt-4 border-t">
               <button
                 onClick={() => {
                   setSearchQuery('');
                   clearFolderSelection();
                   setSelectedTags([]);
+                  setShowSharedWithMe(false);
                 }}
                 className="text-sm text-blue-600 hover:text-blue-800"
               >
@@ -346,6 +609,18 @@ const Dashboard = () => {
               >
                 <ArrowDownTrayIcon className="w-5 h-5" />
               </button>
+
+              <Tooltip content="Import Bookmarks from HTML File" position="top">
+                <label className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors cursor-pointer">
+                  <ArrowUpTrayIcon className="w-5 h-5" />
+                  <input
+                    type="file"
+                    accept=".html,.htm"
+                    onChange={handleImportBookmarksHTML}
+                    className="hidden"
+                  />
+                </label>
+              </Tooltip>
             </div>
 
             <div className="flex items-center gap-3">
@@ -373,11 +648,11 @@ const Dashboard = () => {
               </div>
 
               <button
-                onClick={() => setShowFontSettings(true)}
+                onClick={() => setShowTutorial(true)}
                 className="flex items-center px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <Cog6ToothIcon className="w-5 h-5 mr-2" />
-                Settings
+                <QuestionMarkCircleIcon className="w-5 h-5 mr-2" />
+                Tutorial
               </button>
             </div>
           </div>
@@ -392,7 +667,7 @@ const Dashboard = () => {
 
           {/* Bookmarks Grid */}
           <div className="lg:w-3/4">
-            {loading ? (
+            {(loading || (showSharedWithMe && loadingShared)) ? (
               <div className="flex justify-center items-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               </div>
@@ -413,10 +688,25 @@ const Dashboard = () => {
                   descriptionFontWeight: 'normal',
                   descriptionFontColor: '#6B7280'
                 }}
+                onSelectionChange={handleSelectionChange}
+                selectedBookmarks={selectedBookmarks}
               />
             )}
           </div>
         </div>
+
+        {/* Bulk Edit Toolbar */}
+        {selectedBookmarks.size > 0 && (
+          <BulkEditToolbar
+            selectedCount={selectedBookmarks.size}
+            onBulkEdit={handleBulkEdit}
+            onBulkTags={handleBulkTags}
+            onBulkDelete={handleBulkDelete}
+            onBulkVisibility={handleBulkVisibility}
+            onBulkShare={handleBulkShare}
+            onCancel={handleBulkCancel}
+          />
+        )}
 
         {/* Modals */}
         {showAddForm && (
@@ -436,6 +726,45 @@ const Dashboard = () => {
             isOpen={showFontSettings}
             onClose={() => setShowFontSettings(false)}
             onUpdateSettings={handleUpdateFontSettings}
+          />
+        )}
+
+        {showTutorial && (
+          <TutorialModal
+            isOpen={showTutorial}
+            onClose={() => setShowTutorial(false)}
+          />
+        )}
+
+        {/* Bulk Edit Modal */}
+        {console.log('🔍 [DEBUG] BulkEditModal condition:', showBulkEditModal, 'operationType:', bulkEditOperation)}
+        {showBulkEditModal && (
+          <BulkEditModal
+            isOpen={showBulkEditModal}
+            onClose={() => {
+              console.log('🔍 [DEBUG] BulkEditModal onClose called');
+              setShowBulkEditModal(false);
+            }}
+            selectedBookmarks={Array.from(selectedBookmarks)}
+            operationType={bulkEditOperation}
+            folders={folders}
+            existingTags={tags}
+            onSave={handleBulkSave}
+            initialData={{
+              folderId: bulkEditOperation === 'edit' ? '' : undefined,
+              tags: bulkEditOperation === 'tags' ? [] : undefined,
+              visibility: bulkEditOperation === 'edit' || bulkEditOperation === 'visibility' ? 'private' : undefined,
+              sharedWith: bulkEditOperation === 'share' ? [] : undefined
+            }}
+          />
+        )}
+
+        {/* Bulk Operation Toast */}
+        {showBulkOperationToast && (
+          <BulkOperationToast
+            message={bulkOperationMessage}
+            type={bulkOperationType}
+            onClose={() => setShowBulkOperationToast(false)}
           />
         )}
       </div>

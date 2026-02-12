@@ -5,11 +5,13 @@ import { FolderProvider } from "./contexts/FolderContext";
 import { BookmarkProvider } from "./contexts/BookmarkContext";
 import { TagProvider } from "./contexts/TagContext";
 import { FontProvider } from "./contexts/FontContext";
+import { ToastProvider } from "./contexts/ToastContext";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import ImportBookmarksPage from "./pages/ImportBookmarksPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -19,24 +21,34 @@ function App() {
         <BookmarkProvider>
           <TagProvider>
             <FontProvider>
-              <Router>
-                <div className="min-h-screen bg-gray-50">
-                  <Navbar />
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                  </Routes>
-                </div>
-              </Router>
+              <ToastProvider>
+                <Router>
+                  <div className="min-h-screen bg-gray-50">
+                    <Navbar />
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route
+                        path="/dashboard"
+                        element={
+                          <ProtectedRoute>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/import-bookmarks"
+                        element={
+                          <ProtectedRoute>
+                            <ImportBookmarksPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                    </Routes>
+                  </div>
+                </Router>
+              </ToastProvider>
             </FontProvider>
           </TagProvider>
         </BookmarkProvider>

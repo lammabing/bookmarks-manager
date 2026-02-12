@@ -36,28 +36,29 @@ A web-based application for managing bookmarks with advanced organization featur
 
 3. Set up environment variables:
    ```bash
-   cp .env copy .env
+   cp .env\ copy .env
    ```
    Edit .env with your configuration. Required variables:
    - `MONGODB_URI`: MongoDB connection string (e.g., `mongodb://localhost:27017/bookmarking-app`)
    - `JWT_SECRET`: Secret key for JWT authentication (generate with `openssl rand -base64 32`)
    - `VITE_API_BASE_URL`: Frontend API base URL for production (e.g., `https://yourdomain.com/api`)
 
-4. Start MongoDB with Docker:
+4. Security Notice: Never commit your .env file to version control. Ensure your .gitignore properly excludes sensitive files:
+   - The .env file should be in .gitignore and never committed
+   - Use .env.example for documenting required environment variables without exposing values
+   - Regularly rotate your API keys and secrets
+
+5. Start MongoDB with Docker:
    ```bash
    ./start-mongo.sh
    ```
-   Or use Docker Compose:
-   ```bash
-   docker compose up -d
-   ```
 
-5. Start the development server:
+6. Start the development server:
    ```bash
    npm run dev
    ```
 
-6. Access the application at: http://localhost:5170
+7. Access the application at: http://localhost:5170
 
 ### Production Deployment
 1. Build frontend assets:
@@ -89,7 +90,7 @@ A web-based application for managing bookmarks with advanced organization featur
 │   └── icons/              # Extension icons
 ├── admin-scripts/          # Admin/maintenance scripts
 ├── .env                    # Environment variables
-├── docker-compose.yml      # Docker configuration
+├── start-mongo.sh          # MongoDB Docker container starter script
 ├── package.json            # Project dependencies
 ├── server.js               # Backend entry point
 ├── README.md               # Project documentation
@@ -174,8 +175,43 @@ See [documentation/techStack.md](documentation/techStack.md) and [documentation/
 4. Push to the branch (`git push origin feature/your-feature`)
 5. Open a pull request
 
+## Data Backup and Recovery
+
+### Backup Strategy
+To protect against data loss during WSL reinstallation or system failures, this application includes a robust backup system:
+
+- **Automated Backups**: Use the `admin-scripts/robust-backup-improved.js` script
+- **Dual Storage**: Backups are stored both locally and on the Windows host filesystem
+- **Cross-Platform**: Survives WSL reinstallation since Windows files persist
+- **Compressed Archives**: Efficient storage with .tar.gz format
+- **Scheduled Options**: Configure cron jobs for automatic backups
+
+### Setting Up Automated Backups
+1. Create a backup directory in Windows: `C:\Users\[YourUsername]\Documents\BookmarkManagerBackups`
+2. Set up a cron job to run backups automatically:
+   ```bash
+   # Daily at 2 AM
+   0 2 * * * cd /mnt/g/www/bookmarks && /usr/bin/node admin-scripts/robust-backup-improved.js >> /tmp/bookmark-backup.log 2>&1
+   ```
+
+### Recovery Process
+In case of data loss:
+1. Reinstall the application
+2. Use the `restore-bookmarks.js` script to restore from backup files
+3. Your bookmarks and user data will be recovered
+
+### MongoDB Data Persistence
+To ensure your MongoDB data survives WSL reinstallation, move the data directory to a dedicated drive like D: which is separate from system drives:
+1. Create directory: `D:\backups\mongodb-data` (or `/mnt/d/backups/mongodb-data`)
+2. Stop current container: `docker stop mongodb-container`
+3. Copy data: `cp -r /home/ceo/mongodb/* /mnt/d/backups/mongodb-data/`
+4. Restart with bind mount: Use the persistent startup command above
+
+For detailed backup instructions, see [documentation/backup-strategy.md](documentation/backup-strategy.md).
+For backup cleanup summary, see [documentation/backup-cleanup-summary.md](documentation/backup-cleanup-summary.md).
+
 ## License
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ---
-*Documentation updated: 2025-07-30*
+*Documentation updated: 2026-02-05*

@@ -14,8 +14,8 @@ const UserSelector = ({ selectedUsers, onUserSelect, placeholder = "Select users
       try {
         setLoading(true);
         const response = await authApi.getShareableUsers();
-        setUsers(response.data);
-        setFilteredUsers(response.data);
+        setUsers(response.data || response);
+        setFilteredUsers(response.data || response);
       } catch (error) {
         console.error('Error fetching users:', error);
       } finally {

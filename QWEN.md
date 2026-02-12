@@ -43,7 +43,7 @@ A web-based application for managing bookmarks with advanced organization featur
 │   ├── utils/              # Utility functions
 │   └── App.jsx             # Root application component
 ├── .env                    # Environment variables
-├── docker-compose.yml      # Docker configuration
+├── start-mongo.sh          # MongoDB Docker container starter script
 ├── package.json            # Project dependencies
 ├── server.js               # Backend entry point
 └── README.md               # Project documentation
@@ -72,10 +72,6 @@ A web-based application for managing bookmarks with advanced organization featur
 4. Start MongoDB with Docker:
    ```bash
    ./start-mongo.sh
-   ```
-   Or use Docker Compose:
-   ```bash
-   docker compose up -d
    ```
 5. Start the development server:
    ```bash
@@ -201,7 +197,7 @@ The bookmarklet automatically extracts page information (URL, title, description
 - `server.js`: Backend entry point
 - `vite.config.js`: Frontend build configuration
 - `.env`: Environment variables
-- `docker-compose.yml`: Docker configuration for MongoDB
+- `start-mongo.sh`: MongoDB Docker container starter script
 
 ### Documentation
 - `README.md`: Project overview and setup instructions
@@ -240,7 +236,7 @@ The bookmarklet automatically extracts page information (URL, title, description
 ## Development Tips
 
 1. **Environment Variables**: Ensure `.env` is properly configured with MongoDB URI and JWT secret
-2. **MongoDB**: Use `./start-mongo.sh` or `docker compose up -d` to start the database
+2. **MongoDB**: Use `./start-mongo.sh` to start the database
 3. **Frontend Development**: Use `npm run dev` for hot reloading development server
 4. **Backend Development**: Use `npm run start` to run the Express server
 5. **Full Development Environment**: Use `npm run dev:full` to run both frontend and backend

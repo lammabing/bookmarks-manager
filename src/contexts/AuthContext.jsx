@@ -26,7 +26,9 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (token) {
         const response = await authApi.getProfile(); // This should call /users/me
-        setUser(response.data);
+        // The server returns user data directly, not in a data property
+        const userData = response.data || response;
+        setUser(userData);
         setIsAuthenticated(true);
       } else {
         setUser(null);
@@ -60,7 +62,9 @@ export const AuthProvider = ({ children }) => {
         // Verify token in background without blocking UI
         try {
           const response = await authApi.getProfile(); // This should call /users/me
-          setUser(response.data);
+          // The server returns user data directly, not in a data property
+          const userData = response.data || response;
+          setUser(userData);
           setIsAuthenticated(true);
         } catch (error) {
           // Only remove token for 401 (unauthorized)
@@ -105,7 +109,8 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('🔍 [DEBUG] AuthContext login function called');
       const response = await authApi.login({ email, password });
-      const { token, user } = response.data;
+      const responseData = response.data || response;
+      const { token, user } = responseData;
 
       console.log('🔍 [DEBUG] Login successful, storing token in localStorage');
       localStorage.setItem('token', token);
@@ -141,7 +146,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (username, email, password) => {
     try {
       const response = await authApi.register({ username, email, password });
-      const { token, user } = response.data;
+      const responseData = response.data || response;
+      const { token, user } = responseData;
 
       localStorage.setItem('token', token);
       setUser(user);

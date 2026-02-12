@@ -23,7 +23,9 @@ export const TagProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await tagApi.getTags();
-      setTags(response.data);
+      // The server returns tags directly, not in a data property
+      const tagsData = response.data || response;
+      setTags(tagsData);
     } catch (error) {
       console.error('Error loading tags:', error);
       setTags([]);

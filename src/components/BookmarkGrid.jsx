@@ -1,13 +1,27 @@
 import React, { useState } from 'react';
-import { Trash2, Edit, Lock, Globe, Users, Folder } from 'lucide-react';
+import { Trash2, Edit, Lock, Globe, Users, Folder, Square, CheckSquare } from 'lucide-react';
 import EditBookmarkForm from './EditBookmarkForm';
 import BookmarkDetail from './BookmarkDetail';
 import SharingBadge from './SharingBadge';
 import SocialMediaShare from './SocialMediaShare';
 
-const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hoverEffect = "hover:shadow-lg hover:bg-blue-50 transition" }) => {
+const BookmarkGrid = ({
+  bookmarks,
+  onDelete,
+  onEdit,
+  viewMode,
+  fontSettings,
+  hoverEffect = "hover:shadow-lg hover:bg-blue-50 transition",
+  onSelectionChange,
+  selectedBookmarks = new Set()
+}) => {
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [selectedBookmark, setSelectedBookmark] = useState(null);
+  const [internalSelectedBookmarks, setInternalSelectedBookmarks] = useState(new Set());
+  
+  // Use external selection state if provided, otherwise use internal state
+  const effectiveSelectedBookmarks = onSelectionChange ? selectedBookmarks : internalSelectedBookmarks;
+  const isControlled = onSelectionChange && selectedBookmarks;
 
   const handleEdit = (bookmark) => {
     setEditingBookmark(bookmark);
@@ -38,6 +52,48 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleSelectBookmark = (bookmarkId, e) => {
+    e.stopPropagation();
+    
+    const newSelection = new Set(effectiveSelectedBookmarks);
+    if (newSelection.has(bookmarkId)) {
+      newSelection.delete(bookmarkId);
+    } else {
+      newSelection.add(bookmarkId);
+    }
+    
+    if (isControlled) {
+      onSelectionChange(newSelection);
+    } else {
+      setInternalSelectedBookmarks(newSelection);
+    }
+  };
+
+  const handleSelectAll = (e) => {
+    e.stopPropagation();
+    
+    if (effectiveSelectedBookmarks.size === bookmarks.length) {
+      // Deselect all
+      const emptySelection = new Set();
+      if (isControlled) {
+        onSelectionChange(emptySelection);
+      } else {
+        setInternalSelectedBookmarks(emptySelection);
+      }
+    } else {
+      // Select all
+      const allSelection = new Set(bookmarks.map(b => b._id));
+      if (isControlled) {
+        onSelectionChange(allSelection);
+      } else {
+        setInternalSelectedBookmarks(allSelection);
+      }
+    }
+  };
+
+  const isAllSelected = bookmarks.length > 0 && effectiveSelectedBookmarks.size === bookmarks.length;
+  const isPartiallySelected = effectiveSelectedBookmarks.size > 0 && effectiveSelectedBookmarks.size < bookmarks.length;
+
   // If a bookmark is selected for detailed view, show BookmarkDetail
   if (selectedBookmark) {
     return (
@@ -50,12 +106,40 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
 
   return (
     <div>
+      {/* Select All Header */}
+      {bookmarks.length > 0 && (
+        <div className="flex items-center px-4 py-2 bg-gray-50 border-b">
+          <button
+            onClick={handleSelectAll}
+            className="flex items-center text-sm text-gray-600 hover:text-gray-800"
+          >
+            {isAllSelected ? (
+              <CheckSquare className="w-5 h-5 text-blue-600" />
+            ) : isPartiallySelected ? (
+              <div className="w-5 h-5 border-2 border-blue-600 rounded bg-blue-50 flex items-center justify-center">
+                <div className="w-3 h-3 bg-blue-600 rounded-sm"></div>
+              </div>
+            ) : (
+              <Square className="w-5 h-5" />
+            )}
+            <span className="ml-2">
+              {isAllSelected ? 'Deselect all' : 'Select all'}
+            </span>
+          </button>
+          {effectiveSelectedBookmarks.size > 0 && (
+            <span className="ml-4 text-sm text-gray-600">
+              {effectiveSelectedBookmarks.size} selected
+            </span>
+          )}
+        </div>
+      )}
+      
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 p-4">
           {bookmarks.map((bookmark) => (
             <div
               key={bookmark._id}
-              className={`border rounded-lg p-4 shadow-sm relative cursor-pointer ${hoverEffect}`}
+              className={`border rounded-lg p-4 shadow-sm relative cursor-pointer ${hoverEffect} ${effectiveSelectedBookmarks.has(bookmark._id) ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
               onClick={(e) => {
                 if (editingBookmark?._id !== bookmark._id) {
                   console.log('Card click event triggered');
@@ -63,6 +147,18 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
                 }
               }}
             >
+              {/* Checkbox for multi-select */}
+              <button
+                onClick={(e) => handleSelectBookmark(bookmark._id, e)}
+                className="absolute top-2 right-24 p-1 text-gray-600 hover:text-blue-600 focus:outline-none"
+                aria-label={effectiveSelectedBookmarks.has(bookmark._id) ? 'Deselect bookmark' : 'Select bookmark'}
+              >
+                {effectiveSelectedBookmarks.has(bookmark._id) ? (
+                  <CheckSquare className="w-5 h-5 text-blue-600" />
+                ) : (
+                  <Square className="w-5 h-5" />
+                )}
+              </button>
               {editingBookmark?._id === bookmark._id ? (
                 <EditBookmarkForm
                   bookmark={bookmark}
@@ -171,9 +267,21 @@ const BookmarkGrid = ({ bookmarks, onDelete, onEdit, viewMode, fontSettings, hov
           {bookmarks.map((bookmark) => (
             <div
               key={bookmark._id}
-              className="flex items-center justify-between border rounded-lg p-4 shadow-sm cursor-pointer hover:bg-gray-50 transition"
+              className={`flex items-center justify-between border rounded-lg p-4 shadow-sm cursor-pointer hover:bg-gray-50 transition ${effectiveSelectedBookmarks.has(bookmark._id) ? 'bg-blue-50 border-blue-300' : ''}`}
               onClick={() => handleCardClick(bookmark)}
             >
+              {/* Checkbox for multi-select */}
+              <button
+                onClick={(e) => handleSelectBookmark(bookmark._id, e)}
+                className="mr-3 p-1 text-gray-600 hover:text-blue-600 focus:outline-none"
+                aria-label={effectiveSelectedBookmarks.has(bookmark._id) ? 'Deselect bookmark' : 'Select bookmark'}
+              >
+                {effectiveSelectedBookmarks.has(bookmark._id) ? (
+                  <CheckSquare className="w-5 h-5 text-blue-600" />
+                ) : (
+                  <Square className="w-5 h-5" />
+                )}
+              </button>
               <div className="flex items-center space-x-4">
                 <img src={bookmark.favicon} alt="Favicon" className="w-6 h-6" />
                 <div>

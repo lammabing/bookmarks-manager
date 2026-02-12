@@ -9,7 +9,8 @@
     "start": "node server.js",
     "dev:full": "concurrently \"npm run start\" \"npm run dev\"",
     "backup": "node admin-scripts/backup-database.js",
-    "backup:pre-migration": "node admin-scripts/backup-database.js"
+    "backup:pre-migration": "node admin-scripts/backup-database.js",
+    "import-bookmarks": "node import-bookmarks.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -24,6 +25,8 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.100.0",
     "mongoose": "^8.0.3",
+    "multer": "^2.0.2",
+    "node-html-parser": "^7.0.2",
     "postcss": "^8.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

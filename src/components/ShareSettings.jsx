@@ -2,17 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Lock, Globe, Users, Share2 } from 'lucide-react';
 import UserSelector from './UserSelector';
 import SharingBadge from './SharingBadge';
+import { useToast } from '../contexts/ToastContext';
 
-const ShareSettings = ({ 
-  bookmark, 
-  onVisibilityChange, 
+const ShareSettings = ({
+  bookmark,
+  onVisibilityChange,
   onSharedWithChange,
   onShare,
-  className = "" 
+  className = ""
 }) => {
   const [visibility, setVisibility] = useState(bookmark?.visibility || 'private');
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isSharing, setIsSharing] = useState(false);
+  const [previousSettings, setPreviousSettings] = useState(null);
+  const { showSuccess, showError, showUndoable } = useToast();
 
   useEffect(() => {
     if (bookmark?.sharedWith && bookmark.sharedWith.length > 0) {
@@ -42,9 +45,16 @@ const ShareSettings = ({
 
   const handleShare = async () => {
     if (visibility === 'selected' && selectedUsers.length === 0) {
-      alert('Please select at least one user to share with');
+      showError('Please select at least one user to share with');
       return;
     }
+
+    // Store previous settings for undo
+    const currentSettings = {
+      visibility: bookmark?.visibility || 'private',
+      sharedWith: bookmark?.sharedWith || []
+    };
+    setPreviousSettings(currentSettings);
 
     setIsSharing(true);
     try {
@@ -52,9 +62,24 @@ const ShareSettings = ({
         visibility,
         sharedWith: visibility === 'selected' ? selectedUsers.map(user => user._id) : []
       });
+      
+      // Show success message with undo option
+      const visibilityText = visibility === 'private' ? 'private' :
+                              visibility === 'public' ? 'public' :
+                              `with ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''}`;
+      
+      showUndoable(
+        `Bookmark sharing updated: ${visibilityText}`,
+        () => {
+          // Undo function
+          onVisibilityChange(currentSettings.visibility);
+          onSharedWithChange(currentSettings.sharedWith);
+          onShare(currentSettings);
+        }
+      );
     } catch (error) {
       console.error('Error sharing bookmark:', error);
-      alert('Failed to share bookmark');
+      showError('Failed to share bookmark');
     } finally {
       setIsSharing(false);
     }
@@ -106,7 +131,7 @@ const ShareSettings = ({
             return (
               <label
                 key={option.value}
-                className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                className={`inline-flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
                   visibility === option.value
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-300 hover:border-gray-400'

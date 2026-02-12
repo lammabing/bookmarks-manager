@@ -43,7 +43,7 @@ const PublicBookmarksGrid = () => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="bg-white rounded-lg shadow-sm border p-4 animate-pulse">
             <div className="w-6 h-6 bg-gray-200 rounded mb-3"></div>
@@ -83,7 +83,7 @@ const PublicBookmarksGrid = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4">
       {bookmarks.map((bookmark) => (
         <div
           key={bookmark._id}

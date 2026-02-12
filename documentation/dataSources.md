@@ -11,7 +11,8 @@
    - favicon: String
    - userId: ObjectId (references users._id)
    - folder: ObjectId (references folders._id, optional)
-   - visibility: String (enum: 'private', 'public', default: 'private')
+   - visibility: String (enum: 'private', 'public', 'shared', default: 'private')
+   - sharedWith: [ObjectId] (references users._id, for 'shared' visibility)
    - createdAt: Date (auto)
    - updatedAt: Date (auto)
 
@@ -56,6 +57,9 @@
 - `POST /api/users/login` - Authenticate user and get JWT
 - `GET /api/users/me` - Get current user's profile (updated from /profile)
 
+### Users
+- `GET /api/users/shareable` - Get list of users that can be shared with
+
 ### Bookmarks
 - `GET /api/bookmarks` - Get all bookmarks for current user
 - `GET /api/bookmarks/public` - Get public bookmarks for homepage
@@ -65,6 +69,8 @@
 - `DELETE /api/bookmarks/:id` - Delete bookmark by ID
 - `PUT /api/bookmarks/:id/move` - Move bookmark to different folder
 - `POST /api/bookmarks/move` - Move multiple bookmarks to folder
+- `POST /api/bookmarks/:id/share` - Update bookmark sharing settings
+- `GET /api/bookmarks/shared` - Get bookmarks shared with current user
 
 ### Folders
 - `GET /api/folders` - Get all folders for current user
@@ -111,6 +117,7 @@ The metadata fetching logic targets:
 - **FolderContext**: Hierarchical folder management (fully implemented)
 - **TagContext**: Tag management and statistics
 - **FontContext**: Font customization settings
+- **ToastContext**: Toast notification system with undo functionality
 
 ### API Integration
 - RESTful API design with proper HTTP methods
@@ -125,4 +132,4 @@ The metadata fetching logic targets:
 - Connection pooling for MongoDB performance
 
 ---
-Last Updated: 2025-07-30 by Development Team
+Last Updated: 2025-08-05 by Development Team

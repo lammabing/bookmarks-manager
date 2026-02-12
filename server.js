@@ -7,6 +7,7 @@ import bookmarkRoutes from './routes/bookmarks.js';
 import tagRoutes from './routes/tags.js'; // Import the new tags router
 import bookmarkExtensionRoutes from './routes/bookmarkExtensions.js';
 import folderRoutes from './routes/folders.js';
+import bookmarkImportRoutes from './routes/bookmark-import.js'; // Import the new bookmark import router
 
 // Load environment variables
 dotenv.config();
@@ -40,6 +41,7 @@ app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/tags', tagRoutes); // Add the tags routes
 app.use('/api', bookmarkExtensionRoutes);
 app.use('/api/folders', folderRoutes);
+app.use('/api/import', bookmarkImportRoutes); // Add the bookmark import routes
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)

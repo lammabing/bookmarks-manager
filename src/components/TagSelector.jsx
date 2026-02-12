@@ -5,9 +5,14 @@ const TagSelector = ({ selectedTags = [], onTagsChange, availableTags = [] }) =>
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  // Normalize selected tags to always be objects with name property
+  const normalizedSelectedTags = selectedTags.map(tag => 
+    typeof tag === 'string' ? { _id: `string-${tag}`, name: tag } : tag
+  );
+
   const filteredTags = availableTags.filter(tag => 
     tag.name.toLowerCase().includes(inputValue.toLowerCase()) &&
-    !selectedTags.some(selected => selected._id === tag._id)
+    !normalizedSelectedTags.some(selected => selected._id === tag._id)
   );
 
   const handleInputChange = (e) => {
@@ -16,23 +21,33 @@ const TagSelector = ({ selectedTags = [], onTagsChange, availableTags = [] }) =>
   };
 
   const handleTagSelect = (tag) => {
-    onTagsChange([...selectedTags, tag]);
+    const newTags = [...normalizedSelectedTags, tag];
+    console.log('TagSelector handleTagSelect - newTags:', newTags);
+    onTagsChange(newTags);
     setInputValue('');
     setShowSuggestions(false);
   };
 
   const handleTagRemove = (tagToRemove) => {
-    onTagsChange(selectedTags.filter(tag => tag._id !== tagToRemove._id));
+    const newTags = normalizedSelectedTags.filter(tag => tag._id !== tagToRemove._id);
+    console.log('TagSelector handleTagRemove - newTags:', newTags);
+    onTagsChange(newTags);
   };
 
   const handleCreateTag = () => {
     if (inputValue.trim()) {
-      const newTag = {
-        _id: `temp-${Date.now()}`,
-        name: inputValue.trim(),
+      // Check if it's a comma-separated list of tags
+      const newTagNames = inputValue.split(',').map(tagName => tagName.trim()).filter(tagName => tagName.length > 0);
+      
+      const tagsToAdd = newTagNames.map(tagName => ({
+        _id: `temp-${Date.now()}-${tagName}`,
+        name: tagName,
         color: '#3B82F6'
-      };
-      onTagsChange([...selectedTags, newTag]);
+      }));
+      
+      const newTags = [...normalizedSelectedTags, ...tagsToAdd];
+      console.log('TagSelector handleCreateTag - newTags:', newTags);
+      onTagsChange(newTags);
       setInputValue('');
       setShowSuggestions(false);
     }
@@ -52,9 +67,9 @@ const TagSelector = ({ selectedTags = [], onTagsChange, availableTags = [] }) =>
   return (
     <div className="relative">
       {/* Selected Tags */}
-      {selectedTags.length > 0 && (
+      {normalizedSelectedTags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2">
-          {selectedTags.map((tag) => (
+          {normalizedSelectedTags.map((tag) => (
             <span
               key={tag._id}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"

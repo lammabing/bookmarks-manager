@@ -77,7 +77,7 @@
 │   └── App.jsx             # Root application component
 ├── backups/                # Database backups
 ├── .env                    # Environment variables
-├── docker-compose.yml      # Docker configuration
+├── start-mongo.sh          # MongoDB Docker container starter script
 ├── package.json            # Project dependencies
 ├── server.js               # Backend entry point
 └── README.md               # Project documentation
@@ -168,6 +168,13 @@
 - ✅ Enhanced browser extensions with pre-filled bookmark forms
 - ✅ Fixed Firefox extension compatibility (using scripts instead of service_worker)
 - ✅ Added favicon support to browser extensions
+
+### Security Improvements
+- ✅ Enhanced .gitignore to properly exclude all sensitive files
+- ✅ Removed .env files from git tracking to prevent credential exposure
+- ✅ Added comprehensive security documentation
+- ✅ Implemented security best practices in documentation
+- ✅ Added security guidelines for environment variable management
 
 ### UI/UX Enhancements
 - ✅ Added view mode toggle (grid/list) to Dashboard

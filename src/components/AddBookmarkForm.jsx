@@ -19,12 +19,14 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
     url: initialData?.url || '',
     title: initialData?.title || '',
     description: initialData?.description || '',
-    tags: initialData?.tags || [],
+    tags: Array.isArray(initialData?.tags)
+      ? initialData.tags.map(tag => typeof tag === 'string' ? tag : tag.name).filter(tag => tag && tag.length > 0)
+      : [],
     folder: initialData?.folder?._id || initialData?.folder || null,
     notes: initialData?.notes || '',
     favicon: initialData?.favicon || '',
     visibility: initialData?.visibility || 'private',
-    sharedWith: initialData?.sharedWith || []
+    sharedWith: Array.isArray(initialData?.sharedWith) ? initialData.sharedWith : []
   });
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -38,7 +40,13 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
       if (pendingBookmark) {
         try {
           const savedData = JSON.parse(pendingBookmark);
-          setFormData(savedData);
+          setFormData(prev => ({
+            ...prev,
+            ...savedData,
+            tags: Array.isArray(savedData.tags)
+              ? savedData.tags.map(tag => typeof tag === 'string' ? tag : tag.name).filter(tag => tag && tag.length > 0)
+              : []
+          }));
           sessionStorage.removeItem('pendingBookmark');
           return;
         } catch (error) {
@@ -52,12 +60,14 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
       const titleParam = queryParams.get('title');
       const descriptionParam = queryParams.get('description');
       const faviconParam = queryParams.get('favicon');
+      const tagsParam = queryParams.get('tags');
 
       console.log('URL Parameters:', {
         url: urlParam,
         title: titleParam,
         description: descriptionParam,
-        favicon: faviconParam
+        favicon: faviconParam,
+        tags: tagsParam
       });
 
       if (urlParam) {
@@ -67,11 +77,24 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
             ? decodeURIComponent(faviconParam)
             : `https://www.google.com/s2/favicons?domain=${new URL(decodedUrl).hostname}`;
 
+          // Parse tags if provided
+          let tags = [];
+          if (tagsParam) {
+            try {
+              const decodedTags = decodeURIComponent(tagsParam);
+              // Split by comma and trim whitespace
+              tags = decodedTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+            } catch (error) {
+              console.error('Error parsing tags parameter:', error);
+            }
+          }
+
           console.log('Setting form data with:', {
             url: decodedUrl,
             title: titleParam ? decodeURIComponent(titleParam) : '',
             description: descriptionParam ? decodeURIComponent(descriptionParam) : '',
-            favicon: faviconUrl
+            favicon: faviconUrl,
+            tags: tags
           });
 
           setFormData(prev => ({
@@ -79,7 +102,8 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
             url: decodedUrl,
             title: titleParam ? decodeURIComponent(titleParam) : '',
             description: descriptionParam ? decodeURIComponent(descriptionParam) : '',
-            favicon: faviconUrl
+            favicon: faviconUrl,
+            tags: Array.isArray(tags) ? tags : []
           }));
         } catch (error) {
           console.error('Error parsing URL parameters:', error);
@@ -114,10 +138,36 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
     setError('');
 
     try {
+      console.log('AddBookmarkForm - Form data before processing:', formData);
+      console.log('AddBookmarkForm - Form data tags type:', typeof formData.tags, 'value:', formData.tags);
+      
+      // Force tags to be included even if empty
+const tagsToSubmit = formData.tags || [];
+      console.log('AddBookmarkForm - Tags to submit (forced):', tagsToSubmit);
+      
+      // Ensure tags is always an array of strings before submitting
+      const processedTags = Array.isArray(tagsToSubmit)
+        ? tagsToSubmit.map(tag => typeof tag === 'string' ? tag : tag.name).filter(tag => tag && tag.length > 0)
+        : [];
+      console.log('AddBookmarkForm - Processed tags for submission:', processedTags);
+      
+      const submitData = {
+        url: formData.url,
+        title: formData.title,
+        description: formData.description,
+        tags: processedTags,
+        folder: formData.folder,
+        notes: formData.notes || '',
+        favicon: formData.favicon,
+        visibility: formData.visibility || 'private',
+        sharedWith: Array.isArray(formData.sharedWith) ? formData.sharedWith : []
+      };
+      console.log('AddBookmarkForm - Final submit data:', submitData);
+
       if (initialData) {
-        await updateBookmark(initialData._id, formData);
+        await updateBookmark(initialData._id, submitData);
       } else {
-        await addBookmark(formData);
+        await addBookmark(submitData);
       }
       setShowSuccess(true);
       // Close the form after a short delay to show the success message
@@ -142,10 +192,17 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
 
   const handleTagsChange = (selectedTags) => {
     console.log('Tags changed:', selectedTags);
-    setFormData(prev => ({
-      ...prev,
-      tags: selectedTags.map(tag => typeof tag === 'string' ? tag : tag.name)
-    }));
+    const processedTags = selectedTags.map(tag => typeof tag === 'string' ? tag : tag.name).filter(tag => tag && tag.length > 0);
+    console.log('Processed tags:', processedTags);
+    setFormData(prev => {
+      console.log('Previous form data tags:', prev.tags);
+      const newData = {
+        ...prev,
+        tags: processedTags
+      };
+      console.log('New form data tags:', newData.tags);
+      return newData;
+    });
   };
 
   const handleFolderChange = (folderId) => {
@@ -253,9 +310,13 @@ const AddBookmarkForm = ({ onClose, initialData = null }) => {
               </label>
               <TagSelector
                 selectedTags={formData.tags}
-                onTagsChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+                onTagsChange={handleTagsChange}
+                availableTags={tags}
                 placeholder="Add tags..."
               />
+              <div className="text-xs text-gray-500 mt-1">
+                Separate multiple tags with commas
+              </div>
             </div>
 
             {/* Notes */}

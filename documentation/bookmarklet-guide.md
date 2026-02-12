@@ -4,6 +4,15 @@ The bookmarklet allows you to quickly add bookmarks to your bookmarks-manager fr
 
 ## How to Install the Bookmarklet
 
+There are two ways to install the bookmarklet:
+
+**Option 1: Drag-and-Drop (Easiest)**
+1. Log in to your Bookmarks Manager
+2. Look for the "Add Bookmark" button in the navigation bar
+3. Drag this button to your browser's bookmarks bar
+4. The bookmarklet is now installed!
+
+**Option 2: Manual Installation**
 1. Copy the following JavaScript code:
 
 ```javascript
@@ -19,19 +28,22 @@ javascript:(function(){const url=encodeURIComponent(window.location.href),title=
 
 1. Navigate to any webpage you want to bookmark
 2. Click the "Add to Bookmarks Manager" bookmark in your bookmarks bar
-3. A new window will open with a form pre-filled with:
+3. A prompt will appear asking for tags (comma-separated) - enter any tags you want to associate with this bookmark
+4. A new window will open with a form pre-filled with:
    - Page URL
    - Page title
    - Page description (if available)
    - Site favicon (if available)
-4. You can edit any of these fields before saving
-5. Click "Add Bookmark" to save it to your bookmarks-manager
-6. After successful save, you'll see a subtle success message and the form will automatically close
+   - Tags (if entered in step 3)
+5. You can edit any of these fields before saving
+6. Click "Add Bookmark" to save it to your bookmarks-manager
+7. After successful save, you'll see a subtle success message and the form will automatically close
 
-## Features
+### Bookmarklet Features
 
 - Automatically extracts page information (URL, title, description)
 - Attempts to fetch the site's favicon
+- Prompts for tags when adding bookmarks (comma-separated)
 - Opens in a properly sized window for easy use
 - Works on most websites
 - Preserves form data during login redirects

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { BookmarkIcon, UserIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { BookmarkIcon, UserIcon, ArrowRightOnRectangleIcon, LinkIcon } from '@heroicons/react/24/outline';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -11,6 +11,9 @@ const Navbar = () => {
     logout();
     navigate('/');
   };
+
+  // Bookmarklet code - this is the JavaScript that will be executed when the bookmarklet is clicked
+  const bookmarkletCode = `javascript:(function(){const url=encodeURIComponent(window.location.href),title=encodeURIComponent(document.title||""),metaDesc=document.querySelector('meta[name="description"]'),description=metaDesc?encodeURIComponent(metaDesc.getAttribute("content")||""):"",faviconLink=document.querySelector('link[rel*="icon"]'),favicon=faviconLink&&faviconLink.href?encodeURIComponent(faviconLink.href):function(){try{return encodeURIComponent(\`https://www.google.com/s2/favicons?domain=\${window.location.hostname}\`)}catch(e){return""}}(),appUrl=\`http://localhost:5170/?url=\${url}&title=\${title}&description=\${description}&favicon=\${favicon}\`,width=600,height=700,left=(screen.width-width)/2,top=(screen.height-height)/2;window.open(appUrl,"_blank",\`width=\${width},height=\${height},left=\${left},top=\${top},resizable=yes,scrollbars=yes\`);})();`;
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -36,6 +39,25 @@ const Navbar = () => {
                 >
                   Dashboard
                 </Link>
+
+                <Link
+                  to="/import-bookmarks"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Import Bookmarks
+                </Link>
+
+                {/* Bookmarklet drag-and-drop button */}
+                <a
+                  href={bookmarkletCode}
+                  draggable="true"
+                  className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+                  title="Drag to bookmarks bar to add bookmarklet"
+                >
+                  <LinkIcon className="h-4 w-4" />
+                  <span>Add Bookmark</span>
+                </a>
+                
                 <div className="flex items-center space-x-2">
                   <UserIcon className="h-5 w-5 text-gray-500" />
                   <span className="text-sm text-gray-700">{user?.username}</span>

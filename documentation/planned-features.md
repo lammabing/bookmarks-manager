@@ -60,11 +60,12 @@ This document outlines potential features to add to the bookmarking application,
 *   **Practicality:** Moderate to High complexity. Requires robust backend logic for dynamic querying and updating, and a clear UI for defining criteria.
 *   **Tradeoffs:** Can be resource-intensive if not optimized. UI for defining complex rules might become complicated.
 
-#### 10. Sharing Options
+#### 10. Sharing Options [COMPLETED]
 
 *   **Description:** Enable users to share individual bookmarks or collections (if implemented) via a unique link. If user accounts are added, sharing could be direct to other users.
 *   **Practicality:** Moderate complexity if sharing publicly. High complexity if sharing with specific users (requires user accounts).
 *   **Tradeoffs:** Public sharing needs careful consideration of privacy. User-specific sharing depends on the authentication system.
+*   **Status:** Completed. Implemented with three visibility levels (private, public, shared), user-specific sharing, toast notifications with undo functionality, and social media sharing options.
 
 #### 11. Custom Fields
 
