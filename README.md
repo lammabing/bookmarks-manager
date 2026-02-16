@@ -19,8 +19,16 @@ A web-based application for managing bookmarks with advanced organization featur
 
 ### Prerequisites
 - Node.js v20+
-- MongoDB (local or cloud instance)
+- MongoDB (automatically handled via Docker)
 - Docker (for local MongoDB setup)
+
+### Database Setup Information
+When you first clone and set up this application, here's what you need to know about the database:
+
+- **Automatic Schema Creation**: The database schema is automatically created by Mongoose ODM when the application first connects to MongoDB. You don't need to manually create collections or define schemas.
+- **Docker Container**: The project includes a `start-mongo.sh` script that automatically creates and manages a MongoDB Docker container for you.
+- **Persistent Storage**: The Docker container is configured to persist data in `~/mongodb` so your bookmarks and user data remain even if the container stops.
+- **No Manual Database Setup Required**: Unlike many applications, you don't need to manually install MongoDB or set up the database structure - everything is handled automatically.
 
 ### Installation
 1. Clone the repository:
@@ -52,6 +60,11 @@ A web-based application for managing bookmarks with advanced organization featur
    ```bash
    ./start-mongo.sh
    ```
+   This script will automatically:
+   - Check if Docker is installed and running
+   - Create a MongoDB container if one doesn't exist
+   - Mount a persistent volume at `~/mongodb` for data storage
+   - Wait for MongoDB to be ready before completing
 
 6. Start the development server:
    ```bash
