@@ -97,8 +97,18 @@ const Dashboard = () => {
       bookmark.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       bookmark.url.toLowerCase().includes(searchQuery.toLowerCase());
 
+    // Handle folder filtering - bookmark.folder can be a string ID or an object with _id
+    const bookmarkFolderId = typeof bookmark.folder === 'string' 
+      ? bookmark.folder 
+      : bookmark.folder?._id;
+    
     const matchesFolder = !selectedFolder ||
-      (selectedFolder === 'none' ? !bookmark.folder : bookmark.folder?._id === selectedFolder);
+      (selectedFolder === 'none' ? !bookmark.folder : bookmarkFolderId === selectedFolder);
+
+    // Debug logging for folder filtering
+    if (selectedFolder) {
+      console.log(`[Folder Filter] Bookmark: ${bookmark.title}, bookmark.folder:`, bookmark.folder, ', bookmarkFolderId:', bookmarkFolderId, ', selectedFolder:', selectedFolder, ', matches:', matchesFolder);
+    }
 
     const matchesTags = selectedTags.length === 0 ||
       selectedTags.every(tag => bookmark.tags?.includes(tag));
