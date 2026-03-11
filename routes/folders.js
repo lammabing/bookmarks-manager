@@ -2,8 +2,57 @@ import express from 'express';
 import Folder from '../models/Folder.js';
 import Bookmark from '../models/Bookmark.js';
 import auth from '../middleware/auth.js';
+import mongoose from 'mongoose';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
+
+// Auto-backup configuration (shared with bookmarks.js)
+const AUTO_BACKUP_DIR = './backups/auto';
+const MAX_AUTO_BACKUPS = 5;
+
+if (!fs.existsSync(AUTO_BACKUP_DIR)) {
+  fs.mkdirSync(AUTO_BACKUP_DIR, { recursive: true });
+}
+
+const createQuickBackup = async () => {
+  try {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupPath = path.join(AUTO_BACKUP_DIR, `auto-backup_${timestamp}`);
+    fs.mkdirSync(backupPath, { recursive: true });
+
+    const db = mongoose.connection.db;
+    if (!db) return null;
+
+    const collections = await db.listCollections().toArray();
+    
+    for (const collection of collections) {
+      const documents = await db.collection(collection.name).find({}).toArray();
+      fs.writeFileSync(
+        path.join(backupPath, `${collection.name}.json`),
+        JSON.stringify(documents, null, 2)
+      );
+    }
+
+    const backups = fs.readdirSync(AUTO_BACKUP_DIR)
+      .filter(name => name.startsWith('auto-backup_'))
+      .sort()
+      .reverse();
+    
+    if (backups.length > MAX_AUTO_BACKUPS) {
+      backups.slice(MAX_AUTO_BACKUPS).forEach(backup => {
+        fs.rmSync(path.join(AUTO_BACKUP_DIR, backup), { recursive: true, force: true });
+      });
+    }
+
+    console.log(`💾 Auto-backup created: ${backupPath}`);
+    return backupPath;
+  } catch (error) {
+    console.error('⚠️  Auto-backup failed:', error.message);
+    return null;
+  }
+};
 
 // Get all folders for user (tree structure)
 router.get('/', auth, async (req, res) => {
@@ -56,6 +105,9 @@ router.get('/:id', auth, async (req, res) => {
 // Create new folder
 router.post('/', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const { name, description, parent, color, icon } = req.body;
 
     // Validate parent folder ownership if provided
@@ -91,6 +143,9 @@ router.post('/', auth, async (req, res) => {
 // Update folder
 router.put('/:id', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const { name, description, parent, color, icon, order } = req.body;
 
     const folder = await Folder.findOne({
@@ -133,6 +188,9 @@ router.put('/:id', auth, async (req, res) => {
 // Delete folder (move bookmarks to parent)
 router.delete('/:id', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const folder = await Folder.findOne({
       _id: req.params.id,
       owner: req.user.id

@@ -3,8 +3,59 @@ import Bookmark from '../models/Bookmark.js';
 import Folder from '../models/Folder.js';
 import { auth } from '../middleware/auth.js';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
+
+// Auto-backup before write operations
+const AUTO_BACKUP_DIR = './backups/auto';
+const MAX_AUTO_BACKUPS = 5;
+
+// Ensure auto backup directory exists
+if (!fs.existsSync(AUTO_BACKUP_DIR)) {
+  fs.mkdirSync(AUTO_BACKUP_DIR, { recursive: true });
+}
+
+const createQuickBackup = async () => {
+  try {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupPath = path.join(AUTO_BACKUP_DIR, `auto-backup_${timestamp}`);
+    fs.mkdirSync(backupPath, { recursive: true });
+
+    const db = mongoose.connection.db;
+    if (!db) return null;
+
+    const collections = await db.listCollections().toArray();
+    
+    for (const collection of collections) {
+      const documents = await db.collection(collection.name).find({}).toArray();
+      fs.writeFileSync(
+        path.join(backupPath, `${collection.name}.json`),
+        JSON.stringify(documents, null, 2)
+      );
+    }
+
+    // Cleanup old backups
+    const backups = fs.readdirSync(AUTO_BACKUP_DIR)
+      .filter(name => name.startsWith('auto-backup_'))
+      .sort()
+      .reverse();
+    
+    if (backups.length > MAX_AUTO_BACKUPS) {
+      backups.slice(MAX_AUTO_BACKUPS).forEach(backup => {
+        fs.rmSync(path.join(AUTO_BACKUP_DIR, backup), { recursive: true, force: true });
+      });
+    }
+
+    console.log(`💾 Auto-backup created: ${backupPath}`);
+    return backupPath;
+  } catch (error) {
+    console.error('⚠️  Auto-backup failed:', error.message);
+    return null; // Don't block the operation
+  }
+};
 
 // @route   GET /api/bookmarks/public
 // @desc    Get all public bookmarks (no auth required)
@@ -46,6 +97,9 @@ router.get('/public', async (req, res) => {
 // Add bulk move endpoint (before other routes)
 router.post('/move', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const { bookmarkIds, targetFolder } = req.body;
 
     // Validate folder ownership if provided
@@ -99,6 +153,9 @@ router.post('/move', auth, async (req, res) => {
 // @access  Private
 router.post('/bulk-edit', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const { bookmarkIds, operations } = req.body;
 
     // Validate input
@@ -290,6 +347,9 @@ router.post('/bulk-edit', auth, async (req, res) => {
 // @access  Private
 router.post('/bulk-tags', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const { bookmarkIds, action, tags } = req.body;
 
     // Validate input
@@ -384,6 +444,9 @@ router.post('/bulk-tags', auth, async (req, res) => {
 // @access  Private
 router.post('/bulk-delete', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const { bookmarkIds } = req.body;
 
     // Validate input
@@ -441,6 +504,9 @@ router.post('/bulk-delete', auth, async (req, res) => {
 // @access  Private
 router.post('/bulk-visibility', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const { bookmarkIds, visibility, sharedWith } = req.body;
 
     // Validate input
@@ -517,6 +583,9 @@ router.post('/bulk-visibility', auth, async (req, res) => {
 // @access  Private
 router.post('/bulk-share', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const { bookmarkIds, userIds, message } = req.body;
 
     // Validate input
@@ -659,6 +728,9 @@ router.get('/:id', async (req, res) => {
 // @access  Private
 router.post('/', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     console.log('=== BOOKMARK CREATION REQUEST ===');
     console.log('Request body keys:', Object.keys(req.body));
     console.log('Request body:', req.body);
@@ -758,6 +830,9 @@ router.post('/', auth, async (req, res) => {
 // @access  Private
 router.put('/:id', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const bookmark = await Bookmark.findById(req.params.id);
 
     if (!bookmark) {
@@ -840,6 +915,9 @@ router.put('/:id', auth, async (req, res) => {
 // @access  Private
 router.delete('/:id', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const bookmark = await Bookmark.findById(req.params.id);
 
     if (!bookmark) {
@@ -865,6 +943,9 @@ router.delete('/:id', auth, async (req, res) => {
 // @access  Private
 router.post('/:id/share', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const { userIds } = req.body;
 
     if (!userIds || !Array.isArray(userIds)) {

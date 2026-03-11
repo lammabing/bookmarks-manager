@@ -2,8 +2,56 @@ import express from 'express';
 import mongoose from 'mongoose';
 import Bookmark from '../models/Bookmark.js';
 import { auth } from '../middleware/auth.js';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
+
+// Auto-backup configuration
+const AUTO_BACKUP_DIR = './backups/auto';
+const MAX_AUTO_BACKUPS = 5;
+
+if (!fs.existsSync(AUTO_BACKUP_DIR)) {
+  fs.mkdirSync(AUTO_BACKUP_DIR, { recursive: true });
+}
+
+const createQuickBackup = async () => {
+  try {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupPath = path.join(AUTO_BACKUP_DIR, `auto-backup_${timestamp}`);
+    fs.mkdirSync(backupPath, { recursive: true });
+
+    const db = mongoose.connection.db;
+    if (!db) return null;
+
+    const collections = await db.listCollections().toArray();
+    
+    for (const collection of collections) {
+      const documents = await db.collection(collection.name).find({}).toArray();
+      fs.writeFileSync(
+        path.join(backupPath, `${collection.name}.json`),
+        JSON.stringify(documents, null, 2)
+      );
+    }
+
+    const backups = fs.readdirSync(AUTO_BACKUP_DIR)
+      .filter(name => name.startsWith('auto-backup_'))
+      .sort()
+      .reverse();
+    
+    if (backups.length > MAX_AUTO_BACKUPS) {
+      backups.slice(MAX_AUTO_BACKUPS).forEach(backup => {
+        fs.rmSync(path.join(AUTO_BACKUP_DIR, backup), { recursive: true, force: true });
+      });
+    }
+
+    console.log(`💾 Auto-backup created: ${backupPath}`);
+    return backupPath;
+  } catch (error) {
+    console.error('⚠️  Auto-backup failed:', error.message);
+    return null;
+  }
+};
 
 // @route   GET /api/tags
 // @desc    Get all tags with bookmark counts
@@ -57,6 +105,9 @@ router.get('/', auth, async (req, res) => {
 // @access  Private
 router.put('/:tagName', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const oldTag = req.params.tagName;
     const newTag = req.body.newName;
     
@@ -100,6 +151,9 @@ router.put('/:tagName', auth, async (req, res) => {
 // @access  Private
 router.delete('/:tagName', auth, async (req, res) => {
   try {
+    // Create auto-backup before write operation
+    await createQuickBackup();
+    
     const tagName = req.params.tagName;
     
     // Remove the tag from all bookmarks
