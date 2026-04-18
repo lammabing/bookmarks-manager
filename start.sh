@@ -9,6 +9,6 @@ cd "$SCRIPT_DIR"
 # Now run your commands
 npx kill-port 5015
 npx kill-port 5170
-/mnt/g/www/bookmarks/start-mongo.sh
+"$SCRIPT_DIR/start-mongo-reliable.sh"
 npm run dev:full
 

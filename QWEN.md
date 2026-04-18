@@ -54,7 +54,17 @@ A web-based application for managing bookmarks with advanced organization featur
 ### Prerequisites
 - Node.js v20+
 - MongoDB (local or cloud instance)
-- Docker (for local MongoDB setup)
+- Docker Desktop for Windows (must be running for Docker-based MongoDB)
+
+### ⚠️ IMPORTANT: MongoDB Data Persistence Issue
+
+**Root Cause of Data Loss**: MongoDB runs in a Docker container that requires Docker Desktop to be running. If Docker Desktop is stopped/restarted, the container may be recreated without proper volume mounts, resulting in **data loss**.
+
+**Solution**:
+1. **Always start MongoDB using**: `./start-mongo-reliable.sh` (waits for Docker Desktop)
+2. **Alternative**: Use `docker-compose up -d` for more reliable volume management
+3. **Keep Docker Desktop running** while using the application
+4. **Regular backups are automated** - runs every 6 hours via cron
 
 ### Installation Steps
 1. Clone the repository
@@ -64,14 +74,14 @@ A web-based application for managing bookmarks with advanced organization featur
    ```
 3. Set up environment variables:
    ```bash
-   cp .env\ copy .env
+   cp .env.copy .env
    ```
    Required variables:
-   - `MONGODB_URI`: MongoDB connection string
+   - `MONGODB_URI`: MongoDB connection string (default: mongodb://localhost:27017/bookmarking-app)
    - `JWT_SECRET`: Secret key for JWT authentication
-4. Start MongoDB with Docker:
+4. **Start MongoDB** (ensure Docker Desktop is running first):
    ```bash
-   ./start-mongo.sh
+   ./start-mongo-reliable.sh
    ```
 5. Start the development server:
    ```bash
@@ -236,13 +246,15 @@ The bookmarklet automatically extracts page information (URL, title, description
 ## Development Tips
 
 1. **Environment Variables**: Ensure `.env` is properly configured with MongoDB URI and JWT secret
-2. **MongoDB**: Use `./start-mongo.sh` to start the database
-3. **Frontend Development**: Use `npm run dev` for hot reloading development server
-4. **Backend Development**: Use `npm run start` to run the Express server
-5. **Full Development Environment**: Use `npm run dev:full` to run both frontend and backend
-6. **API Testing**: Test endpoints with tools like Postman or curl
-7. **Extension Development**: Load unpacked extension from `extension/` directory in browser
-8. **Database Backup**: Use `npm run backup` before making significant changes
+2. **MongoDB**: Use `./start-mongo-reliable.sh` to start the database (requires Docker Desktop)
+3. **Docker Desktop**: Must be running before starting MongoDB. Check with `docker info`
+4. **Frontend Development**: Use `npm run dev` for hot reloading development server
+5. **Backend Development**: Use `npm run start` to run the Express server
+6. **Full Development Environment**: Use `npm run dev:full` to run both frontend and backend
+7. **API Testing**: Test endpoints with tools like Postman or curl
+8. **Extension Development**: Load unpacked extension from `extension/` directory in browser
+9. **Database Backup**: Backups run automatically every 6 hours. Manual backup: `npm run backup`
+10. **Data Loss Prevention**: If bookmarks disappear, check if Docker Desktop is running and run `./start-mongo-reliable.sh`
 
 ## Recent Achievements (August 2025)
 - Completed bookmark sharing system with visibility levels
