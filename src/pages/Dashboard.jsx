@@ -36,7 +36,7 @@ const Dashboard = () => {
   const { bookmarks, loading, loadBookmarks, getSharedWithMeBookmarks } = useBookmarks();
   const { folders, selectedFolder, selectFolder, clearFolderSelection } = useFolders();
   const { tags } = useTags();
-  const { fontSettings } = useFontContext();
+  const { fontSettings, updateFontSettings } = useFontContext();
 
   // Debug logging
   console.log('🔍 [DEBUG] Dashboard component mounted');
@@ -140,8 +140,8 @@ const Dashboard = () => {
   };
 
   const handleUpdateFontSettings = (newSettings) => {
-    // This function should update font settings through the context
-    console.log('Font settings updated:', newSettings);
+    updateFontSettings(newSettings);
+    setShowFontSettings(false);
   };
 
   const handleExportBookmarks = () => {
@@ -613,6 +613,16 @@ const Dashboard = () => {
               </button>
 
               <button
+                onClick={() => setShowFontSettings(true)}
+                className="flex items-center px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
+                title="Font Settings"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 100-5.78m8.279-1.727c.239-.013.479-.035.717-.067m5.908-.388c.545-.126.977-.38.977-.79V6.75a2.25 2.25 0 00-2.25-2.25H7.5a2.25 2.25 0 00-2.25 2.25v5.5c0 .41.432.664.977.79m-5.908.388a3 3 0 100 5.78m8.279-1.727c.239-.013.479-.035.717-.067m-5.908-.388c.545-.126.977-.38.977-.79V6.75a2.25 2.25 0 00-2.25-2.25H7.5a2.25 2.25 0 00-2.25 2.25v5.5c0 .41.432.664.977.79" />
+                </svg>
+              </button>
+
+              <button
                 onClick={handleExportFilteredBookmarks}
                 className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 title="Export Filtered Bookmarks"
@@ -735,7 +745,8 @@ const Dashboard = () => {
           <FontSettingsModal
             isOpen={showFontSettings}
             onClose={() => setShowFontSettings(false)}
-            onUpdateSettings={handleUpdateFontSettings}
+            onApply={handleUpdateFontSettings}
+            initialSettings={fontSettings}
           />
         )}
 

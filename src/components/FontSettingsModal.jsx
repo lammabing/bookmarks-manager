@@ -1,7 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const FontSettingsModal = ({ isOpen, onClose, onApply, initialSettings }) => {
-  const [fontSettings, setFontSettings] = useState(initialSettings);
+  const [fontSettings, setFontSettings] = useState(initialSettings || {
+    titleFontFamily: 'Inter, sans-serif',
+    titleFontSize: 16,
+    titleFontWeight: 'bold',
+    titleFontColor: '#111827',
+    descriptionFontFamily: 'Inter, sans-serif',
+    descriptionFontSize: 14,
+    descriptionFontWeight: 'normal',
+    descriptionFontColor: '#6B7280'
+  });
+
+  useEffect(() => {
+    if (initialSettings) {
+      setFontSettings(initialSettings);
+    }
+  }, [initialSettings]);
 
   const handleApply = () => {
     onApply(fontSettings);
@@ -20,18 +35,21 @@ const FontSettingsModal = ({ isOpen, onClose, onApply, initialSettings }) => {
               <div className="space-y-2">
                 <div>
                   <label className="block text-sm font-medium mb-1">Font Family</label>
-                  <select
+<select
                       value={fontSettings.titleFontFamily}
                       onChange={(e) =>
                           setFontSettings({...fontSettings, titleFontFamily: e.target.value})
                       }
                       className="w-full p-2 border rounded-lg"
-                  >
-                    <option value="Arial">Arial</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                    <option value="Courier New">Courier New</option>
-                  </select>
+                    >
+                      <option value="Arial">Arial</option>
+                      <option value="Helvetica">Helvetica</option>
+                      <option value="Calibri">Calibri</option>
+                      <option value="Trebuchet MS">Trebuchet MS</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Courier New">Courier New</option>
+                    </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Font Size (px)</label>
@@ -75,18 +93,21 @@ const FontSettingsModal = ({ isOpen, onClose, onApply, initialSettings }) => {
               <div className="space-y-2">
                 <div>
                   <label className="block text-sm font-medium mb-1">Font Family</label>
-                  <select
+<select
                       value={fontSettings.descriptionFontFamily}
                       onChange={(e) =>
                           setFontSettings({...fontSettings, descriptionFontFamily: e.target.value})
                       }
                       className="w-full p-2 border rounded-lg"
-                  >
-                    <option value="Arial">Arial</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                    <option value="Courier New">Courier New</option>
-                  </select>
+                    >
+                      <option value="Arial">Arial</option>
+                      <option value="Helvetica">Helvetica</option>
+                      <option value="Calibri">Calibri</option>
+                      <option value="Trebuchet MS">Trebuchet MS</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Courier New">Courier New</option>
+                    </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Font Size (px)</label>
