@@ -666,6 +666,74 @@ router.post('/bulk-share', auth, async (req, res) => {
   }
 });
 
+// @route   POST /api/bookmarks/deduplicate
+// @desc    Find and optionally remove duplicate bookmarks (same URL) for the current user
+// @access  Private
+router.post('/deduplicate', auth, async (req, res) => {
+  try {
+    const { remove = false } = req.body;
+    const userId = req.user.id;
+
+    const bookmarks = await Bookmark.find({ owner: userId }).lean();
+
+    // Group by URL (case-insensitive, trimmed)
+    const grouped = {};
+    for (const bm of bookmarks) {
+      const url = bm.url?.trim().toLowerCase();
+      if (!url) continue;
+      if (!grouped[url]) grouped[url] = [];
+      grouped[url].push(bm);
+    }
+
+    const duplicateGroups = Object.values(grouped).filter(bms => bms.length > 1);
+    const totalDuplicateUrls = duplicateGroups.length;
+
+    if (totalDuplicateUrls === 0) {
+      return res.json({ duplicates: [], totalDuplicateUrls: 0, removedCount: 0, message: 'No duplicate bookmarks found' });
+    }
+
+    // For each group, keep the most complete bookmark, mark rest for removal
+    const toRemove = [];
+
+    for (const bms of duplicateGroups) {
+      bms.sort((a, b) => {
+        const scoreA = (a.description ? 2 : 0) + (a.notes ? 1 : 0) + (a.tags?.length || 0);
+        const scoreB = (b.description ? 2 : 0) + (b.notes ? 1 : 0) + (b.tags?.length || 0);
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      });
+      toRemove.push(...bms.slice(1));
+    }
+
+    let removedCount = 0;
+
+    if (remove && toRemove.length > 0) {
+      await createQuickBackup();
+      const ids = toRemove.map(b => b._id);
+      const result = await Bookmark.deleteMany({ _id: { $in: ids }, owner: userId });
+      removedCount = result.deletedCount;
+    }
+
+    const duplicates = duplicateGroups.map(bms => ({
+      url: bms[0].url,
+      keep: { _id: bms[0]._id, title: bms[0].title },
+      remove: bms.slice(1).map(b => ({ _id: b._id, title: b.title }))
+    }));
+
+    res.json({
+      duplicates,
+      totalDuplicateUrls,
+      totalDuplicates: toRemove.length,
+      removedCount,
+      message: remove
+        ? `Removed ${removedCount} duplicate bookmark(s)`
+        : `Found ${totalDuplicateUrls} URL(s) with ${toRemove.length} duplicate(s)`
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // @route   GET /api/bookmarks
 // @desc    Get all bookmarks (filtered by visibility and ownership)
 // @access  Private

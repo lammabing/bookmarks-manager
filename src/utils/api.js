@@ -90,6 +90,10 @@ export const bookmarkApi = {
   bulkMove: async (bookmarkIds, targetFolder) => {
     const response = await api.post('/bookmarks/move', { bookmarkIds, targetFolder });
     return response.data || response;
+  },
+  deduplicate: async (remove = false) => {
+    const response = await api.post('/bookmarks/deduplicate', { remove });
+    return response.data || response;
   }
 };
 

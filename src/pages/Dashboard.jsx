@@ -16,6 +16,7 @@ import FolderBreadcrumb from '../components/FolderBreadcrumb';
 import BulkEditToolbar from '../components/BulkEditToolbar';
 import BulkEditModal from '../components/BulkEditModal';
 import BulkOperationToast from '../components/BulkOperationToast';
+import DuplicateBookmarksModal from '../components/DuplicateBookmarksModal';
 import Tooltip from '../components/Tooltip';
 import { bookmarkApi } from '../utils/api';
 import {
@@ -28,7 +29,8 @@ import {
   PlusIcon,
   BookmarkIcon,
   QuestionMarkCircleIcon,
-  UsersIcon
+  UsersIcon,
+  DocumentDuplicateIcon
 } from '@heroicons/react/24/outline';
 
 const Dashboard = () => {
@@ -131,6 +133,44 @@ const Dashboard = () => {
       loadBookmarks(); // Reload bookmarks after update
     } catch (error) {
       console.error('Error updating bookmark:', error);
+    }
+  };
+
+  const [showDedupModal, setShowDedupModal] = useState(false);
+  const [dedupDuplicates, setDedupDuplicates] = useState([]);
+  const [deduplicating, setDeduplicating] = useState(false);
+
+  const handleFindDuplicates = async () => {
+    try {
+      setDeduplicating(true);
+      const result = await bookmarkApi.deduplicate(false);
+      if (result.totalDuplicateUrls === 0) {
+        alert('No duplicate bookmarks found.');
+        return;
+      }
+      setDedupDuplicates(result.duplicates);
+      setShowDedupModal(true);
+    } catch (error) {
+      console.error('Error finding duplicates:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      setDeduplicating(false);
+    }
+  };
+
+  const handleRemoveDuplicates = async () => {
+    try {
+      setDeduplicating(true);
+      setShowDedupModal(false);
+      const removeResult = await bookmarkApi.deduplicate(true);
+      alert(`Removed ${removeResult.removedCount} duplicate(s).`);
+      loadBookmarks();
+      setDedupDuplicates([]);
+    } catch (error) {
+      console.error('Error removing duplicates:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      setDeduplicating(false);
     }
   };
 
@@ -641,6 +681,15 @@ const Dashboard = () => {
                   />
                 </label>
               </Tooltip>
+
+              <button
+                onClick={handleFindDuplicates}
+                disabled={deduplicating}
+                className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                title="Find and remove duplicate bookmarks"
+              >
+                <DocumentDuplicateIcon className="w-5 h-5" />
+              </button>
             </div>
 
             <div className="flex items-center gap-3">
@@ -777,6 +826,18 @@ const Dashboard = () => {
               visibility: bulkEditOperation === 'edit' || bulkEditOperation === 'visibility' ? 'private' : undefined,
               sharedWith: bulkEditOperation === 'share' ? [] : undefined
             }}
+          />
+        )}
+
+        {/* Duplicate Bookmarks Modal */}
+        {showDedupModal && dedupDuplicates.length > 0 && (
+          <DuplicateBookmarksModal
+            duplicates={dedupDuplicates}
+            onClose={() => {
+              setShowDedupModal(false);
+              setDedupDuplicates([]);
+            }}
+            onRemove={handleRemoveDuplicates}
           />
         )}
 
