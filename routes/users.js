@@ -14,11 +14,13 @@ router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
     
     // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      return res.status(400).json({ 
-        message: existingUser.email === email ? 'Email already in use' : 'Username already taken' 
-      });
+    const emailExists = await User.findOne({ email });
+    const usernameExists = await User.findOne({ username });
+    if (emailExists) {
+      return res.status(400).json({ message: 'Email already in use' });
+    }
+    if (usernameExists) {
+      return res.status(400).json({ message: 'Username already taken' });
     }
     
     // Hash password

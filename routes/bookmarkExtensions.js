@@ -1,9 +1,10 @@
 import express from 'express';
 const router = express.Router();
 import BookmarkExtension from '../models/BookmarkExtension.js';
+import { auth } from '../middleware/auth.js';
 
 // Get all extensions for a bookmark
-router.get('/bookmarks/:bookmarkId/extensions', async (req, res) => {
+router.get('/bookmarks/:bookmarkId/extensions', auth, async (req, res) => {
   try {
     const extensions = await BookmarkExtension.find({ bookmarkId: req.params.bookmarkId });
     res.json(extensions);
@@ -13,7 +14,7 @@ router.get('/bookmarks/:bookmarkId/extensions', async (req, res) => {
 });
 
 // Create a new extension for a bookmark
-router.post('/bookmarks/:bookmarkId/extensions', async (req, res) => {
+router.post('/bookmarks/:bookmarkId/extensions', auth, async (req, res) => {
   try {
     const { type, content, metadata } = req.body;
     const extension = new BookmarkExtension({
@@ -30,7 +31,7 @@ router.post('/bookmarks/:bookmarkId/extensions', async (req, res) => {
 });
 
 // Update an extension
-router.put('/extensions/:extensionId', async (req, res) => {
+router.put('/extensions/:extensionId', auth, async (req, res) => {
   try {
     const { type, content, metadata } = req.body;
     const extension = await BookmarkExtension.findByIdAndUpdate(
@@ -46,7 +47,7 @@ router.put('/extensions/:extensionId', async (req, res) => {
 });
 
 // Delete an extension
-router.delete('/extensions/:extensionId', async (req, res) => {
+router.delete('/extensions/:extensionId', auth, async (req, res) => {
   try {
     const extension = await BookmarkExtension.findByIdAndDelete(req.params.extensionId);
     if (!extension) return res.status(404).json({ error: 'Extension not found' });

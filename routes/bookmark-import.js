@@ -2,7 +2,8 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import BookmarkImporter from '../src/utils/BookmarkImporter.js';
+import jwt from 'jsonwebtoken';
+import BookmarkImporter from '../utils/BookmarkImporter.js';
 import User from '../models/User.js';
 
 const router = express.Router();
@@ -52,8 +53,7 @@ router.post('/', upload.single('bookmarksFile'), async (req, res) => {
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    // Verify token and get user (assuming you have jwt installed and configured)
-    const jwt = await import('jsonwebtoken');
+    // Verify token and get user
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Find user by ID
