@@ -47,8 +47,8 @@ export const memoize = (func, resolver) => {
 };
 
 // Virtualization utility for large lists
-export const useVirtualization = (items, itemHeight, containerHeight) => {
-  const startIndex = Math.max(0, Math.floor(0));
+export const useVirtualization = (items, itemHeight, containerHeight, scrollTop = 0) => {
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight));
   const endIndex = Math.min(items.length, Math.ceil(containerHeight / itemHeight) + startIndex);
   
   return {
@@ -62,7 +62,7 @@ export const useVirtualization = (items, itemHeight, containerHeight) => {
 // Batch updates for React state
 export const batchUpdates = (updates, setState) => {
   setState(prevState => {
-    const newState = { ...prevState };
+    let newState = { ...prevState };
     updates.forEach(update => {
       newState = { ...newState, ...update };
     });

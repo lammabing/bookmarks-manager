@@ -3,13 +3,14 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { auth } from '../middleware/auth.js';
+import { authLimiter } from '../middleware/rateLimit.js';
 
 const router = express.Router();
 
 // @route   POST /api/users/register
 // @desc    Register a new user
 // @access  Public
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   try {
     const { username, email, password } = req.body;
     
@@ -60,7 +61,7 @@ router.post('/register', async (req, res) => {
 // @route   POST /api/users/login
 // @desc    Authenticate user & get token
 // @access  Public
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     

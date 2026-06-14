@@ -27,15 +27,13 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         const response = await authApi.getProfile(); // This should call /users/me
         // The server returns user data directly, not in a data property
-        const userData = response.data || response;
-        setUser(userData);
+        setUser(response);
         setIsAuthenticated(true);
       } else {
         setUser(null);
         setIsAuthenticated(false);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
       // CRITICAL FIX: Only remove token for actual authentication errors
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
@@ -61,10 +59,8 @@ export const AuthProvider = ({ children }) => {
 
         // Verify token in background without blocking UI
         try {
-          const response = await authApi.getProfile(); // This should call /users/me
-          // The server returns user data directly, not in a data property
-          const userData = response.data || response;
-          setUser(userData);
+          const response = await authApi.getProfile();
+          setUser(response);
           setIsAuthenticated(true);
         } catch (error) {
           // Only remove token for 401 (unauthorized)
@@ -107,17 +103,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      console.log('🔍 [DEBUG] AuthContext login function called');
       const response = await authApi.login({ email, password });
-      const responseData = response.data || response;
-      const { token, user } = responseData;
+      const { token, user } = response;
 
-      console.log('🔍 [DEBUG] Login successful, storing token in localStorage');
       localStorage.setItem('token', token);
-      console.log('🔍 [DEBUG] Token stored, setting user state');
       setUser(user);
       setIsAuthenticated(true);
-      console.log('🔍 [DEBUG] Auth state updated after login');
 
       // Send token to Chrome extension
       // IMPORTANT: Replace 'YOUR_CHROME_EXTENSION_ID_HERE' with your actual Chrome extension ID
@@ -146,8 +137,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (username, email, password) => {
     try {
       const response = await authApi.register({ username, email, password });
-      const responseData = response.data || response;
-      const { token, user } = responseData;
+      const { token, user } = response;
 
       localStorage.setItem('token', token);
       setUser(user);

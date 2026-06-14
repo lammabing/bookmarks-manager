@@ -4,6 +4,7 @@ import Folder from '../models/Folder.js';
 import { auth } from '../middleware/auth.js';
 import jwt from 'jsonwebtoken';
 import { createQuickBackup } from '../utils/backup.js';
+import { normalizeTags } from '../utils/helpers.js';
 
 const router = express.Router();
 
@@ -12,9 +13,6 @@ const router = express.Router();
 // @access  Public
 router.get('/public', async (req, res) => {
   try {
-    console.log('=== PUBLIC BOOKMARKS REQUEST ===');
-    console.log('Query params:', req.query);
-
     const { page = 1, limit = 12 } = req.query;
 
     const bookmarks = await Bookmark.find({
@@ -24,8 +22,6 @@ router.get('/public', async (req, res) => {
     .sort({ updatedAt: -1 })
     .limit(parseInt(limit))
     .skip((parseInt(page) - 1) * parseInt(limit));
-
-    console.log(`Found ${bookmarks.length} public bookmarks`);
 
     const total = await Bookmark.countDocuments({ visibility: 'public' });
 
@@ -702,6 +698,42 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// @route   GET /api/bookmarks/shared-with-me
+// @desc    Get bookmarks shared with the current user
+// @access  Private
+router.get('/shared-with-me', auth, async (req, res) => {
+  try {
+    const { page = 1, limit = 12 } = req.query;
+
+    const bookmarks = await Bookmark.find({
+      sharedWith: req.user.id,
+      owner: { $ne: req.user.id }
+    })
+    .populate('owner', 'username')
+    .sort({ updatedAt: -1 })
+    .limit(parseInt(limit))
+    .skip((parseInt(page) - 1) * parseInt(limit));
+
+    const total = await Bookmark.countDocuments({
+      sharedWith: req.user.id,
+      owner: { $ne: req.user.id }
+    });
+
+    res.json({
+      bookmarks,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching shared bookmarks:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // @route   GET /api/bookmarks/:id
 // @desc    Get a single bookmark
 // @access  Public/Private (depending on bookmark visibility)
@@ -749,28 +781,10 @@ router.post('/', auth, async (req, res) => {
     // Create auto-backup before write operation
     await createQuickBackup();
     
-    console.log('=== BOOKMARK CREATION REQUEST ===');
-    console.log('Request body keys:', Object.keys(req.body));
-    console.log('Request body:', req.body);
-    console.log('Request body tags type:', typeof req.body.tags, 'value:', req.body.tags);
-    console.log('Request body tags is undefined:', req.body.tags === undefined);
-    console.log('Request body tags is null:', req.body.tags === null);
-    const { title, url, description, tags, folder, favicon, notes } = req.body;
-    
-    // Ensure tags is explicitly handled even if not in destructuring
+    const { title, url, description, tags, folder, favicon: rawFavicon, notes } = req.body;
     const requestTags = req.body.tags;
-    console.log('Explicitly extracted tags from req.body.tags:', requestTags);
-    
-    // Validation: Check if tags field exists in request
-    if (!('tags' in req.body)) {
-      console.log('WARNING: Tags field is missing from request body!');
-    }
-    
-    // Force tags to be an array even if undefined
     const finalTags = requestTags || [];
-    console.log('Final tags after forcing array:', finalTags);
 
-    // Validate folder ownership if provided
     if (folder) {
       const folderDoc = await Folder.findOne({
         _id: folder,
@@ -781,37 +795,15 @@ router.post('/', auth, async (req, res) => {
       }
     }
 
-    // Ensure tags is always an array of strings
-    let processedTags = [];
-    console.log('Processing tags - input tags type:', typeof finalTags, 'value:', finalTags);
-    
-    // Handle undefined or null tags
-    if (!finalTags) {
-      console.log('Tags is null or undefined, using empty array');
-      processedTags = [];
-    } else if (Array.isArray(finalTags)) {
-      // If tags is an array, extract just the names
-      processedTags = finalTags
-        .map(tag => {
-          if (typeof tag === 'string') {
-            return tag.trim();
-          } else if (tag && typeof tag === 'object' && tag.name) {
-            return tag.name.trim();
-          }
-          return null;
-        })
-        .filter(tag => tag && tag.length > 0);
-      console.log('Processed tags from array:', processedTags);
-    } else if (typeof finalTags === 'string') {
-      // If tags is a string, split by comma
-      processedTags = finalTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-      console.log('Processed tags from string:', processedTags);
-    } else {
-      console.log('Tags is unexpected type, using empty array');
-      processedTags = [];
+    let favicon = rawFavicon;
+    if (favicon && !favicon.startsWith('http://') && !favicon.startsWith('https://')) {
+      favicon = '';
+    }
+    if (!favicon) {
+      try { favicon = `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}`; } catch { favicon = ''; }
     }
 
-    console.log('Creating bookmark with processedTags:', processedTags);
+    const processedTags = normalizeTags(finalTags);
     const bookmark = new Bookmark({
       title,
       url,
@@ -819,17 +811,12 @@ router.post('/', auth, async (req, res) => {
       tags: processedTags,
       folder: folder || null,
       owner: req.user.id,
-      favicon: favicon || (() => { try { return `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}`; } catch { return ''; } })(),
+      favicon,
       notes: notes || '',
       visibility: req.body.visibility || 'private',
       sharedWith: Array.isArray(req.body.sharedWith) ? req.body.sharedWith : []
     });
-    console.log('Bookmark object before save:', bookmark);
-
     await bookmark.save();
-
-    console.log('Bookmark saved successfully:', bookmark);
-    console.log('Saved bookmark tags:', bookmark.tags);
 
     // Update folder bookmark count
     if (folder) {
@@ -873,46 +860,16 @@ router.put('/:id', auth, async (req, res) => {
       }
     }
 
-    // Process tags if provided
     let updateData = { ...req.body, updatedAt: new Date() };
-    console.log('Update bookmark - req.body:', req.body);
-    console.log('Update bookmark - req.body.tags type:', typeof req.body.tags, 'value:', req.body.tags);
-    
+
     if (req.body.tags !== undefined) {
-      // Ensure tags is always an array of strings
-      let processedTags = [];
-      console.log('Processing tags for update - input tags type:', typeof req.body.tags, 'value:', req.body.tags);
-      
-      // Handle undefined or null tags
-      if (!req.body.tags) {
-        console.log('Tags is null or undefined for update, using empty array');
-        processedTags = [];
-      } else if (Array.isArray(req.body.tags)) {
-        // If tags is an array, extract just the names
-        processedTags = req.body.tags
-          .map(tag => {
-            if (typeof tag === 'string') {
-              return tag.trim();
-            } else if (tag && typeof tag === 'object' && tag.name) {
-              return tag.name.trim();
-            }
-            return null;
-          })
-          .filter(tag => tag && tag.length > 0);
-        console.log('Processed tags from array for update:', processedTags);
-      } else if (typeof req.body.tags === 'string') {
-        // If tags is a string, split by comma
-        processedTags = req.body.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-        console.log('Processed tags from string for update:', processedTags);
-      } else {
-        console.log('Tags is unexpected type for update, using empty array');
-        processedTags = [];
-      }
-      updateData.tags = processedTags;
+      updateData.tags = normalizeTags(req.body.tags);
     } else {
-      // Ensure tags is always an array
       updateData.tags = updateData.tags || [];
-      console.log('Tags not provided in update, using existing or empty array:', updateData.tags);
+    }
+
+    if (updateData.favicon && !updateData.favicon.startsWith('http://') && !updateData.favicon.startsWith('https://')) {
+      delete updateData.favicon;
     }
 
     const updatedBookmark = await Bookmark.findByIdAndUpdate(
@@ -992,42 +949,6 @@ router.post('/:id/share', auth, async (req, res) => {
   } catch (err) {
     console.error('Error sharing bookmark:', err);
     res.status(500).json({ message: err.message });
-  }
-});
-
-// @route   GET /api/bookmarks/shared-with-me
-// @desc    Get bookmarks shared with the current user
-// @access  Private
-router.get('/shared-with-me', auth, async (req, res) => {
-  try {
-    const { page = 1, limit = 12 } = req.query;
-
-    const bookmarks = await Bookmark.find({
-      sharedWith: req.user.id,
-      owner: { $ne: req.user.id } // Exclude user's own bookmarks
-    })
-    .populate('owner', 'username')
-    .sort({ updatedAt: -1 })
-    .limit(parseInt(limit))
-    .skip((parseInt(page) - 1) * parseInt(limit));
-
-    const total = await Bookmark.countDocuments({
-      sharedWith: req.user.id,
-      owner: { $ne: req.user.id }
-    });
-
-    res.json({
-      bookmarks,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / parseInt(limit))
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching shared bookmarks:', error);
-    res.status(500).json({ message: error.message });
   }
 });
 

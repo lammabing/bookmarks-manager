@@ -7,7 +7,8 @@ import bookmarkRoutes from './routes/bookmarks.js';
 import tagRoutes from './routes/tags.js'; // Import the new tags router
 import bookmarkExtensionRoutes from './routes/bookmarkExtensions.js';
 import folderRoutes from './routes/folders.js';
-import bookmarkImportRoutes from './routes/bookmark-import.js'; // Import the new bookmark import router
+import bookmarkImportRoutes from './routes/bookmark-import.js';
+import metadataRoutes from './routes/metadata.js';
 
 // Load environment variables
 dotenv.config();
@@ -30,7 +31,7 @@ const PORT = process.env.PORT || 5015;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5170',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5170',
   credentials: true
 }));
 app.use(express.json());
@@ -41,7 +42,8 @@ app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/tags', tagRoutes); // Add the tags routes
 app.use('/api', bookmarkExtensionRoutes);
 app.use('/api/folders', folderRoutes);
-app.use('/api/import', bookmarkImportRoutes); // Add the bookmark import routes
+app.use('/api/import', bookmarkImportRoutes);
+app.use('/api/metadata', metadataRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -49,10 +51,7 @@ mongoose.connect(process.env.MONGODB_URI)
     console.log('Connected to MongoDB');
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
-      // Add explicit garbage collection hint
-      if (global.gc) {
-        setInterval(() => global.gc(), 30000); // Run GC every 30 seconds
-      }
+
     });
   })
   .catch(err => {

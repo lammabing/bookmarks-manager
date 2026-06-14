@@ -37,7 +37,6 @@ const BookmarkGrid = ({
   };
 
   const handleCardClick = (bookmark) => {
-    console.log('Card clicked for bookmark:', bookmark.title);
     setSelectedBookmark(bookmark);
   };
 
@@ -46,7 +45,6 @@ const BookmarkGrid = ({
   };
 
   const handleTitleClick = (e, url) => {
-    console.log('Title clicked for URL:', url);
     e.preventDefault();
     e.stopPropagation();
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -142,7 +140,6 @@ const BookmarkGrid = ({
               className={`border rounded-lg p-4 shadow-sm relative cursor-pointer ${hoverEffect} ${effectiveSelectedBookmarks.has(bookmark._id) ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
               onClick={(e) => {
                 if (editingBookmark?._id !== bookmark._id) {
-                  console.log('Card click event triggered');
                   handleCardClick(bookmark);
                 }
               }}

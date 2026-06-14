@@ -18,17 +18,15 @@ const cancelBtn = document.getElementById('cancelBtn');
 const messageDiv = document.getElementById('message');
 
 // App URL
-const APP_URL = 'http://localhost:5170'; // Change this to your production URL when deploying
+let APP_URL = 'http://localhost:5170';
 
-// Current tab URL and title
 let currentUrl = '';
 let currentTitle = '';
 
-// Initialize popup
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('Popup initialized');
-  
-  // Get current tab info
+  const { appUrl } = await chrome.storage.sync.get('appUrl');
+  if (appUrl) APP_URL = appUrl;
+
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab) {
     currentUrl = tab.url;
@@ -37,7 +35,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     titleInput.value = currentTitle || currentUrl;
   }
 
-  // Check authentication status
   checkAuthStatus();
 });
 

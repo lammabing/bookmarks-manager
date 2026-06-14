@@ -80,7 +80,7 @@ router.post('/', upload.single('bookmarksFile'), async (req, res) => {
     const result = await importer.importFromFile(req.file.path);
 
     // Clean up uploaded file
-    fs.unlinkSync(req.file.path);
+    await fs.promises.unlink(req.file.path);
 
     if (result.success) {
       res.json({
@@ -102,7 +102,7 @@ router.post('/', upload.single('bookmarksFile'), async (req, res) => {
     // Clean up uploaded file if it exists
     if (req.file && req.file.path) {
       try {
-        fs.unlinkSync(req.file.path);
+        await fs.promises.unlink(req.file.path);
       } catch (unlinkError) {
         console.error('Error deleting uploaded file:', unlinkError);
       }

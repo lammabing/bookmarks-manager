@@ -40,13 +40,7 @@ const Dashboard = () => {
   const { tags } = useTags();
   const { fontSettings, updateFontSettings } = useFontContext();
 
-  // Debug logging
-  console.log('🔍 [DEBUG] Dashboard component mounted');
-  console.log('🔍 [DEBUG] Dashboard fontSettings:', fontSettings);
-  console.log('🔍 [DEBUG] Dashboard user:', user);
-  console.log('🔍 [DEBUG] Dashboard bookmarks:', bookmarks);
-  console.log('🔍 [DEBUG] Dashboard folders:', folders);
-  console.log('🔍 [DEBUG] Dashboard folders length:', folders?.length || 0);
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [showFontSettings, setShowFontSettings] = useState(false);
   const [showTagManager, setShowTagManager] = useState(false);
@@ -107,10 +101,7 @@ const Dashboard = () => {
     const matchesFolder = !selectedFolder ||
       (selectedFolder === 'none' ? !bookmark.folder : bookmarkFolderId === selectedFolder);
 
-    // Debug logging for folder filtering
-    if (selectedFolder) {
-      console.log(`[Folder Filter] Bookmark: ${bookmark.title}, bookmark.folder:`, bookmark.folder, ', bookmarkFolderId:', bookmarkFolderId, ', selectedFolder:', selectedFolder, ', matches:', matchesFolder);
-    }
+
 
     const matchesTags = selectedTags.length === 0 ||
       selectedTags.every(tag => bookmark.tags?.includes(tag));
@@ -184,43 +175,38 @@ const Dashboard = () => {
     setShowFontSettings(false);
   };
 
+  const sanitizeForExport = (bookmarks) =>
+    bookmarks.map(({ _id, __v, owner, ...rest }) => rest);
+
   const handleExportBookmarks = () => {
-    // Create a blob with the bookmarks data
-    const dataStr = JSON.stringify(bookmarks, null, 2);
+    const dataStr = JSON.stringify(sanitizeForExport(bookmarks), null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
 
-    // Create a download link
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
     link.download = 'bookmarks.json';
 
-    // Trigger the download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    // Clean up
     URL.revokeObjectURL(url);
   };
 
   const handleExportFilteredBookmarks = () => {
-    // Create a blob with the filtered bookmarks data
-    const dataStr = JSON.stringify(filteredBookmarks, null, 2);
+    const dataStr = JSON.stringify(sanitizeForExport(filteredBookmarks), null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
 
-    // Create a download link
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
     link.download = 'filtered-bookmarks.json';
 
-    // Trigger the download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    // Clean up
     URL.revokeObjectURL(url);
   };
 
@@ -325,17 +311,13 @@ const Dashboard = () => {
   };
 
   const handleBulkEdit = () => {
-    console.log('🔍 [DEBUG] handleBulkEdit called');
     setBulkEditOperation('edit');
     setShowBulkEditModal(true);
-    console.log('🔍 [DEBUG] showBulkEditModal set to:', true, 'operationType:', 'edit');
   };
 
   const handleBulkTags = () => {
-    console.log('🔍 [DEBUG] handleBulkTags called');
     setBulkEditOperation('tags');
     setShowBulkEditModal(true);
-    console.log('🔍 [DEBUG] showBulkEditModal set to:', true, 'operationType:', 'tags');
   };
 
   const handleBulkDelete = async () => {
@@ -404,20 +386,14 @@ const Dashboard = () => {
   };
 
   const handleBulkSave = async (data) => {
-    console.log('🔍 [DEBUG] handleBulkSave called with data:', data);
     try {
       const bookmarkIds = Array.from(selectedBookmarks);
-      console.log('🔍 [DEBUG] bookmarkIds:', bookmarkIds);
       
-      // Handle share operation separately
       if (bulkEditOperation === 'share') {
-        console.log('🔍 [DEBUG] Handling share operation');
         await bookmarkApi.bulkShare(bookmarkIds, data.sharedWith);
       } else {
-        console.log('🔍 [DEBUG] Handling edit/tags operation');
         const operations = {};
         
-        // Build operations object based on what's being updated
         if (data.folderId !== undefined) {
           operations.folder = data.folderId;
         }
@@ -432,8 +408,6 @@ const Dashboard = () => {
         if (data.visibility) {
           operations.visibility = data.visibility;
         }
-        
-        console.log('🔍 [DEBUG] operations:', operations);
         
         // Use bulk edit API if we have operations
         if (Object.keys(operations).length > 0) {
@@ -807,12 +781,10 @@ const Dashboard = () => {
         )}
 
         {/* Bulk Edit Modal */}
-        {console.log('🔍 [DEBUG] BulkEditModal condition:', showBulkEditModal, 'operationType:', bulkEditOperation)}
         {showBulkEditModal && (
           <BulkEditModal
             isOpen={showBulkEditModal}
             onClose={() => {
-              console.log('🔍 [DEBUG] BulkEditModal onClose called');
               setShowBulkEditModal(false);
             }}
             selectedBookmarks={Array.from(selectedBookmarks)}

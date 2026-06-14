@@ -5,7 +5,7 @@ export const getFolders = async () => {
   try {
     const response = await api.get('/folders');
     // The server returns folders directly, not in a data property
-    return response.data || response;
+    return response.data;
   } catch (error) {
     console.error('Error fetching folders:', error);
     throw error;
@@ -17,7 +17,7 @@ export const getFolder = async (folderId) => {
   try {
     const response = await api.get(`/folders/${folderId}`);
     // The server returns folder directly, not in a data property
-    return response.data || response;
+    return response.data;
   } catch (error) {
     console.error('Error fetching folder:', error);
     throw error;
@@ -29,7 +29,7 @@ export const createFolder = async (folderData) => {
   try {
     const response = await api.post('/folders', folderData);
     // The server returns folder directly, not in a data property
-    return response.data || response;
+    return response.data;
   } catch (error) {
     console.error('Error creating folder:', error);
     throw error;
@@ -41,7 +41,7 @@ export const updateFolder = async (folderId, folderData) => {
   try {
     const response = await api.put(`/folders/${folderId}`, folderData);
     // The server returns folder directly, not in a data property
-    return response.data || response;
+    return response.data;
   } catch (error) {
     console.error('Error updating folder:', error);
     throw error;
@@ -53,7 +53,7 @@ export const deleteFolder = async (folderId) => {
   try {
     const response = await api.delete(`/folders/${folderId}`);
     // The server returns response directly, not in a data property
-    return response.data || response;
+    return response.data;
   } catch (error) {
     console.error('Error deleting folder:', error);
     throw error;
@@ -65,7 +65,7 @@ export const getFolderBookmarks = async (folderId) => {
   try {
     const response = await api.get(`/folders/${folderId}/bookmarks`);
     // The server returns bookmarks directly, not in a data property
-    return response.data || response;
+    return response.data;
   } catch (error) {
     console.error('Error fetching folder bookmarks:', error);
     throw error;
@@ -79,7 +79,7 @@ export const moveFolder = async (folderId, newParentId) => {
       newParent: newParentId
     });
     // The server returns response directly, not in a data property
-    return response.data || response;
+    return response.data;
   } catch (error) {
     console.error('Error moving folder:', error);
     throw error;

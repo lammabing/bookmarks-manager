@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Share2, Twitter, Facebook, MessageCircle, Link, Mail } from 'lucide-react';
+import { Share2, Twitter, Facebook, Linkedin, MessageCircle, Link, Mail } from 'lucide-react';
 
 const SocialMediaShare = ({ bookmark, className = "" }) => {
   const [showCopied, setShowCopied] = useState(false);
@@ -29,7 +29,7 @@ const SocialMediaShare = ({ bookmark, className = "" }) => {
     },
     {
       name: 'LinkedIn',
-      icon: MessageCircle,
+      icon: Linkedin,
       color: 'text-blue-700',
       hoverColor: 'hover:text-blue-800',
       getUrl: () => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(getShareUrl())}`
