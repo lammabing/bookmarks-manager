@@ -17,6 +17,8 @@ A web-based application for managing bookmarks with advanced organization featur
 - **Browser Extension**: Add bookmarks directly from Chrome/Firefox with enhanced popup UI and context menu; now supports pre-filling bookmark forms with current page information when not logged in
 - **Bookmarklet**: Add bookmarks from any webpage with a single click using the bookmarklet
 - **Auto-Backup System**: Automatic backups before every write operation to protect against data loss
+- **Server-Side Metadata**: Secure metadata extraction without third-party proxies
+- **Rate Limiting**: Protection against brute-force attacks on authentication endpoints
 
 ---
 
@@ -97,7 +99,7 @@ If `.env.example` doesn't exist, create `.env` manually:
 # MongoDB Connection
 MONGODB_URI=mongodb://localhost:27017/bookmarking-app
 
-# JWT Secret (change to a random secure string in production)
+# JWT Secret (generate with `openssl rand -base64 64`)
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 
 # Server Port
@@ -105,12 +107,15 @@ PORT=5015
 
 # Frontend Port (for Vite)
 VITE_PORT=5170
+
+# CORS Origin (set to frontend URL in production)
+CORS_ORIGIN=http://localhost:5170
 ```
 
 **Important:** Change `JWT_SECRET` to a random string for production:
 ```bash
 # Generate a random secret
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+openssl rand -base64 64
 ```
 
 ---
@@ -419,6 +424,7 @@ After installation:
 
 ## Additional Resources
 
+- **Changelog:** See `CHANGELOG.md` for version history and recent fixes
 - **Documentation:** See `documentation/` folder for detailed guides
 - **API Endpoints:** See `documentation/dataSources.md`
 - **Backup Strategy:** See `documentation/AUTO-BACKUP-SYSTEM.md`
