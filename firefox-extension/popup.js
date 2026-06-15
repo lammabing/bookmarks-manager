@@ -47,20 +47,8 @@ async function checkAuthStatus() {
     const response = await browser.runtime.sendMessage({ action: 'get_auth_token' });
 
     if (response && response.token) {
-      // Token exists, verify it
-      const verifyResponse = await browser.runtime.sendMessage({
-        action: 'verify_token',
-        token: response.token
-      });
-
-      if (verifyResponse.success && verifyResponse.user) {
-        // User is authenticated
-        showBookmarkForm(verifyResponse.user);
-      } else {
-        // Token is invalid, clear it and show login
-        await browser.runtime.sendMessage({ action: 'clear_auth_token' });
-        showLoginSection();
-      }
+      // Token exists, user is logged in
+      showBookmarkForm(response.user || {});
     } else {
       // No token, show login
       showLoginSection();

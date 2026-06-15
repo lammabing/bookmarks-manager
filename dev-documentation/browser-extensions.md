@@ -94,33 +94,40 @@ chrome-extension/
 ```javascript
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'get_auth_token') {
-    chrome.storage.local.get(['authToken'], (result) => {
-      sendResponse({ token: result.authToken });
+    chrome.storage.local.get(['authToken', 'user'], (result) => {
+      sendResponse({ token: result.authToken, user: result.user });
     });
     return true;  // Keep message channel open for async response
   }
   
   if (message.action === 'set_auth_token') {
-    chrome.storage.local.set({ authToken: message.token }, () => {
+    chrome.storage.local.set({
+      authToken: message.token,
+      user: message.user
+    }, () => {
       sendResponse({ success: true });
     });
     return true;
   }
   
   if (message.action === 'clear_auth_token') {
-    chrome.storage.local.remove('authToken', () => {
+    chrome.storage.local.remove(['authToken', 'user'], () => {
       sendResponse({ success: true });
     });
     return true;
   }
   
   if (message.action === 'add_bookmark') {
-    addBookmark(message.bookmarkData, sendResponse);
+    addBookmark(message.bookmarkData, message.token)
+      .then(response => sendResponse({ success: true, data: response }))
+      .catch(error => sendResponse({ success: false, error: error.message }));
     return true;
   }
   
   if (message.action === 'verify_token') {
-    verifyToken(message.token, sendResponse);
+    verifyToken(message.token)
+      .then(user => sendResponse({ success: true, user }))
+      .catch(error => sendResponse({ success: false, error: error.message }));
     return true;
   }
 });
@@ -162,7 +169,7 @@ async function addBookmark(bookmarkData, sendResponse) {
 
 **Token Verification**:
 ```javascript
-async function verifyToken(token, sendResponse) {
+async function verifyToken(token) {
   try {
     const response = await fetch('http://localhost:5015/api/users/me', {
       headers: {
@@ -170,17 +177,19 @@ async function verifyToken(token, sendResponse) {
       }
     });
     
-    if (response.ok) {
-      const user = await response.json();
-      sendResponse({ valid: true, user });
-    } else {
-      sendResponse({ valid: false });
+    if (!response.ok) {
+      throw new Error('Token is invalid or expired');
     }
+    
+    return await response.json();
   } catch (error) {
-    sendResponse({ valid: false, error: error.message });
+    console.error('Error verifying token:', error);
+    throw error;
   }
 }
 ```
+
+> **Note**: `verify_token` is no longer called during popup open. The popup trusts stored tokens directly, avoiding false "Login Required" state when the API is unreachable. Verification happens naturally at bookmark submission time.
 
 ### Popup UI
 
@@ -261,10 +270,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('url').value = tab.url;
   document.getElementById('title').value = tab.title;
   
-  // Check authentication
+  // Check authentication — trusts stored token without API verify call
   chrome.runtime.sendMessage({ action: 'get_auth_token' }, (response) => {
-    if (!response.token) {
-      // Show login prompt
+    if (response.token) {
+      // Token exists, show bookmark form immediately
+      showBookmarkForm(response.user);
+    } else {
+      // No token, show login prompt
       document.getElementById('content').innerHTML = `
         <p>Please log in to the Bookmarks Manager first.</p>
         <button id="login">Go to Login</button>
@@ -527,7 +539,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
 | `set_auth_token` | Web App → Background | `{ token }` | `{ success }` |
 | `clear_auth_token` | Web App → Background | - | `{ success }` |
 | `add_bookmark` | Popup → Background | `{ bookmarkData }` | `{ success, bookmark }` |
-| `verify_token` | Background → API | `{ token }` | `{ valid, user }` |
+| `verify_token` | (available but unused in popup auth flow) | `{ token }` | `{ valid, user }` |
 
 ---
 
@@ -557,6 +569,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
 | **Token not syncing** | Check chrome.storage.local in DevTools |
 | **API calls failing** | Verify backend is running on port 5015 |
 | **Icon not showing** | Ensure icon files exist and paths are correct |
+| **Popup shows "Login Required" despite being logged in** | Fixed in 2026-06-16 — popup no longer calls `verify_token` API on open. Reinstall or reload the extension to get the update. The popup now trusts the stored token directly. |
 
 ---
 
@@ -603,4 +616,4 @@ Required for:
 
 ---
 
-*Last Updated: April 9, 2026*
+*Last Updated: June 16, 2026*

@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixes (2026-06-16)
+- **Fix popup showing "Login Required" for logged-in users** — Chrome and Firefox extensions no longer call `verify_token` API (`GET /api/users/me`) on popup open. If a stored token exists, the bookmark form is shown immediately. Network-dependent verification was causing false "Login Required" state when the API server was unreachable.
+
 ### Code Review — Security & Correctness (2026-06-14)
 
 #### 🔴 Critical

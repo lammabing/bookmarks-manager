@@ -9,7 +9,7 @@ The browser extension has been fully implemented with the following features:
 3. **Enhanced Popup UI** - Toolbar popup for adding bookmarks and importing browser bookmarks
 4. **Bookmark import functionality** - Import all bookmarks or select specific folders from the browser
 5. **Authentication handling** - Securely manages user authentication tokens
-6. **Pre-filled bookmark forms** - When not logged in, clicking the extension opens the app with current page information pre-filled in the add bookmark form
+6. **Pre-filled bookmark forms** - The extension popup shows a bookmark form pre-filled with the current page URL and title. If no stored token exists, it shows a login prompt that opens the app with current page information pre-filled.
 7. **Favicon support** - Automatically fetches favicons for bookmarked pages
 
 ## Implemented Components
@@ -60,9 +60,10 @@ The browser extension has been fully implemented with the following features:
    - Progress tracking during import
 
 4. **Authentication**
-   - Secure login through popup interface
-   - Token storage using browser storage API
-   - Automatic authentication for bookmark operations
+   - Token-based auth with browser storage API
+   - Stored token is trusted on popup open — no blocking API verification call (avoids false "Login Required" when API is unreachable)
+   - Token verified at submission time when adding bookmarks
+   - Content script on app page syncs token from localStorage to extension storage on login/page load
 
 ## Testing
 
