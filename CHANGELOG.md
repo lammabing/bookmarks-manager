@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Fixes (2026-06-16)
+- **Fix extension always showing "Login Required" even when logged in** — The popup now falls back to querying the content script (injected into the app page) for the auth token when the background storage has none. The content script reads the token directly from `localStorage`. This handles the case where the content script's initial `set_auth_token` message to the background failed (e.g., service worker was not running at the time).
 - **Fix popup showing "Login Required" for logged-in users** — Chrome and Firefox extensions no longer call `verify_token` API (`GET /api/users/me`) on popup open. If a stored token exists, the bookmark form is shown immediately. Network-dependent verification was causing false "Login Required" state when the API server was unreachable.
 - **Fix bookmarklet and extension showing main page instead of add-bookmark form** — Created dedicated `/bookmark/new` route that renders the AddBookmarkForm as a standalone page (not a modal overlay on the Home page). Updated bookmarklet code, extension popups, and bookmarklet.min.js to point to the new route. Fixed login redirect to preserve `pendingBookmark` from sessionStorage so the bookmark flow survives authentication. Dashboard now also checks for pending bookmarks on mount.
 

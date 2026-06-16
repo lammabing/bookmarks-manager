@@ -44,15 +44,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Check if user is authenticated
 async function checkAuthStatus() {
   try {
+    // First try to get token from background storage
     const response = await browser.runtime.sendMessage({ action: 'get_auth_token' });
 
     if (response && response.token) {
       // Token exists, user is logged in
       showBookmarkForm(response.user || {});
-    } else {
-      // No token, show login
-      showLoginSection();
+      return;
     }
+
+    // No token in background — try to get it from the content script on the active tab
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.id) {
+      try {
+        const contentResponse = await browser.tabs.sendMessage(tab.id, { action: 'check_auth_status' });
+
+        if (contentResponse && contentResponse.token) {
+          // Content script found a token — store it in the background
+          await browser.runtime.sendMessage({
+            action: 'set_auth_token',
+            token: contentResponse.token,
+            user: contentResponse.user
+          });
+          showBookmarkForm(contentResponse.user || {});
+          return;
+        }
+      } catch (e) {
+        // No content script on this page (e.g., not on the app domain)
+        console.log('Could not read token from content script:', e.message);
+      }
+    }
+
+    // No token found anywhere — show login
+    showLoginSection();
   } catch (error) {
     console.error('Error checking auth status:', error);
     showLoginSection();
