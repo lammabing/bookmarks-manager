@@ -38,7 +38,7 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
-                      <Route path="/bookmark/new" element={<ProtectedRoute><AddBookmarkPage /></ProtectedRoute>} />
+                      <Route path="/bookmark/new" element={<AddBookmarkPage />} />
                       <Route
                         path="/import-bookmarks"
                         element={

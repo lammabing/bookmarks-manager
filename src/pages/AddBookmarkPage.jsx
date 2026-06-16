@@ -65,7 +65,7 @@ const AddBookmarkPage = () => {
               ×
             </button>
           </div>
-          <AddBookmarkForm onClose={() => navigate('/dashboard')} />
+          <AddBookmarkForm onClose={() => navigate('/dashboard')} pageMode={true} />
         </div>
       </div>
     </div>

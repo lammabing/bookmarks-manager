@@ -29,9 +29,10 @@ const Login = () => {
     const result = await login(formData.email, formData.password);
     
     if (result.success) {
-      const pendingBookmark = sessionStorage.getItem('pendingBookmark');
-      if (pendingBookmark) {
-        const data = JSON.parse(pendingBookmark);
+      const pending = sessionStorage.getItem('pendingBookmark');
+      if (pending) {
+        sessionStorage.removeItem('pendingBookmark');
+        const data = JSON.parse(pending);
         const params = new URLSearchParams();
         if (data.url) params.set('url', data.url);
         if (data.title) params.set('title', data.title);
