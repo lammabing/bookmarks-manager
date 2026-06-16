@@ -2,13 +2,11 @@
 
 // DOM Elements
 const loading = document.getElementById('loading');
-const loginSection = document.getElementById('loginSection');
 const bookmarkForm = document.getElementById('bookmarkForm');
 const userInfo = document.getElementById('userInfo');
 const userName = document.getElementById('userName');
 const userAvatar = document.getElementById('userAvatar');
 const logoutBtn = document.getElementById('logoutBtn');
-const loginBtn = document.getElementById('loginBtn');
 const urlPreview = document.getElementById('urlPreview');
 const titleInput = document.getElementById('title');
 const descriptionInput = document.getElementById('description');
@@ -48,7 +46,6 @@ async function checkAuthStatus() {
     const response = await browser.runtime.sendMessage({ action: 'get_auth_token' });
 
     if (response && response.token) {
-      // Token exists, user is logged in
       showBookmarkForm(response.user || {});
       return;
     }
@@ -60,7 +57,6 @@ async function checkAuthStatus() {
         const contentResponse = await browser.tabs.sendMessage(tab.id, { action: 'check_auth_status' });
 
         if (contentResponse && contentResponse.token) {
-          // Content script found a token — store it in the background
           await browser.runtime.sendMessage({
             action: 'set_auth_token',
             token: contentResponse.token,
@@ -70,31 +66,34 @@ async function checkAuthStatus() {
           return;
         }
       } catch (e) {
-        // No content script on this page (e.g., not on the app domain)
         console.log('Could not read token from content script:', e.message);
       }
     }
 
-    // No token found anywhere — show login
-    showLoginSection();
+    // No token found — redirect to the app's bookmark form and close popup
+    openAppWithBookmarkData();
   } catch (error) {
     console.error('Error checking auth status:', error);
-    showLoginSection();
+    openAppWithBookmarkData();
   }
 }
 
-// Show login section
-function showLoginSection() {
-  loading.style.display = 'none';
-  loginSection.style.display = 'block';
-  bookmarkForm.classList.remove('active');
-  userInfo.style.display = 'none';
+// Open the app's bookmark form in a new tab with the current page data
+async function openAppWithBookmarkData() {
+  const faviconUrl = await getFaviconUrl(currentUrl);
+  const params = new URLSearchParams({
+    url: currentUrl,
+    title: currentTitle || '',
+    description: '',
+    favicon: faviconUrl
+  });
+  await browser.tabs.create({ url: `${APP_URL}/bookmark/new?${params.toString()}` });
+  window.close();
 }
 
 // Show bookmark form
 function showBookmarkForm(user) {
   loading.style.display = 'none';
-  loginSection.style.display = 'none';
   bookmarkForm.classList.add('active');
   userInfo.style.display = 'flex';
 
@@ -195,25 +194,10 @@ async function getFaviconUrl(tabUrl) {
 }
 
 // Event listeners
-loginBtn.addEventListener('click', async () => {
-  // Get favicon for the current URL
-  const faviconUrl = await getFaviconUrl(currentUrl);
-
-  // Open the app in a new tab with URL parameters to pre-fill the bookmark form
-  const params = new URLSearchParams({
-    url: encodeURIComponent(currentUrl),
-    title: encodeURIComponent(currentTitle || ''),
-    description: '',
-    favicon: encodeURIComponent(faviconUrl)
-  });
-
-  browser.tabs.create({ url: `${APP_URL}/bookmark/new?${params.toString()}` });
-});
-
-
 logoutBtn.addEventListener('click', async () => {
   await browser.runtime.sendMessage({ action: 'clear_auth_token' });
-  showLoginSection();
+  await browser.tabs.create({ url: APP_URL });
+  window.close();
 });
 
 addBookmarkBtn.addEventListener('click', addBookmark);
@@ -226,11 +210,11 @@ cancelBtn.addEventListener('click', () => {
 browser.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'local' && changes.authToken) {
     if (changes.authToken.newValue) {
-      // User logged in
+      // User logged in — re-check auth
       checkAuthStatus();
     } else {
-      // User logged out
-      showLoginSection();
+      // User logged out — close popup
+      window.close();
     }
   }
 });
