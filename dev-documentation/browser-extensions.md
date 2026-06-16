@@ -282,7 +282,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         <button id="login">Go to Login</button>
       `;
       document.getElementById('login').addEventListener('click', () => {
-        chrome.tabs.create({ url: 'http://localhost:5170/login' });
+        // Opens dedicated /bookmark/new route with bookmark data as query params
+        chrome.tabs.create({ url: 'http://localhost:5170/bookmark/new?url=...&title=...' });
       });
     }
   });
@@ -308,6 +309,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 ```
+
+The app provides a dedicated route `/bookmark/new` that renders the add bookmark form as a standalone page (not a modal overlay). The route accepts query parameters: `url`, `title`, `description`, `favicon`, and `tags`. This route is used by both the bookmarklet and the extension's "Open Login Page" button. After login, the user is redirected back to this route with the pending bookmark data preserved via `sessionStorage`.
 
 ### Content Script
 

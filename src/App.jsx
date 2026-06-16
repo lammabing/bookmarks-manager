@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ImportBookmarksPage from "./pages/ImportBookmarksPage";
+import AddBookmarkPage from "./pages/AddBookmarkPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
+                      <Route path="/bookmark/new" element={<ProtectedRoute><AddBookmarkPage /></ProtectedRoute>} />
                       <Route
                         path="/import-bookmarks"
                         element={

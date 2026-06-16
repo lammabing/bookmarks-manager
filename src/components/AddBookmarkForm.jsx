@@ -8,7 +8,7 @@ import TagSelector from './TagSelector';
 import FolderSelector from './FolderSelector';
 import ShareSettings from './ShareSettings';
 
-const AddBookmarkForm = ({ onClose, initialData = null }) => {
+const AddBookmarkForm = ({ onClose, initialData = null, pageMode = false }) => {
   const navigate = useNavigate();
   const { addBookmark, updateBookmark } = useBookmarks();
   const { tags } = useTags();
@@ -217,6 +217,146 @@ const tagsToSubmit = formData.tags || [];
     sessionStorage.setItem('pendingBookmark', JSON.stringify(formData));
     navigate('/login');
   };
+
+  if (pageMode) {
+    return (
+      <>
+        {/* Success Message */}
+        {showSuccess && (
+          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+            Bookmark {initialData ? 'updated' : 'added'} successfully!
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* URL */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              URL *
+            </label>
+            <input
+              type="url"
+              name="url"
+              value={formData.url}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://example.com"
+            />
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Title *
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Bookmark title"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Brief description..."
+            />
+          </div>
+
+          {/* Folder Selection */}
+          <div>
+            <label htmlFor="folder" className="block text-sm font-medium text-gray-700 mb-1">
+              Folder
+            </label>
+            <FolderSelector
+              selectedFolderId={formData.folder}
+              onFolderSelect={(folderId) => setFormData(prev => ({ ...prev, folder: folderId }))}
+              placeholder="Select a folder (optional)"
+              allowCreateNew={true}
+              className="w-full"
+            />
+          </div>
+
+          {/* Tags */}
+          <div>
+            <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
+              Tags
+            </label>
+            <TagSelector
+              selectedTags={formData.tags}
+              onTagsChange={handleTagsChange}
+              availableTags={tags}
+              placeholder="Add tags..."
+            />
+            <div className="text-xs text-gray-500 mt-1">
+              Separate multiple tags with commas
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Notes
+            </label>
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleInputChange}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Additional notes..."
+            />
+          </div>
+
+          {/* Sharing Settings */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sharing Settings
+            </label>
+            <ShareSettings
+              bookmark={initialData}
+              onVisibilityChange={(visibility) => setFormData(prev => ({ ...prev, visibility }))}
+              onSharedWithChange={(sharedWith) => setFormData(prev => ({ ...prev, sharedWith }))}
+              onShare={async (sharingData) => {
+                setFormData(prev => ({ ...prev, ...sharingData }));
+              }}
+            />
+          </div>
+
+          {/* Submit Buttons */}
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : (initialData ? 'Update' : 'Add')} Bookmark
+            </button>
+          </div>
+        </form>
+      </>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

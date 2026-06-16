@@ -16,7 +16,7 @@ There are two ways to install the bookmarklet:
 1. Copy the following JavaScript code:
 
 ```javascript
-javascript:(function(){const url=encodeURIComponent(window.location.href),title=encodeURIComponent(document.title||""),metaDesc=document.querySelector('meta[name="description"]'),description=metaDesc?encodeURIComponent(metaDesc.getAttribute("content")||""):"",faviconLink=document.querySelector('link[rel*="icon"]'),favicon=faviconLink&&faviconLink.href?encodeURIComponent(faviconLink.href):function(){try{return encodeURIComponent(`https://www.google.com/s2/favicons?domain=${window.location.hostname}`)}catch(e){return""}}(),appUrl=`http://localhost:5170/?url=${url}&title=${title}&description=${description}&favicon=${favicon}`,width=600,height=700,left=(screen.width-width)/2,top=(screen.height-height)/2;window.open(appUrl,"_blank",`width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);})();
+javascript:(function(){const url=encodeURIComponent(window.location.href),title=encodeURIComponent(document.title||""),metaDesc=document.querySelector('meta[name="description"]'),description=metaDesc?encodeURIComponent(metaDesc.getAttribute("content")||""):"",faviconLink=document.querySelector('link[rel*="icon"]'),favicon=faviconLink&&faviconLink.href?encodeURIComponent(faviconLink.href):function(){try{return encodeURIComponent(`https://www.google.com/s2/favicons?domain=${window.location.hostname}`)}catch(e){return""}}(),appUrl=`http://localhost:5170/bookmark/new?url=${url}&title=${title}&description=${description}&favicon=${favicon}`,width=600,height=700,left=(screen.width-width)/2,top=(screen.height-height)/2;window.open(appUrl,"_blank",`width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);})();
 ```
 
 2. Create a new bookmark in your browser's bookmarks bar
@@ -64,7 +64,7 @@ If the bookmarklet doesn't work:
 If you're running your bookmarks-manager on a different port or URL, you'll need to modify the bookmarklet code accordingly. Change this part of the code:
 
 ```javascript
-const appUrl = `http://localhost:5170/?url=${url}&title=${title}&description=${description}&favicon=${favicon}`;
+const appUrl = `http://localhost:5170/bookmark/new?url=${url}&title=${title}&description=${description}&favicon=${favicon}`;
 ```
 
 Replace `http://localhost:5170` with your actual bookmarks-manager URL.
@@ -74,4 +74,4 @@ Replace `http://localhost:5170` with your actual bookmarks-manager URL.
 For detailed testing instructions, see the [Bookmarklet Testing Guide](bookmarklet-testing-guide.md).
 
 ---
-*Last Updated: 2025-07-30 by Development Team*
+*Last Updated: 2026-06-16*

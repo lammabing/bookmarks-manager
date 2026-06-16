@@ -180,7 +180,7 @@ loginBtn.addEventListener('click', async () => {
     favicon: encodeURIComponent(faviconUrl)
   });
 
-  chrome.tabs.create({ url: `${APP_URL}?${params.toString()}` });
+  chrome.tabs.create({ url: `${APP_URL}/bookmark/new?${params.toString()}` });
 });
 
 

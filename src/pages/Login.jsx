@@ -29,7 +29,19 @@ const Login = () => {
     const result = await login(formData.email, formData.password);
     
     if (result.success) {
-      navigate('/dashboard');
+      const pendingBookmark = sessionStorage.getItem('pendingBookmark');
+      if (pendingBookmark) {
+        const data = JSON.parse(pendingBookmark);
+        const params = new URLSearchParams();
+        if (data.url) params.set('url', data.url);
+        if (data.title) params.set('title', data.title);
+        if (data.description) params.set('description', data.description);
+        if (data.favicon) params.set('favicon', data.favicon);
+        if (data.tags?.length) params.set('tags', data.tags.join(','));
+        navigate(`/bookmark/new?${params.toString()}`);
+      } else {
+        navigate('/dashboard');
+      }
     } else {
       setError(result.error);
     }

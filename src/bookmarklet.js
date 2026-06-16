@@ -24,7 +24,7 @@ javascript:(function(){
     }
     
     // Construct app URL with parameters
-    const appUrl = `http://localhost:5170/?url=${url}&title=${title}&description=${description}&favicon=${favicon}`;
+    const appUrl = `http://localhost:5170/bookmark/new?url=${url}&title=${title}&description=${description}&favicon=${favicon}`;
     
     // Open in new window with specific dimensions
     const width = 600;

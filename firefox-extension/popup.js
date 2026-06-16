@@ -183,7 +183,7 @@ loginBtn.addEventListener('click', async () => {
     favicon: encodeURIComponent(faviconUrl)
   });
 
-  browser.tabs.create({ url: `${APP_URL}?${params.toString()}` });
+  browser.tabs.create({ url: `${APP_URL}/bookmark/new?${params.toString()}` });
 });
 
 

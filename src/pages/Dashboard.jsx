@@ -62,6 +62,15 @@ const Dashboard = () => {
   const [bulkOperationType, setBulkOperationType] = useState('success');
   const [showTutorial, setShowTutorial] = useState(false);
 
+  // Check for pending bookmark from bookmarklet/extension flow
+  useEffect(() => {
+    const pendingBookmark = sessionStorage.getItem('pendingBookmark');
+    if (pendingBookmark) {
+      sessionStorage.removeItem('pendingBookmark');
+      setShowAddForm(true);
+    }
+  }, []);
+
   // Load shared bookmarks
   const loadSharedBookmarks = async () => {
     try {
