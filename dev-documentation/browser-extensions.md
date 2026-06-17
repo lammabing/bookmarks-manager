@@ -191,6 +191,16 @@ async function verifyToken(token) {
 
 > **Note**: `verify_token` is no longer called during popup open. The popup trusts stored tokens directly, avoiding false "Login Required" state when the API is unreachable. Verification happens naturally at bookmark submission time.
 
+#### Popup Auth Flow
+
+The popup's `checkAuthStatus()` uses a three-tier approach:
+
+1. **Check background storage** — fastest path; if a token was previously synced, show the bookmark form immediately.
+2. **Check content script** — if no token in storage, the popup sends `check_auth_status` to the content script on the active tab. The content script reads the token directly from the app's `localStorage` and returns it. The popup then stores it in the background.
+3. **Redirect to app** — if neither has a token, the popup opens `APP_URL/bookmark/new?url=...&title=...` in a new tab (with page data pre-filled) and closes itself. There is no "Login Required" modal.
+
+This ensures the extension never blocks the user with a login prompt. Authenticated users see the bookmark form directly in the popup. Unauthenticated users are seamlessly redirected to the app.
+
 ### Popup UI
 
 **File**: `chrome-extension/popup.html`
@@ -572,7 +582,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
 | **Token not syncing** | Check chrome.storage.local in DevTools |
 | **API calls failing** | Verify backend is running on port 5015 |
 | **Icon not showing** | Ensure icon files exist and paths are correct |
-| **Popup shows "Login Required" despite being logged in** | Fixed in 2026-06-16 — popup no longer calls `verify_token` API on open. Reinstall or reload the extension to get the update. The popup now trusts the stored token directly. |
+| **Popup shows "Login Required" despite being logged in** | Fixed in 2026-06-16 — the "Login Required" modal was removed entirely. The popup now checks background storage, falls back to the content script, and if neither has a token, opens the app's bookmark form in a new tab. Reload the extension to get the update. |
 
 ---
 
@@ -619,4 +629,4 @@ Required for:
 
 ---
 
-*Last Updated: June 16, 2026*
+*Last Updated: June 17, 2026*
