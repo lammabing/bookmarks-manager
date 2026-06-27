@@ -14,6 +14,7 @@ const FolderSelector = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
+  const [createError, setCreateError] = useState('');
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -72,10 +73,11 @@ const FolderSelector = ({
   };
 
   const handleCreateFolder = async (e) => {
-    e.preventDefault();
+    if (e?.preventDefault) e.preventDefault();
     if (!newFolderName.trim()) return;
 
     try {
+      setCreateError('');
       const newFolder = await addFolder({
         name: newFolderName.trim(),
         parent: null,
@@ -86,6 +88,7 @@ const FolderSelector = ({
       setShowCreateForm(false);
       handleFolderSelect(newFolder._id);
     } catch (error) {
+      setCreateError(error.message || 'Failed to create folder');
       console.error('Error creating folder:', error);
     }
   };
@@ -175,15 +178,26 @@ const FolderSelector = ({
           {allowCreateNew && (
             <div className="border-t">
               {showCreateForm ? (
-                <form onSubmit={handleCreateFolder} className="p-2">
+                <div className="p-2">
                   <input
                     type="text"
                     value={newFolderName}
-                    onChange={(e) => setNewFolderName(e.target.value)}
+                    onChange={(e) => {
+                      setNewFolderName(e.target.value);
+                      setCreateError('');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleCreateFolder(e);
+                      }
+                    }}
                     placeholder="Folder name"
                     className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     autoFocus
                   />
+                  {createError && (
+                    <p className="text-xs text-red-600 mt-1">{createError}</p>
+                  )}
                   <div className="flex justify-end space-x-1 mt-2">
                     <button
                       type="button"
@@ -196,17 +210,21 @@ const FolderSelector = ({
                       Cancel
                     </button>
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleCreateFolder}
                       className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
                     >
                       Create
                     </button>
                   </div>
-                </form>
+                </div>
               ) : (
                 <button
                   type="button"
-                  onClick={() => setShowCreateForm(true)}
+                  onClick={() => {
+                    setShowCreateForm(true);
+                    setCreateError('');
+                  }}
                   className="w-full flex items-center px-3 py-2 text-blue-600 hover:bg-blue-50"
                 >
                   <PlusIcon className="w-4 h-4 mr-2" />

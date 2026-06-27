@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed (2026-06-27)
+- **Fix 'create folder' in Add Bookmark form submitting the bookmark form instead** — Nested `<form>` inside `<form>` was invalid HTML. Changed to a `<div>` with button `onClick` and Enter key handler. Added user-visible error message on folder creation failure.
+- **Fix stale closure bugs in `useFolders.js`** — `addFolder` and `editFolder` were using `folders` from closure inside a state updater function for `setFolderTree`, causing incorrect tree state when called sequentially.
+
 ### Fixes (2026-06-16)
 - **Remove "Login Required" modal from extension popup** — The popup no longer shows a login modal at all. If the user is authenticated (token in background storage or content script), the bookmark form is shown directly in the popup. If not, the app's `/bookmark/new` route opens in a new tab with the current page data pre-filled, and the popup closes. The login section HTML/CSS was removed from both extensions.
 - **Fix popup showing "Login Required" for logged-in users** — Chrome and Firefox extensions no longer call `verify_token` API (`GET /api/users/me`) on popup open. If a stored token exists, the bookmark form is shown immediately. Network-dependent verification was causing false "Login Required" state when the API server was unreachable.

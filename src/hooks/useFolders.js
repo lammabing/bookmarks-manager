@@ -50,8 +50,9 @@ export const useFolders = () => {
     
     try {
       const newFolder = await createFolder(folderData);
-      setFolders(prev => [...prev, newFolder]);
-      setFolderTree(prev => buildFolderTree([...folders, newFolder]));
+      const updatedFolders = [...folders, newFolder];
+      setFolders(updatedFolders);
+      setFolderTree(buildFolderTree(updatedFolders));
       return newFolder;
     } catch (err) {
       setError(err.message || 'Failed to create folder');
@@ -68,16 +69,11 @@ export const useFolders = () => {
     
     try {
       const updatedFolder = await updateFolder(folderId, folderData);
-      setFolders(prev =>
-        prev.map(folder =>
-          folder._id === folderId ? updatedFolder : folder
-        )
+      const updatedFolders = folders.map(folder =>
+        folder._id === folderId ? updatedFolder : folder
       );
-      setFolderTree(buildFolderTree(
-        folders.map(folder =>
-          folder._id === folderId ? updatedFolder : folder
-        )
-      ));
+      setFolders(updatedFolders);
+      setFolderTree(buildFolderTree(updatedFolders));
       return updatedFolder;
     } catch (err) {
       setError(err.message || 'Failed to update folder');
