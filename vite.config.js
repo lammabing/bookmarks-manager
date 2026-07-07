@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
+    allowedHosts: ['local.svc.host', '192-168-0-150.svc.host'],
     fs: {
       strict: false, // Disable strict file serving restrictions
       allow: ['/mnt/g/www/bookmarks-manager', './']

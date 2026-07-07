@@ -69,6 +69,8 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
+It also includes a PWA manifest (`manifest.json`) and service worker (`sw.js`) served as static assets for installability and Web Share Target support on Android.
+
 ## Technology Stack
 
 ### Frontend

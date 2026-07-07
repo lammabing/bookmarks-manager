@@ -42,7 +42,11 @@ dist/
 │   ├── index-abc123.js      # Bundled JS (minified)
 │   ├── index-def456.css     # Bundled CSS (minified)
 │   └── logo-ghi789.png      # Optimized assets
-└── favicon.png
+├── favicon.png
+├── icon-192x192.png          # PWA icon
+├── icon-512x512.png          # PWA icon
+├── manifest.json             # PWA manifest with Web Share Target
+└── sw.js                     # Service worker (asset caching)
 ```
 
 **Build Optimizations**:

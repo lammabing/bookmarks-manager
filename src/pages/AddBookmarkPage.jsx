@@ -12,11 +12,15 @@ const AddBookmarkPage = () => {
     if (!loading && !isAuthenticated) {
       const queryParams = new URLSearchParams(window.location.search);
       const urlParam = queryParams.get('url');
-      if (urlParam) {
+      const textParam = queryParams.get('text');
+      const descriptionParam = queryParams.get('description');
+      const rawUrl = urlParam || textParam || descriptionParam;
+      if (rawUrl) {
+        const urlCameFromDescription = !urlParam && !textParam && !!descriptionParam;
         sessionStorage.setItem('pendingBookmark', JSON.stringify({
-          url: decodeURIComponent(urlParam),
+          url: decodeURIComponent(rawUrl),
           title: queryParams.get('title') ? decodeURIComponent(queryParams.get('title')) : '',
-          description: queryParams.get('description') ? decodeURIComponent(queryParams.get('description')) : '',
+          description: urlCameFromDescription ? '' : descriptionParam ? decodeURIComponent(descriptionParam) : '',
           favicon: queryParams.get('favicon') ? decodeURIComponent(queryParams.get('favicon')) : '',
           tags: queryParams.get('tags') ? decodeURIComponent(queryParams.get('tags')).split(',').map(t => t.trim()).filter(t => t) : []
         }));

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+- **PWA support with Web Share Target** — Added `manifest.json`, service worker, and PWA icons (192×192, 512×512). Android Chrome users can install the app and share web pages directly to it via the system share sheet. Added `text` query param handling as a fallback for bookmark description (maps from Web Share Target API).
+- **Service worker** — Static asset caching for offline-capable app shell and faster repeat loads.
+
 ### Fixed (2026-06-27)
 - **Fix 'create folder' in Add Bookmark form submitting the bookmark form instead** — Nested `<form>` inside `<form>` was invalid HTML. Changed to a `<div>` with button `onClick` and Enter key handler. Added user-visible error message on folder creation failure.
 - **Fix stale closure bugs in `useFolders.js`** — `addFolder` and `editFolder` were using `folders` from closure inside a state updater function for `setFolderTree`, causing incorrect tree state when called sequentially.

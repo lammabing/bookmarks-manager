@@ -36,6 +36,12 @@
 │   └── checkPublicBookmarks.js # Public bookmark verification
 ├── admin-scripts/          # Admin/maintenance scripts
 │   └── backup-database.js  # Database backup utility
+├── public/                 # Static assets (copied to dist/ as-is)
+│   ├── favicon.png         # Browser tab icon
+│   ├── icon-192x192.png    # PWA icon (192×192)
+│   ├── icon-512x512.png    # PWA icon (512×512)
+│   ├── manifest.json       # PWA manifest with Web Share Target
+│   └── sw.js               # Service worker (asset caching)
 ├── src/                    # Frontend React application
 │   ├── components/         # Reusable UI components
 │   │   ├── AddBookmarkForm.jsx
@@ -192,9 +198,18 @@
 - ✅ Enhanced debugging and logging
 - ✅ Added folder management hook for better state handling
 
+### PWA (Progressive Web App) — New
+- ✅ `public/manifest.json` — PWA manifest with `display: standalone` and `share_target` for Android share sheet
+- ✅ `public/sw.js` — Service worker with network-first caching strategy
+- ✅ `public/icon-{192,512}x{192,512}.png` — PWA icons at required sizes
+- ✅ `index.html` — Added manifest link, theme-color, and iOS `apple-mobile-web-app` meta tags
+- ✅ `src/main.jsx` — Service worker registration on window load
+- ✅ `src/pages/AddBookmarkPage.jsx` / `src/components/AddBookmarkForm.jsx` — Handle `text` query param as URL fallback for Chrome Android share behavior
+
 ## Development Status
 
 ### Completed Systems
+- ✅ PWA support with Web Share Target (Android)
 - ✅ User authentication and session management
 - ✅ Bookmark CRUD operations with metadata
 - ✅ Tag management and filtering

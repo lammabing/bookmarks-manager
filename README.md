@@ -16,6 +16,7 @@ A web-based application for managing bookmarks with advanced organization featur
 - **Import/Export**: Import bookmarks from browsers or export for backup
 - **Browser Extension**: Add bookmarks directly from Chrome/Firefox with enhanced popup UI and context menu; now supports pre-filling bookmark forms with current page information when not logged in
 - **Bookmarklet**: Add bookmarks from any webpage with a single click using the bookmarklet
+- **PWA with Web Share Target**: Installable on Android — share any webpage directly to the app via the system share sheet
 - **Auto-Backup System**: Automatic backups before every write operation to protect against data loss
 - **Server-Side Metadata**: Secure metadata extraction without third-party proxies
 - **Rate Limiting**: Protection against brute-force attacks on authentication endpoints
@@ -419,6 +420,7 @@ After installation:
 4. ✅ **Add tags** for easy searching
 5. ✅ **Install browser extension** (optional) from `extension/` folder
 6. ✅ **Set up bookmarklet** for quick bookmarking
+7. ✅ **Install as PWA** on mobile — open in Android Chrome → Install app → share web pages directly
 
 ---
 

@@ -59,57 +59,41 @@ const AddBookmarkForm = ({ onClose, initialData = null, pageMode = false }) => {
       const urlParam = queryParams.get('url');
       const titleParam = queryParams.get('title');
       const descriptionParam = queryParams.get('description');
+      const textParam = queryParams.get('text');
       const faviconParam = queryParams.get('favicon');
       const tagsParam = queryParams.get('tags');
 
-      console.log('URL Parameters:', {
-        url: urlParam,
-        title: titleParam,
-        description: descriptionParam,
-        favicon: faviconParam,
-        tags: tagsParam
-      });
+      const rawUrl = urlParam || textParam || descriptionParam;
+      const urlCameFromDescription = !urlParam && !textParam && !!descriptionParam;
 
-      if (urlParam) {
+      if (rawUrl) {
         try {
-          const decodedUrl = decodeURIComponent(urlParam);
+          const decodedUrl = decodeURIComponent(rawUrl);
           const faviconUrl = faviconParam
             ? decodeURIComponent(faviconParam)
             : `https://www.google.com/s2/favicons?domain=${new URL(decodedUrl).hostname}`;
 
-          // Parse tags if provided
           let tags = [];
           if (tagsParam) {
             try {
               const decodedTags = decodeURIComponent(tagsParam);
-              // Split by comma and trim whitespace
               tags = decodedTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
             } catch (error) {
               console.error('Error parsing tags parameter:', error);
             }
           }
 
-          console.log('Setting form data with:', {
-            url: decodedUrl,
-            title: titleParam ? decodeURIComponent(titleParam) : '',
-            description: descriptionParam ? decodeURIComponent(descriptionParam) : '',
-            favicon: faviconUrl,
-            tags: tags
-          });
-
           setFormData(prev => ({
             ...prev,
             url: decodedUrl,
             title: titleParam ? decodeURIComponent(titleParam) : '',
-            description: descriptionParam ? decodeURIComponent(descriptionParam) : '',
+            description: urlCameFromDescription ? '' : descriptionParam ? decodeURIComponent(descriptionParam) : '',
             favicon: faviconUrl,
             tags: Array.isArray(tags) ? tags : []
           }));
         } catch (error) {
           console.error('Error parsing URL parameters:', error);
         }
-      } else {
-        console.log('No URL parameter found');
       }
     } else {
       console.log('Initial data provided, skipping URL parameter extraction');
