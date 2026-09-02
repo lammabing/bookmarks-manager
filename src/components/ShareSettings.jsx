@@ -182,6 +182,7 @@ const ShareSettings = ({
       {/* Share Button */}
       <div className="flex justify-end pt-4">
         <button
+          type="button"
           onClick={handleShare}
           disabled={isSharing}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"

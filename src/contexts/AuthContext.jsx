@@ -96,8 +96,17 @@ export const AuthProvider = ({ children }) => {
 
     window.addEventListener('storage', handleStorageChange);
 
+    // Global logout when the API interceptor detects an expired/invalid token
+    const handleUnauthorized = () => {
+      setUser(null);
+      setIsAuthenticated(false);
+      setLoading(false);
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
     };
   }, []); // Empty dependency array - only run once on mount
 

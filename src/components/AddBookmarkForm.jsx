@@ -109,7 +109,8 @@ const AddBookmarkForm = ({ onClose, initialData = null, pageMode = false }) => {
 
     // Wait for auth loading to complete before checking authentication
     if (authLoading) {
-      return; // Don't proceed while still checking auth
+      setError('Still checking login status, please try again.');
+      return;
     }
 
     // Check authentication after loading is complete
@@ -160,7 +161,15 @@ const tagsToSubmit = formData.tags || [];
         setShowSuccess(false);
       }, 1500);
     } catch (err) {
-      setError(err.message || 'Failed to save bookmark');
+      // Token expired/invalidated: stash the form so it can be restored after
+      // the user logs back in, then let the API interceptor flip us to logged-out.
+      if (err.response?.status === 401) {
+        sessionStorage.setItem('pendingBookmark', JSON.stringify({
+          ...formData,
+          tags: Array.isArray(formData.tags) ? formData.tags : []
+        }));
+      }
+      setError(err.response?.data?.message || err.message || 'Failed to save bookmark');
     } finally {
       setLoading(false);
     }
@@ -209,6 +218,27 @@ const tagsToSubmit = formData.tags || [];
         {showSuccess && (
           <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
             Bookmark {initialData ? 'updated' : 'added'} successfully!
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+
+        {/* Login Prompt */}
+        {showLoginPrompt && (
+          <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+            Please log in to save bookmarks.
+            <button
+              type="button"
+              onClick={handleLoginRedirect}
+              className="ml-3 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Go to Login
+            </button>
           </div>
         )}
 
@@ -362,6 +392,27 @@ const tagsToSubmit = formData.tags || [];
           {showSuccess && (
             <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
               Bookmark {initialData ? 'updated' : 'added'} successfully!
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+
+          {/* Login Prompt */}
+          {showLoginPrompt && (
+            <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+              Please log in to save bookmarks.
+              <button
+                type="button"
+                onClick={handleLoginRedirect}
+                className="ml-3 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Go to Login
+              </button>
             </div>
           )}
 

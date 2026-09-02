@@ -21,6 +21,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Global 401 handler: expired/invalid/revoked tokens are cleared so the app
+// can drop back to the logged-out state instead of failing every request.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && error.config?.url !== '/users/login') {
+      if (localStorage.getItem('token')) {
+        localStorage.removeItem('token');
+        window.dispatchEvent(new Event('auth:unauthorized'));
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Bookmark API
 export const bookmarkApi = {
   getBookmarks: async () => {

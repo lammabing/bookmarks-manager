@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Fixed (2026-08-10)
+- **"Request failed with status code 401" when adding a bookmark** — the API returns 401 when the stored JWT is expired (tokens last 24h), invalidated, or the user was removed from the database. The app previously kept the stale token and stuck "authenticated" state, so every save failed with a cryptic axios error. Added a global 401 response interceptor (`src/utils/api.js`) that clears the invalid token and fires an `auth:unauthorized` event; `AuthContext` listens for it and drops back to the logged-out state so the UI shows the login prompt. `AddBookmarkForm` now also stashes the in-progress bookmark to `pendingBookmark` on 401 (so it's restored after re-login) and shows the server's own message (e.g. "Token is not valid") instead of the raw axios error.
+
+### Fixed (2026-08-02)
+- **Add Bookmark submit no longer silently fails ("unresponsive")** — `AddBookmarkForm` never rendered its `error` state or the login prompt, so any failed save (server error, network failure, auth issue) appeared to do nothing. Errors and the login prompt are now shown inline, and the `authLoading` guard gives feedback instead of returning silently.
+- **Harden client-side favicon generation** — `addBookmark` in `BookmarkContext` used `new URL(bookmarkData.url).hostname` without a try/catch (the server was already hardened in 2026-06-14). An invalid URL could throw and abort the save before the API call. Now wrapped in try/catch.
+- **Fix "Save Sharing Settings" submitting the bookmark form** — the button in `ShareSettings` had no `type` attribute, defaulting to `type="submit"` inside the Add Bookmark form, so it triggered the form submit instead of saving sharing settings. Added `type="button"`.
+- **Fix password double-hash breaking new registrations** — the register route hashes the password and the `User` model pre-save hook hashed it again, so newly registered users could never log back in. The hook now skips re-hashing already-bcrypt-hashed passwords. Existing accounts with double-hashed passwords need a password reset.
+
+### Fixed (2026-07-27)
+- **Fix inline edit not saving bookmark changes** — `EditBookmarkForm` spread the entire bookmark object when submitting, including the populated `folder` object (`{ _id, name, color }`). The backend's folder validation (`Folder.findOne`) received an object instead of a plain ID, causing a 400 "Invalid folder" error that was silently caught. Fixed by extracting just the folder ID before submission.
+
 ### Added
 - **PWA support with Web Share Target** — Added `manifest.json`, service worker, and PWA icons (192×192, 512×512). Android Chrome users can install the app and share web pages directly to it via the system share sheet. Added `text` query param handling as a fallback for bookmark description (maps from Web Share Target API).
 - **Service worker** — Static asset caching for offline-capable app shell and faster repeat loads.

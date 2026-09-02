@@ -102,6 +102,22 @@ window.addEventListener('storage', (e) => {
 - Logout in Tab A → Tab B auto-logs out
 - Token refresh in Tab A → Tab B syncs
 
+### Global 401 Handling (Expired/Invalid Token)
+
+The axios response interceptor in `src/utils/api.js` clears an invalid token from `localStorage` and dispatches a `auth:unauthorized` event. `AuthContext` listens for it and flips to the logged-out state so the UI shows a login prompt instead of failing every request:
+
+```javascript
+window.addEventListener('auth:unauthorized', () => {
+  setUser(null);
+  setIsAuthenticated(false);
+  setLoading(false);
+});
+```
+
+**Behavior**:
+- Tagged requests that return 401 (e.g. `POST /api/bookmarks`) clear the stale token and log the user out gracefully
+- The `pendingBookmark` session-storage mechanism preserves in-progress bookmark forms so the user can re-submit after logging back in
+
 ### Optimistic Authentication
 
 ```javascript

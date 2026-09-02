@@ -43,9 +43,16 @@ export const BookmarkProvider = ({ children }) => {
       const processedTags = Array.isArray(bookmarkData.tags) ? bookmarkData.tags : [];
       console.log('Processed tags for API call:', processedTags);
 
+      let defaultFavicon = '';
+      try {
+        defaultFavicon = `https://www.google.com/s2/favicons?domain=${new URL(bookmarkData.url).hostname}`;
+      } catch {
+        defaultFavicon = '';
+      }
+
       const bookmarkDataWithFavicon = {
         ...bookmarkData,
-        favicon: bookmarkData.favicon || `https://www.google.com/s2/favicons?domain=${new URL(bookmarkData.url).hostname}`,
+        favicon: bookmarkData.favicon || defaultFavicon,
         // Ensure tags is always an array
         tags: processedTags,
         // Ensure notes field is included

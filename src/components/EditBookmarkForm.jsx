@@ -15,6 +15,7 @@ const EditBookmarkForm = ({ bookmark, onSave, onCancel }) => {
             title,
             description,
             tags: tags.split(',').map((tag) => tag.trim()),
+            folder: bookmark.folder?._id || bookmark.folder || null,
             visibility
         });
     };
