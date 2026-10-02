@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed (2026-10-02)
+- **PWA not showing bookmarks added from other devices** — The service worker (`public/sw.js`) used a cache-first strategy for *all* GET requests, including `/api/*` responses. Once `GET /api/bookmarks` was cached, every subsequent app open immediately served the stale cached response (the background network fetch only refreshed the cache for the *next* load), so bookmarks added via the web browser appeared one session late or never. Rewrote the fetch handler: API requests and page navigations are now network-first (cache used only as an offline fallback), while static assets remain cache-first (safe since Vite fingerprints asset filenames). Bumped cache name to `bookmarks-manager-v2` so existing clients purge old cached API responses on activate.
+
+### Changed (2026-09-08)
+- **Vite dev server listens on all interfaces** — Added `host: true` to `server` in `vite.config.js` so the app is reachable on the LAN (e.g. `http://192.168.0.150:5170`), not just `localhost`.
+
 ### Fixed (2026-08-10)
 - **"Request failed with status code 401" when adding a bookmark** — the API returns 401 when the stored JWT is expired (tokens last 24h), invalidated, or the user was removed from the database. The app previously kept the stale token and stuck "authenticated" state, so every save failed with a cryptic axios error. Added a global 401 response interceptor (`src/utils/api.js`) that clears the invalid token and fires an `auth:unauthorized` event; `AuthContext` listens for it and drops back to the logged-out state so the UI shows the login prompt. `AddBookmarkForm` now also stashes the in-progress bookmark to `pendingBookmark` on 401 (so it's restored after re-login) and shows the server's own message (e.g. "Token is not valid") instead of the raw axios error.
 
